@@ -1,0 +1,6 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Base.Theme.ServiceTool" parent="Theme.Material3.DayNight.NoActionBar">
+    </style>
+
+    <style name="Theme.ServiceTool" parent="Base.Theme.ServiceTool" />
+</resources>
