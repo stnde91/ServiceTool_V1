@@ -1,3 +1,43 @@
 <resources>
-    <string name="app_name">ServiceTool</string>
+    <string name="app_name">Service Tool</string> <string name="app_name_moxa">Moxa Zellensteuerung</string>
+
+    <string name="navigation_drawer_open">Navigation Drawer öffnen</string>
+    <string name="navigation_drawer_close">Navigation Drawer schließen</string>
+
+    <string name="start_all_cells_button_text">Alle Zellen starten &amp; Live Counts</string>
+    <string name="stop_live_updates_button_text">Live-Updates stoppen</string>
+    <string name="connect_button_text">Verbinden / Testen</string>
+
+    <string name="status_bereit">Status: Bereit</string>
+    <string name="status_nicht_verbunden">Status: Nicht verbunden</string>
+    <string name="status_verbinde_mit">Verbinde mit %1$s:%2$s...</string> <string name="status_verbindung_erfolgreich">Status: Verbunden</string>
+    <string name="status_verbindung_fehlgeschlagen">Status: Verbindung fehlgeschlagen</string>
+    <string name="status_ungueltiger_port">Ungültiger Port</string>
+    <string name="status_bitte_ip_port_eingeben">IP und Port eingeben</string>
+
+    <string name="status_wird_ausgefuehrt">Status: Wird ausgeführt...</string>
+    <string name="status_initialisiere_zelle">Initialisiere Zelle %1$d...</string> <string name="status_zelle_initialisiert">Zelle %1$d initialisiert</string>
+    <string name="status_zelle_mit_fehlern">Zelle %1$d mit Fehlern</string>
+    <string name="status_live_daten_zelle">Live-Daten Zelle %1$d</string>
+    <string name="status_fehler_live_zelle">Fehler Live Zelle %1$d</string>
+    <string name="status_live_zelle_ok">Live Zelle %1$d OK</string>
+    <string name="status_live_gestoppt">Live gestoppt</string>
+    <string name="status_warte_auf_abruf">Warte auf Abruf...</string>
+    <string name="status_lade_daten_fuer_zelle">Lade Daten für Zelle %1$d...</string>
+    <string name="status_fehler_beim_laden">Fehler beim Laden</string>
+    <string name="status_daten_geladen">Daten geladen</string>
+
+
+    <string name="ergebnisse_fuer_zelle">Ergebnisse für Zelle %1$d...</string>
+    <string name="platzhalter_keine_daten">N/A</string>
+    <string name="platzhalter_keine_daten_ausfuehrlich">Noch keine Daten empfangen.</string>
+
+
+    <string name="menu_live_zellen">Live Zellen</string>
+    <string name="menu_digitale_zellen">Digitale Zellen</string>
+    <string name="menu_settings">Settings</string>
+
+    <string name="hint_ip_adresse">IP Adresse</string>
+    <string name="hint_port">Port</string>
+
 </resources>
