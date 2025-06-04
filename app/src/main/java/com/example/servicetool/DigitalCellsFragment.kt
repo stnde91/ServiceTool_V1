@@ -44,7 +44,7 @@ class DigitalCellsFragment : Fragment() {
 
     // Moxa Konfiguration (Idealfall: aus einem ViewModel oder SharedPreferences)
     // Diese Werte sollten aus dem SettingsFragment übernommen werden.
-    private var moxaIpAddress = "192.168.0.100" // Standard, sollte konfigurierbar sein
+    private var moxaIpAddress = "192.168.50.3" // Standard, sollte konfigurierbar sein
     private var moxaPort = 4001 // Standard, sollte konfigurierbar sein
     private val MOXA_CONNECTION_TIMEOUT_MS = 3000 // Verbindungstimeout in ms
     private val MOXA_READ_TIMEOUT_MS = 3000       // Lesetimeout in ms

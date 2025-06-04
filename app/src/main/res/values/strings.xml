@@ -40,4 +40,41 @@
     <string name="hint_ip_adresse">IP Adresse</string>
     <string name="hint_port">Port</string>
 
+    <!-- Flintec RC3D spezifische Strings -->
+    <string name="flintec_cell_title">Flintec RC3D - Zelle %1$d</string>
+    <string name="current_weight">Aktuelles Gewicht</string>
+    <string name="gross_weight">Bruttogewicht</string>
+    <string name="net_weight">Nettogewicht</string>
+    <string name="tare_button">Tarieren</string>
+    <string name="zero_button">Nullen</string>
+    <string name="refresh_button">Update</string>
+    <string name="live_mode_start">Live Start</string>
+    <string name="live_mode_stop">Live Stop</string>
+    <string name="refresh_all">Alle Aktualisieren</string>
+
+    <!-- Diagnose Strings -->
+    <string name="diagnostic_title">Diagnose &amp; Test</string>
+    <string name="run_full_diagnostic">Vollständige Diagnose</string>
+    <string name="quick_connection_test">Schnelltest</string>
+    <string name="moxa_config_help">Moxa-Konfiguration</string>
+    <string name="troubleshooting_guide">Fehlerbehebung</string>
+
+    <!-- Status Nachrichten -->
+    <string name="status_connecting">Verbinde mit Moxa…</string>
+    <string name="status_running_diagnostic">Führe Diagnose durch…</string>
+    <string name="status_testing_commands">Teste Befehle…</string>
+    <string name="status_live_mode_active">Live-Modus aktiv</string>
+    <string name="status_live_mode_stopped">Live-Modus gestoppt</string>
+
+    <!-- Fehlermeldungen -->
+    <string name="error_no_response">Keine Antwort von Wiegezelle</string>
+    <string name="error_connection_failed">Verbindung fehlgeschlagen</string>
+    <string name="error_timeout">Timeout beim Warten auf Antwort</string>
+    <string name="error_invalid_data">Ungültige Daten empfangen</string>
+
+    <!-- Erfolgsbenachrichtigungen -->
+    <string name="success_diagnostic_complete">Diagnose abgeschlossen</string>
+    <string name="success_connection_ok">Verbindung erfolgreich</string>
+    <string name="success_commands_working">Befehle funktionieren</string>
+
 </resources>
