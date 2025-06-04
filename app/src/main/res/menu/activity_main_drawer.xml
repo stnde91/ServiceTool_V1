@@ -5,23 +5,13 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_beautiful_flintec"
-            android:icon="@drawable/ic_weight_24"
-            android:title="Flintec RC3D" />
-
-        <item
-            android:id="@+id/nav_live_zellen"
-            android:icon="@drawable/ic_live_24"
-            android:title="Live Zellen" />
-
-        <item
-            android:id="@+id/nav_digitale_zellen"
-            android:icon="@drawable/ic_digital_24"
-            android:title="Digitale Zellen" />
+            android:id="@+id/nav_dashboard"
+            android:icon="@drawable/ic_info_24"
+            android:title="Dashboard" />
 
         <item
             android:id="@+id/nav_multicell_overview"
-            android:icon="@drawable/ic_live_24"
+            android:icon="@drawable/ic_weight_24"
             android:title="Multi-Cell Übersicht" />
     </group>
 
@@ -31,6 +21,5 @@
             android:icon="@drawable/ic_settings_24"
             android:title="Einstellungen" />
     </group>
-
 
 </menu>

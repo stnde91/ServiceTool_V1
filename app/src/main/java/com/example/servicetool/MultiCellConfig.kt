@@ -1,9 +1,10 @@
 package com.example.servicetool
 
+import android.content.Context
 import android.util.Log
 
 /**
- * Zentrale Konfiguration für Multi-Cell Support
+ * Zentrale Konfiguration für Multi-Cell Support - jetzt mit Settings Integration
  */
 object MultiCellConfig {
 
@@ -11,19 +12,57 @@ object MultiCellConfig {
     const val maxDisplayCells = 8
 
     // Hält die Liste der aktuell vom Benutzer ausgewählten aktiven Zellen (Nummern 1 bis maxDisplayCells)
-    // Initialwert ist eine Zelle, um mit einem sinnvollen Standard zu starten.
     var availableCells: List<Int> = listOf(1)
         private set // Nur intern über updateAvailableCells änderbar
 
-    // Moxa-Konfiguration
-    const val MOXA_IP = "192.168.50.3" // Stelle sicher, dass dies die korrekte IP für dein Moxa-Gerät ist
-    const val MOXA_PORT = 4001
+    // ENTFERNT: Hardcoded IP/Port - wird jetzt aus Settings geholt
+    // const val MOXA_IP = "192.168.50.3"
+    // const val MOXA_PORT = 4001
 
-    // Timeouts
+    // Timeouts (diese bleiben hardcoded, da sie selten geändert werden)
     const val CONNECTION_TIMEOUT = 5000 // in Millisekunden
     const val READ_TIMEOUT = 3000       // in Millisekunden
     const val LIVE_UPDATE_INTERVAL = 1000L // in Millisekunden für den Live-Modus
     const val CELL_QUERY_DELAY_MS = 200L // Kurze Verzögerung zwischen Abfragen einzelner Zellen beim Refresh
+
+    // Neue Funktionen für Settings-Integration
+    private var settingsManager: SettingsManager? = null
+
+    /**
+     * Initialisiert MultiCellConfig mit SettingsManager
+     */
+    fun initialize(context: Context) {
+        settingsManager = SettingsManager.getInstance(context)
+        Log.i("MultiCellConfig", "Initialisiert mit SettingsManager")
+    }
+
+    /**
+     * Gibt die aktuelle Moxa IP-Adresse aus den Settings zurück
+     */
+    fun getMoxaIpAddress(): String {
+        return settingsManager?.getMoxaIpAddress() ?: "192.168.50.3" // Fallback
+    }
+
+    /**
+     * Gibt den aktuellen Moxa Port aus den Settings zurück
+     */
+    fun getMoxaPort(): Int {
+        return settingsManager?.getMoxaPort() ?: 4001 // Fallback
+    }
+
+    /**
+     * Gibt Connection Timeout aus Settings zurück (falls konfigurierbar)
+     */
+    fun getConnectionTimeout(): Int {
+        return settingsManager?.getConnectionTimeout() ?: CONNECTION_TIMEOUT
+    }
+
+    /**
+     * Gibt Read Timeout aus Settings zurück (falls konfigurierbar)
+     */
+    fun getReadTimeout(): Int {
+        return settingsManager?.getReadTimeout() ?: READ_TIMEOUT
+    }
 
     /**
      * Aktualisiert die Liste der verfügbaren (aktiven) Zellen basierend auf der Benutzerauswahl.
@@ -37,8 +76,6 @@ object MultiCellConfig {
             Log.i("MultiCellConfig", "Aktive Zellen aktualisiert auf: ${availableCells.joinToString(", ")} (Anzahl: $count)")
         } else {
             Log.w("MultiCellConfig", "Ungültige Anzahl für updateAvailableCells: $count. Muss zwischen 1 und $maxDisplayCells liegen.")
-            // Optional: Fallback auf einen Standardwert, falls eine ungültige Anzahl übergeben wird
-            // availableCells = listOf(1)
         }
     }
 
@@ -65,7 +102,8 @@ object MultiCellConfig {
     fun getConfigSummary(): String {
         return "Maximal anzeigbare Zellen: $maxDisplayCells. " +
                 "Aktuell aktive Zellen (vom Benutzer ausgewählt): ${availableCells.joinToString(", ")} " +
-                "(Anzahl: ${getAvailableCellCount()})."
+                "(Anzahl: ${getAvailableCellCount()}). " +
+                "Moxa: ${getMoxaIpAddress()}:${getMoxaPort()}"
     }
 
     // Erweiterte Konfiguration für einzelne Zellen (kann später genutzt werden)

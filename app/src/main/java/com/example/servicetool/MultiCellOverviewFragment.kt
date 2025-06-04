@@ -57,9 +57,15 @@ class MultiCellOverviewFragment : Fragment() {
     // Wird durch den Spinner und MultiCellConfig.availableCells aktualisiert.
     private var configuredCells: List<Int> = MultiCellConfig.availableCells.toList()
 
-    // Multi-Cell Konfiguration (aus MultiCellConfig Objekt)
-    private val MOXA_IP = MultiCellConfig.MOXA_IP
-    private val MOXA_PORT = MultiCellConfig.MOXA_PORT
+    // Settings und Logging Manager
+    private lateinit var settingsManager: SettingsManager
+    private lateinit var loggingManager: LoggingManager
+
+    // Multi-Cell Konfiguration (jetzt aus Settings)
+    private fun getMoxaIpAddress(): String = MultiCellConfig.getMoxaIpAddress()
+    private fun getMoxaPort(): Int = MultiCellConfig.getMoxaPort()
+    private fun getConnectionTimeout(): Int = MultiCellConfig.getConnectionTimeout()
+    private fun getReadTimeout(): Int = MultiCellConfig.getReadTimeout()
     private val MAX_DISPLAY_CELLS = MultiCellConfig.maxDisplayCells
     private val CELL_QUERY_DELAY_MS = MultiCellConfig.CELL_QUERY_DELAY_MS
 
@@ -74,6 +80,7 @@ class MultiCellOverviewFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        initializeServices()
         initializeViews(view) // UI-Elemente initialisieren
         setupSpinner()        // Spinner konfigurieren und Listener setzen
         setupClickListeners() // Klick-Listener für Buttons setzen
@@ -88,6 +95,13 @@ class MultiCellOverviewFragment : Fragment() {
 
         updateUI() // Generelles UI-Update (z.B. leere Felder initial anzeigen)
         refreshAllCells() // Initiale Datenabfrage für die ausgewählten Zellen
+    }
+
+    private fun initializeServices() {
+        settingsManager = SettingsManager.getInstance(requireContext())
+        loggingManager = LoggingManager.getInstance(requireContext())
+
+        loggingManager.logInfo("MultiCellOverview", "Fragment gestartet mit Moxa: ${getMoxaIpAddress()}:${getMoxaPort()}")
     }
 
     private fun initializeViews(view: View) {
@@ -146,19 +160,6 @@ class MultiCellOverviewFragment : Fragment() {
                 val selectedCellCount = position + 1 // Position ist 0-basiert, Zellanzahl 1-basiert
 
                 Log.d("MultiCellOverview", "Spinner: Auswahl '$selectedCellCount Zellen' an Position $position.")
-
-                // Nur handeln, wenn sich die Auswahl tatsächlich geändert hat, um unnötige Aktionen zu vermeiden
-                // (besonders beim ersten Setzen des Adapters/Listeners)
-                if (MultiCellConfig.getAvailableCellCount() == selectedCellCount && configuredCells.size == selectedCellCount) {
-                    // Log.d("MultiCellOverview", "Spinner: Auswahl hat sich nicht geändert ($selectedCellCount), keine Aktion.")
-                    // return // Frühzeitiger Ausstieg, wenn sich nichts geändert hat.
-                    // ACHTUNG: Dieser Check kann dazu führen, dass beim ersten Start nach der Initialisierung
-                    // refreshAllCells() nicht korrekt getriggert wird, wenn der Default-Wert des Spinners
-                    // zufällig dem Initialwert von MultiCellConfig entspricht.
-                    // Besser ist es, die Aktionen immer auszuführen und die Logik in refreshAllCells etc.
-                    // idempotent zu gestalten oder den Zustand genauer zu prüfen.
-                }
-
 
                 if (isLiveMode) {
                     stopLiveMode() // Live-Modus stoppen, wenn die Zellanzahl geändert wird
@@ -224,26 +225,24 @@ class MultiCellOverviewFragment : Fragment() {
         }
     }
 
-
     private fun refreshAllCells() {
         if (isLiveMode) {
             Log.d("MultiCellOverview", "refreshAllCells: Im Live-Modus, kein Refresh.")
             return
         }
-        if (configuredCells.isEmpty()){
+        if (configuredCells.isEmpty()) {
             Log.w("MultiCellOverview", "refreshAllCells: Keine Zellen konfiguriert, kein Refresh.")
             updateOverallStatus("Keine Zellen ausgewählt", StatusType.PENDING)
             showLoading(false)
-            // Stelle sicher, dass alle Zellen-UIs als "N/A" oder leer angezeigt werden
             updateActiveCellViews(0) // Blendet alle Zellen aus und setzt sie zurück
-            // Gemeinsame Daten auch zurücksetzen
             commonData = CommonDisplayData()
             updateCommonUI()
             return
         }
 
         showLoading(true)
-        updateOverallStatus("Lade Daten für ${configuredCells.size} Zellen...", StatusType.CONNECTING)
+        updateOverallStatus("Lade Daten für ${configuredCells.size} Zellen mit ${getMoxaIpAddress()}:${getMoxaPort()}...", StatusType.CONNECTING)
+        loggingManager.logInfo("MultiCellOverview", "Refresh aller Zellen gestartet mit ${getMoxaIpAddress()}:${getMoxaPort()}")
 
         lifecycleScope.launch {
             try {
@@ -262,7 +261,7 @@ class MultiCellOverviewFragment : Fragment() {
                     val result = fetchCellData(cellNumber)
                     fetchedDataMap[cellNumber] = result
 
-                    if (!isActive && index < configuredCells.size -1) { // Wenn abgebrochen und nicht die letzte Zelle
+                    if (!isActive && index < configuredCells.size - 1) { // Wenn abgebrochen und nicht die letzte Zelle
                         Log.i("MultiCellOverview", "refreshAllCells Coroutine abgebrochen (nach fetch, vor Delay).")
                         return@launch
                     }
@@ -299,12 +298,13 @@ class MultiCellOverviewFragment : Fragment() {
                 if (successfulFetches > 0) {
                     loadCommonDataFromFetched(fetchedDataMap)
                     updateOverallStatus("$successfulFetches/${configuredCells.size} Zellen verbunden", StatusType.CONNECTED)
+                    loggingManager.logInfo("MultiCellOverview", "Refresh abgeschlossen: $successfulFetches/${configuredCells.size} Zellen erfolgreich")
                 } else if (configuredCells.isNotEmpty()) {
                     updateOverallStatus("Keine der ${configuredCells.size} Zellen erreichbar", StatusType.ERROR)
                     commonData = CommonDisplayData() // Gemeinsame Daten zurücksetzen
                     updateCommonUI()
+                    loggingManager.logError("MultiCellOverview", "Refresh fehlgeschlagen: Keine Zellen erreichbar")
                 } else {
-                    // Dieser Fall sollte durch den Check am Anfang abgedeckt sein
                     updateOverallStatus("Keine Zellen ausgewählt", StatusType.PENDING)
                 }
 
@@ -316,6 +316,7 @@ class MultiCellOverviewFragment : Fragment() {
             } catch (e: Exception) {
                 Log.e("MultiCellOverview", "Fehler beim Laden aller Zellen: ${e.message}", e)
                 updateOverallStatus("Fehler: ${e.localizedMessage ?: e.message}", StatusType.ERROR)
+                loggingManager.logError("MultiCellOverview", "Refresh-Fehler", e)
             } finally {
                 if (isActive) { // Nur ausführen, wenn die Coroutine noch aktiv ist
                     showLoading(false)
@@ -328,16 +329,14 @@ class MultiCellOverviewFragment : Fragment() {
         if (isLiveMode) return
 
         // Filtere Zellen, die beim letzten Refresh erfolgreich waren oder noch nicht probiert wurden
-        // (relevant, wenn direkt nach Spinner-Änderung Live gestartet wird)
         val cellsToQueryInLiveMode = configuredCells.filter { cellNum ->
             val data = cellDataArray.getOrNull(cellNum - 1)
             data != null && data.counts != "Fehler" && data.counts != "N/A"
         }
 
         if (cellsToQueryInLiveMode.isEmpty()) {
-            Log.w("MultiCellOverview", "Live-Modus nicht gestartet: Keine Zellen für Live-Abfrage verfügbar (entweder Fehler beim letzten Refresh oder keine konfiguriert).")
+            Log.w("MultiCellOverview", "Live-Modus nicht gestartet: Keine Zellen für Live-Abfrage verfügbar")
             updateOverallStatus("Keine Zellen für Live-Modus", StatusType.ERROR)
-            // Sicherstellen, dass Buttons korrekt gesetzt sind
             buttonStartLiveAll.isEnabled = true
             buttonStopLiveAll.isEnabled = false
             spinnerActiveCells.isEnabled = true
@@ -346,8 +345,9 @@ class MultiCellOverviewFragment : Fragment() {
 
         isLiveMode = true
         updateButtonStates() // Deaktiviert auch den Spinner
-        updateOverallStatus("Live-Modus aktiv für ${cellsToQueryInLiveMode.size} Zellen", StatusType.LIVE)
-        Log.i("MultiCellOverview", "Starte Live-Modus für Zellen: ${cellsToQueryInLiveMode.joinToString(", ")}")
+        updateOverallStatus("Live-Modus aktiv für ${cellsToQueryInLiveMode.size} Zellen mit ${getMoxaIpAddress()}:${getMoxaPort()}", StatusType.LIVE)
+        Log.i("MultiCellOverview", "Starte Live-Modus für Zellen: ${cellsToQueryInLiveMode.joinToString(", ")} mit ${getMoxaIpAddress()}:${getMoxaPort()}")
+        loggingManager.logInfo("MultiCellOverview", "Live-Modus gestartet für ${cellsToQueryInLiveMode.size} Zellen")
 
         liveUpdateJob = lifecycleScope.launch {
             while (isLiveMode && isActive) {
@@ -394,13 +394,11 @@ class MultiCellOverviewFragment : Fragment() {
                         Log.w("MultiCellOverview_Live", "Keine Zelle hat im Live-Zyklus geantwortet.")
                     }
 
-
                 } catch (e: CancellationException) {
                     Log.i("MultiCellOverview_Live", "Live-Update Job wurde abgebrochen (CancellationException).")
                     break
                 } catch (e: Exception) {
                     Log.e("MultiCellOverview_Live", "Allgemeiner Live-Update Fehler: ${e.message}", e)
-                    // Optional: Fehler im UI anzeigen oder nach kurzer Pause erneut versuchen
                     delay(2000) // Kurze Pause bei allgemeinem Fehler
                 }
                 if (isLiveMode && isActive) { // Nur verzögern, wenn Modus und Coroutine noch aktiv
@@ -413,7 +411,7 @@ class MultiCellOverviewFragment : Fragment() {
                 updateButtonStates() // Stellt sicher, dass Spinner wieder aktiviert wird etc.
                 // Setze Status der Zellen zurück auf "CONNECTED" oder "ERROR" basierend auf dem letzten Refresh
                 configuredCells.forEach { cellNum ->
-                    val idx = cellNum -1
+                    val idx = cellNum - 1
                     if (idx >= 0 && idx < MAX_DISPLAY_CELLS) {
                         if (cellDataArray[idx].counts != "Fehler" && cellDataArray[idx].counts != "N/A") {
                             updateCellStatus(idx, StatusType.CONNECTED)
@@ -438,6 +436,7 @@ class MultiCellOverviewFragment : Fragment() {
         if (!isLiveMode && liveUpdateJob == null) return // Bereits gestoppt
 
         Log.i("MultiCellOverview", "stopLiveMode aufgerufen.")
+        loggingManager.logInfo("MultiCellOverview", "Live-Modus gestoppt")
         isLiveMode = false
         liveUpdateJob?.cancel() // Coroutine sicher beenden
         liveUpdateJob = null
@@ -457,8 +456,6 @@ class MultiCellOverviewFragment : Fragment() {
                 } else if (cellDataArray[idx].counts != "N/A") { // Nur wenn nicht "N/A" (also konfiguriert aber fehlerhaft)
                     updateCellStatus(idx, StatusType.ERROR)
                 }
-                // Für nicht konfigurierte Zellen (die in `configuredCells` nicht enthalten sind, aber im `cellDataArray` evtl. noch alte Daten haben)
-                // wird der Status durch `updateActiveCellViews` beim nächsten Spinner-Event oder Refresh korrekt gesetzt.
             }
         }
 
@@ -469,7 +466,6 @@ class MultiCellOverviewFragment : Fragment() {
         }
     }
 
-
     /**
      * Lädt alle Daten (Counts und gemeinsame Daten) für eine einzelne Zelle.
      * Wird für den initialen Refresh verwendet.
@@ -477,11 +473,11 @@ class MultiCellOverviewFragment : Fragment() {
     private suspend fun fetchCellData(cellNumber: Int): CellDisplayData? {
         return withContext(Dispatchers.IO) {
             if (!isActive) return@withContext null // Früher Ausstieg, wenn Coroutine nicht mehr aktiv
-            Log.d("MultiCellOverview", "fetchCellData für Zelle $cellNumber - Thread: ${Thread.currentThread().name}")
+            Log.d("MultiCellOverview", "fetchCellData für Zelle $cellNumber mit ${getMoxaIpAddress()}:${getMoxaPort()} - Thread: ${Thread.currentThread().name}")
             try {
                 Socket().use { socket ->
-                    socket.connect(InetSocketAddress(MOXA_IP, MOXA_PORT), MultiCellConfig.CONNECTION_TIMEOUT)
-                    socket.soTimeout = MultiCellConfig.READ_TIMEOUT
+                    socket.connect(InetSocketAddress(getMoxaIpAddress(), getMoxaPort()), getConnectionTimeout())
+                    socket.soTimeout = getReadTimeout()
 
                     val outputStream = socket.getOutputStream()
                     val inputStream = socket.getInputStream()
@@ -497,12 +493,7 @@ class MultiCellOverviewFragment : Fragment() {
                     ) ?: run { commandSuccess = false; "Fehler" }
                     if (!isActive) return@withContext null
 
-
-                    // Gemeinsame Daten nur abfragen, wenn Counts erfolgreich waren UND es die erste Zelle in der `configuredCells` Liste ist
-                    // ODER wenn es die erste Zelle ist, die erfolgreich Counts geliefert hat (für Redundanz)
-                    // Diese Logik wird jetzt in `loadCommonDataFromFetched` verfeinert.
-                    // Hier laden wir die Daten für die aktuelle Zelle, wenn sie als Kandidat für gemeinsame Daten gilt.
-                    // Die Entscheidung, welche gemeinsamen Daten letztendlich angezeigt werden, fällt später.
+                    // Gemeinsame Daten nur abfragen, wenn Counts erfolgreich waren
                     if (commandSuccess) { // Nur wenn Counts erfolgreich waren
                         data.temperature = fetchSingleCellCommand("Temperatur", FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.TEMPERATURE), outputStream, inputStream, cellNumber) ?: "0°C"
                         if (!isActive) return@withContext null
@@ -514,7 +505,6 @@ class MultiCellOverviewFragment : Fragment() {
                         if (!isActive) return@withContext null
                     }
 
-
                     data.lastUpdate = System.currentTimeMillis()
                     return@withContext if (commandSuccess) data else null // Nur erfolgreiche Daten zurückgeben
                 }
@@ -522,7 +512,8 @@ class MultiCellOverviewFragment : Fragment() {
                 Log.i("MultiCellOverview", "fetchCellData für Zelle $cellNumber abgebrochen (CancellationException).")
                 return@withContext null
             } catch (e: Exception) {
-                Log.e("MultiCellOverview", "Fehler beim Laden von Zelle $cellNumber: ${e.message}", e)
+                Log.e("MultiCellOverview", "Fehler beim Laden von Zelle $cellNumber mit ${getMoxaIpAddress()}:${getMoxaPort()}: ${e.message}", e)
+                loggingManager.logError("MultiCellOverview", "Zelle $cellNumber Fetch-Fehler", e, cellNumber)
                 return@withContext null // Fehlerfall
             }
         }
