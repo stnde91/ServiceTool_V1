@@ -7,21 +7,36 @@ import android.util.Log
  */
 object MultiCellConfig {
 
-    // Definiere hier, welche Zellen tatsächlich verfügbar sind
-    // Momentan nur Zelle 1 und 2, kann aber einfach erweitert werden
-    val availableCells = listOf(1, 2)
+    // Definiere hier, welche Zellen tatsächlich verfügbar sind.
+    // Wird jetzt dynamisch durch den Spinner im Fragment gesetzt.
+    // Initialwert kann z.B. nur Zelle 1 sein oder die erste Option des Spinners.
+    var availableCells: List<Int> = listOf(1) // Startet mit einer Zelle
+        private set // Nur intern über updateAvailableCells änderbar
 
-    // Maximale Anzahl Zellen in der UI (8 in deinem Layout)
+    // Maximale Anzahl Zellen in der UI (und im Spinner)
     const val maxDisplayCells = 8
 
     // Moxa-Konfiguration
-    const val MOXA_IP = "192.168.50.3"
+    const val MOXA_IP = "192.168.50.3" // Stelle sicher, dass dies die korrekte IP für dein Moxa-Gerät ist
     const val MOXA_PORT = 4001
 
     // Timeouts
-    const val CONNECTION_TIMEOUT = 5000
-    const val READ_TIMEOUT = 3000
-    const val LIVE_UPDATE_INTERVAL = 1000L
+    const val CONNECTION_TIMEOUT = 5000 // in Millisekunden
+    const val READ_TIMEOUT = 3000       // in Millisekunden
+    const val LIVE_UPDATE_INTERVAL = 1000L // in Millisekunden
+
+    /**
+     * Aktualisiert die Liste der verfügbaren Zellen basierend auf der Auswahl.
+     * @param count Die Anzahl der Zellen, die aktiv sein sollen (beginnend bei Zelle 1).
+     */
+    fun updateAvailableCells(count: Int) {
+        if (count in 1..maxDisplayCells) {
+            availableCells = List(count) { it + 1 } // Erzeugt eine Liste [1, 2, ..., count]
+            Log.i("MultiCellConfig", "Verfügbare Zellen aktualisiert auf: ${availableCells.joinToString(", ")}")
+        } else {
+            Log.w("MultiCellConfig", "Ungültige Anzahl für updateAvailableCells: $count")
+        }
+    }
 
     /**
      * Gibt zurück, ob eine bestimmte Zelle konfiguriert ist
@@ -41,13 +56,12 @@ object MultiCellConfig {
      * Debug-Information über die Konfiguration
      */
     fun getConfigSummary(): String {
-        return "Verfügbare Zellen: ${availableCells.joinToString(", ")} " +
-                "(${availableCells.size}/$maxDisplayCells konfiguriert)"
+        return "Aktuell aktive Zellen: ${availableCells.joinToString(", ")} " +
+                "(${availableCells.size} ausgewählt)"
     }
 
     /**
      * Erweiterte Konfiguration für zukünftige Zellen
-     * Hier kannst du später spezielle Einstellungen pro Zelle definieren
      */
     data class CellConfig(
         val cellNumber: Int,
@@ -56,34 +70,18 @@ object MultiCellConfig {
         val customCommands: Map<FlintecRC3DMultiCellCommands.CommandType, ByteArray>? = null
     )
 
-    // Wenn du später spezielle Konfigurationen brauchst:
     private val cellConfigs = mapOf(
-        1 to CellConfig(1, "Hauptzelle A"),
-        2 to CellConfig(2, "Nebenzelle B")
-        // 3 to CellConfig(3, "Zelle C"), // Für später
-        // 4 to CellConfig(4, "Zelle D"), // Für später
+        1 to CellConfig(1, "Zelle A"),
+        2 to CellConfig(2, "Zelle B"),
+        3 to CellConfig(3, "Zelle C"),
+        4 to CellConfig(4, "Zelle D"),
+        5 to CellConfig(5, "Zelle E"),
+        6 to CellConfig(6, "Zelle F"),
+        7 to CellConfig(7, "Zelle G"),
+        8 to CellConfig(8, "Zelle H")
     )
 
-    /**
-     * Hole Konfiguration für eine bestimmte Zelle
-     */
     fun getCellConfig(cellNumber: Int): CellConfig? {
         return cellConfigs[cellNumber]
-    }
-
-    /**
-     * Einfache Erweiterung: Neue Zelle hinzufügen
-     * Rufe diese Funktion auf, wenn du eine neue Zelle aktivieren möchtest
-     */
-    fun addCell(cellNumber: Int): Boolean {
-        return if (cellNumber in 1..maxDisplayCells && !availableCells.contains(cellNumber)) {
-            // Hier würdest du die Zelle zur availableCells Liste hinzufügen
-            // Da availableCells momentan als val definiert ist, müsstest du das zu var ändern
-            // oder eine andere Speichermethode verwenden (SharedPreferences, etc.)
-            Log.i("MultiCellConfig", "Zelle $cellNumber würde hinzugefügt werden")
-            true
-        } else {
-            false
-        }
     }
 }

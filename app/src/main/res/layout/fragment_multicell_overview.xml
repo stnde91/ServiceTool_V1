@@ -39,7 +39,7 @@
                         android:layout_height="32dp"
                         android:layout_marginEnd="12dp"
                         android:src="@drawable/ic_weight_24"
-                        android:tint="@android:color/white" />
+                        app:tint="@android:color/white" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -59,7 +59,7 @@
                             android:id="@+id/textOverallStatus"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="8 Zellen bereit"
+                            android:text="Zellen bereit"
                             android:textColor="@android:color/white"
                             android:textSize="14sp"
                             android:alpha="0.9" />
@@ -79,6 +79,39 @@
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
+
+        <!-- NEU: Card für Zellenanzahl-Auswahl -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:strokeWidth="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Anzahl aktiver Zellen"
+                    android:textColor="?android:attr/textColorPrimary"
+                    android:textSize="16sp"
+                    android:layout_marginBottom="8dp"/>
+
+                <Spinner
+                    android:id="@+id/spinnerActiveCells"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:background="@drawable/rounded_background_light"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"/>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
 
         <!-- 8-Zellen Grid (4x2) -->
         <com.google.android.material.card.MaterialCardView
@@ -106,6 +139,7 @@
 
                 <!-- Erste Reihe: Zellen 1-4 -->
                 <LinearLayout
+                    android:id="@+id/rowCell1to4"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="12dp"
@@ -113,6 +147,7 @@
 
                     <!-- Zelle 1 -->
                     <LinearLayout
+                        android:id="@+id/layoutCell1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="4dp"
@@ -120,7 +155,9 @@
                         android:background="@drawable/rounded_background_light"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="12dp">
+                        android:padding="12dp"
+                        android:visibility="gone"
+                        tools:visibility="visible">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -146,11 +183,11 @@
                             android:layout_height="8dp"
                             android:layout_marginTop="4dp"
                             android:src="@drawable/ic_status_pending" />
-
                     </LinearLayout>
 
                     <!-- Zelle 2 -->
                     <LinearLayout
+                        android:id="@+id/layoutCell2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
@@ -159,7 +196,9 @@
                         android:background="@drawable/rounded_background_light"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="12dp">
+                        android:padding="12dp"
+                        android:visibility="gone"
+                        tools:visibility="visible">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -185,11 +224,11 @@
                             android:layout_height="8dp"
                             android:layout_marginTop="4dp"
                             android:src="@drawable/ic_status_pending" />
-
                     </LinearLayout>
 
                     <!-- Zelle 3 -->
                     <LinearLayout
+                        android:id="@+id/layoutCell3"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
@@ -198,7 +237,9 @@
                         android:background="@drawable/rounded_background_light"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="12dp">
+                        android:padding="12dp"
+                        android:visibility="gone"
+                        tools:visibility="visible">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -224,11 +265,11 @@
                             android:layout_height="8dp"
                             android:layout_marginTop="4dp"
                             android:src="@drawable/ic_status_pending" />
-
                     </LinearLayout>
 
                     <!-- Zelle 4 -->
                     <LinearLayout
+                        android:id="@+id/layoutCell4"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
@@ -236,7 +277,9 @@
                         android:background="@drawable/rounded_background_light"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="12dp">
+                        android:padding="12dp"
+                        android:visibility="gone"
+                        tools:visibility="visible">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -262,19 +305,19 @@
                             android:layout_height="8dp"
                             android:layout_marginTop="4dp"
                             android:src="@drawable/ic_status_pending" />
-
                     </LinearLayout>
-
                 </LinearLayout>
 
                 <!-- Zweite Reihe: Zellen 5-8 -->
                 <LinearLayout
+                    android:id="@+id/rowCell5to8"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
                     <!-- Zelle 5 -->
                     <LinearLayout
+                        android:id="@+id/layoutCell5"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="4dp"
@@ -282,7 +325,9 @@
                         android:background="@drawable/rounded_background_light"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="12dp">
+                        android:padding="12dp"
+                        android:visibility="gone"
+                        tools:visibility="visible">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -308,11 +353,11 @@
                             android:layout_height="8dp"
                             android:layout_marginTop="4dp"
                             android:src="@drawable/ic_status_pending" />
-
                     </LinearLayout>
 
                     <!-- Zelle 6 -->
                     <LinearLayout
+                        android:id="@+id/layoutCell6"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
@@ -321,7 +366,9 @@
                         android:background="@drawable/rounded_background_light"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="12dp">
+                        android:padding="12dp"
+                        android:visibility="gone"
+                        tools:visibility="visible">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -347,11 +394,11 @@
                             android:layout_height="8dp"
                             android:layout_marginTop="4dp"
                             android:src="@drawable/ic_status_pending" />
-
                     </LinearLayout>
 
                     <!-- Zelle 7 -->
                     <LinearLayout
+                        android:id="@+id/layoutCell7"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
@@ -360,7 +407,9 @@
                         android:background="@drawable/rounded_background_light"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="12dp">
+                        android:padding="12dp"
+                        android:visibility="gone"
+                        tools:visibility="visible">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -386,11 +435,11 @@
                             android:layout_height="8dp"
                             android:layout_marginTop="4dp"
                             android:src="@drawable/ic_status_pending" />
-
                     </LinearLayout>
 
                     <!-- Zelle 8 -->
                     <LinearLayout
+                        android:id="@+id/layoutCell8"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
@@ -398,7 +447,9 @@
                         android:background="@drawable/rounded_background_light"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="12dp">
+                        android:padding="12dp"
+                        android:visibility="gone"
+                        tools:visibility="visible">
 
                         <TextView
                             android:layout_width="wrap_content"
@@ -424,13 +475,9 @@
                             android:layout_height="8dp"
                             android:layout_marginTop="4dp"
                             android:src="@drawable/ic_status_pending" />
-
                     </LinearLayout>
-
                 </LinearLayout>
-
             </LinearLayout>
-
         </com.google.android.material.card.MaterialCardView>
 
         <!-- Steuerung Card -->
@@ -502,7 +549,6 @@
                         android:textSize="14sp"
                         app:icon="@drawable/ic_stop_24"
                         app:iconGravity="textStart" />
-
                 </LinearLayout>
 
                 <!-- Letzte Aktualisierung -->
@@ -516,9 +562,7 @@
                     android:textColor="?android:attr/textColorSecondary"
                     android:textSize="12sp"
                     tools:text="Letzte Aktualisierung: 14:32:15" />
-
             </LinearLayout>
-
         </com.google.android.material.card.MaterialCardView>
 
         <!-- Technische Details Liste -->
@@ -558,7 +602,7 @@
                         android:layout_height="20dp"
                         android:layout_marginEnd="12dp"
                         android:src="@drawable/ic_temperature_24"
-                        android:tint="?android:attr/textColorSecondary" />
+                        app:tint="?android:attr/textColorSecondary" />
 
                     <TextView
                         android:layout_width="0dp"
@@ -577,7 +621,6 @@
                         android:textSize="14sp"
                         android:textStyle="bold"
                         tools:text="24,2°C" />
-
                 </LinearLayout>
 
                 <!-- Gemeinsame Baudrate -->
@@ -593,7 +636,7 @@
                         android:layout_height="20dp"
                         android:layout_marginEnd="12dp"
                         android:src="@drawable/ic_speed_24"
-                        android:tint="?android:attr/textColorSecondary" />
+                        app:tint="?android:attr/textColorSecondary" />
 
                     <TextView
                         android:layout_width="0dp"
@@ -612,7 +655,6 @@
                         android:textSize="14sp"
                         android:textStyle="bold"
                         tools:text="9600 bps" />
-
                 </LinearLayout>
 
                 <!-- Gemeinsamer Filter -->
@@ -628,7 +670,7 @@
                         android:layout_height="20dp"
                         android:layout_marginEnd="12dp"
                         android:src="@drawable/ic_filter_24"
-                        android:tint="?android:attr/textColorSecondary" />
+                        app:tint="?android:attr/textColorSecondary" />
 
                     <TextView
                         android:layout_width="0dp"
@@ -647,7 +689,6 @@
                         android:textSize="14sp"
                         android:textStyle="bold"
                         tools:text="Filter: 0" />
-
                 </LinearLayout>
 
                 <!-- Gemeinsame Version -->
@@ -662,7 +703,7 @@
                         android:layout_height="20dp"
                         android:layout_marginEnd="12dp"
                         android:src="@drawable/ic_info_24"
-                        android:tint="?android:attr/textColorSecondary" />
+                        app:tint="?android:attr/textColorSecondary" />
 
                     <TextView
                         android:layout_width="0dp"
@@ -681,13 +722,8 @@
                         android:textSize="14sp"
                         android:textStyle="bold"
                         tools:text="XRC1/331010645" />
-
                 </LinearLayout>
-
             </LinearLayout>
-
         </com.google.android.material.card.MaterialCardView>
-
     </LinearLayout>
-
 </androidx.core.widget.NestedScrollView>

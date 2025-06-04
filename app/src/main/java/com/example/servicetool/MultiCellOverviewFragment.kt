@@ -49,10 +49,14 @@ class MultiCellOverviewFragment : Fragment() {
     private var isLiveMode = false
     private var liveUpdateJob: Job? = null
 
+    // NEU: Set zur Speicherung von Zellen, die beim Refresh nicht geantwortet haben
+    private var unresponsiveCellsDuringRefresh = mutableSetOf<Int>()
+
     // Multi-Cell Konfiguration
     private val MOXA_IP = MultiCellConfig.MOXA_IP
     private val MOXA_PORT = MultiCellConfig.MOXA_PORT
-    private val availableCells = MultiCellConfig.availableCells.sorted() // Sicherstellen, dass die Zellen sortiert abgefragt werden
+    // availableCells wird jetzt beim Start des Live-Modus gefiltert
+    private val configuredCells = MultiCellConfig.availableCells.sorted()
     private val maxCellsToDisplay = MultiCellConfig.maxDisplayCells
     private val CELL_QUERY_DELAY_MS = 1000L
 
@@ -70,7 +74,7 @@ class MultiCellOverviewFragment : Fragment() {
         setupClickListeners()
         updateUI()
 
-        // Initiale Datenabfrage für alle verfügbaren Zellen
+        // Initiale Datenabfrage für alle konfigurierten Zellen
         refreshAllCells()
     }
 
@@ -108,7 +112,7 @@ class MultiCellOverviewFragment : Fragment() {
                 Log.w("MultiCellOverview", "UI Element für Zelle $cellNum nicht gefunden: ${e.message}")
             }
         }
-        Log.i("MultiCellOverview", "Initialisiert für ${availableCells.size} verfügbare Zellen: ${availableCells.joinToString(", ")}")
+        Log.i("MultiCellOverview", "Initialisiert für ${configuredCells.size} konfigurierte Zellen: ${configuredCells.joinToString(", ")}")
     }
 
     private fun setupClickListeners() {
@@ -129,17 +133,19 @@ class MultiCellOverviewFragment : Fragment() {
         if (isLiveMode) return
 
         showLoading(true)
-        updateOverallStatus("Verbinde mit ${availableCells.size} verfügbaren Zellen...", StatusType.CONNECTING)
+        // NEU: Set der nicht antwortenden Zellen für diesen Refresh-Zyklus leeren
+        unresponsiveCellsDuringRefresh.clear()
+        updateOverallStatus("Verbinde mit ${configuredCells.size} konfigurierten Zellen...", StatusType.CONNECTING)
 
         lifecycleScope.launch {
             try {
                 var successCount = 0
-                val totalCells = availableCells.size
+                val totalConfiguredCells = configuredCells.size
                 val fetchedResults = mutableListOf<Pair<Int, CellDisplayData?>>()
 
-                // Lade Daten für alle verfügbaren Zellen sequenziell mit Verzögerung
-                for ((index, cellNumber) in availableCells.withIndex()) {
-                    if (!isActive) { // Überprüfe vor jeder Abfrage, ob die Coroutine noch aktiv ist
+                // Lade Daten für alle konfigurierten Zellen sequenziell mit Verzögerung
+                for ((index, cellNumber) in configuredCells.withIndex()) {
+                    if (!isActive) {
                         Log.i("MultiCellOverview", "refreshAllCells Coroutine abgebrochen.")
                         return@launch
                     }
@@ -147,8 +153,7 @@ class MultiCellOverviewFragment : Fragment() {
                     val result = fetchCellData(cellNumber)
                     fetchedResults.add(cellNumber to result)
 
-                    // Füge eine Verzögerung ein, außer bei der letzten Zelle
-                    if (index < availableCells.size - 1) {
+                    if (index < totalConfiguredCells - 1) {
                         Log.d("MultiCellOverview", "Warte ${CELL_QUERY_DELAY_MS}ms bis zur nächsten Zelle.")
                         delay(CELL_QUERY_DELAY_MS)
                     }
@@ -161,51 +166,55 @@ class MultiCellOverviewFragment : Fragment() {
 
                 // Verarbeite die gesammelten Ergebnisse
                 for ((cellNumber, cellData) in fetchedResults) {
-                    val arrayIndex = cellNumber - 1 // Zelle 1 -> Index 0, Zelle 2 -> Index 1, etc.
+                    val arrayIndex = cellNumber - 1
 
                     if (cellData != null && arrayIndex < maxCellsToDisplay) {
                         cellDataArray[arrayIndex] = cellData
                         successCount++
-                        updateCellUI(arrayIndex) // Direkte UI-Aktualisierung ohne Animation hier
+                        updateCellUI(arrayIndex)
                         updateCellStatus(arrayIndex, StatusType.CONNECTED)
+                        unresponsiveCellsDuringRefresh.remove(cellNumber) // NEU: Erfolgreich, aus Set entfernen
                         Log.i("MultiCellOverview", "Zelle $cellNumber erfolgreich geladen")
                     } else if (arrayIndex < maxCellsToDisplay) {
                         Log.w("MultiCellOverview", "Zelle $cellNumber konnte nicht geladen werden")
                         updateCellStatus(arrayIndex, StatusType.ERROR)
-                        // Initialisiere mit Fehlerdaten, um N/A anzuzeigen
                         cellDataArray[arrayIndex] = CellDisplayData(
                             cellNumber = cellNumber,
                             counts = "Fehler",
                             lastUpdate = System.currentTimeMillis()
                         )
-                        updateCellUI(arrayIndex) // Direkte UI-Aktualisierung
+                        updateCellUI(arrayIndex)
+                        unresponsiveCellsDuringRefresh.add(cellNumber) // NEU: Fehler, zu Set hinzufügen
                     }
                 }
 
-                // Setze nicht verfügbare Zellen auf "Nicht konfiguriert"
+                // Setze UI für Zellen, die nicht in MultiCellConfig.availableCells sind (falls maxDisplayCells > availableCells.size)
                 for (i in 0 until maxCellsToDisplay) {
-                    val cellNumberLoop = i + 1 // Muss anders benannt werden als cellNumber aus der Schleife oben
-                    if (!availableCells.contains(cellNumberLoop)) {
+                    val cellNumberLoop = i + 1
+                    if (!configuredCells.contains(cellNumberLoop)) {
                         cellDataArray[i] = CellDisplayData().apply {
                             this.cellNumber = cellNumberLoop
-                            this.counts = "N/A"
+                            this.counts = "N/A" // Nicht konfiguriert
                             this.lastUpdate = System.currentTimeMillis()
                         }
-                        updateCellUI(i) // Direkte UI-Aktualisierung
-                        updateCellStatus(i, StatusType.PENDING)
+                        updateCellUI(i)
+                        updateCellStatus(i, StatusType.PENDING) // Eigener Status für nicht konfigurierte
                         Log.d("MultiCellOverview", "Zelle $cellNumberLoop als nicht konfiguriert markiert")
                     }
                 }
 
-                // Lade gemeinsame Daten von der ersten funktionierenden Zelle
-                if (successCount > 0) {
-                    loadCommonData()
-                    updateOverallStatus("$successCount/$totalCells Zellen verbunden (${availableCells.size} konfiguriert)", StatusType.CONNECTED)
+                val currentlyActiveCellsCount = totalConfiguredCells - unresponsiveCellsDuringRefresh.size
+                if (successCount > 0) { // successCount ist hier identisch mit currentlyActiveCellsCount
+                    loadCommonData() // Lade gemeinsame Daten, wenn mindestens eine Zelle erfolgreich war
+                    updateOverallStatus("$currentlyActiveCellsCount/$totalConfiguredCells Zellen verbunden", StatusType.CONNECTED)
+                } else if (totalConfiguredCells > 0) {
+                    updateOverallStatus("Keine der $totalConfiguredCells konfigurierten Zellen erreichbar", StatusType.ERROR)
                 } else {
-                    updateOverallStatus("Keine Zellen erreichbar", StatusType.ERROR)
+                    updateOverallStatus("Keine Zellen konfiguriert", StatusType.PENDING)
                 }
 
-                animateDataUpdate() // Allgemeine UI-Feedback-Animation für den gesamten Refresh
+
+                animateDataUpdate()
 
             } catch (e: CancellationException) {
                 Log.i("MultiCellOverview", "refreshAllCells Coroutine wurde abgebrochen (CancellationException).")
@@ -222,23 +231,39 @@ class MultiCellOverviewFragment : Fragment() {
     private fun startLiveMode() {
         if (isLiveMode) return
 
+        // NEU: Bestimme, welche Zellen im Live-Modus abgefragt werden sollen
+        val cellsToQueryInLiveMode = configuredCells.filter { cellNum ->
+            !unresponsiveCellsDuringRefresh.contains(cellNum)
+        }
+
+        if (cellsToQueryInLiveMode.isEmpty()) {
+            Log.w("MultiCellOverview", "Live-Modus nicht gestartet, da keine Zellen beim letzten Refresh erreichbar waren oder keine konfiguriert sind.")
+            updateOverallStatus("Keine Zellen für Live-Modus verfügbar", StatusType.ERROR)
+            // Optional: Buttons entsprechend anpassen
+            buttonStartLiveAll.isEnabled = true
+            buttonStopLiveAll.isEnabled = false
+            return
+        }
+
         isLiveMode = true
         updateButtonStates()
-        updateOverallStatus("Live-Modus aktiv für ${availableCells.size} Zellen", StatusType.LIVE)
+        updateOverallStatus("Live-Modus aktiv für ${cellsToQueryInLiveMode.size} Zellen", StatusType.LIVE)
+        Log.i("MultiCellOverview", "Starte Live-Modus für Zellen: ${cellsToQueryInLiveMode.joinToString(", ")}")
+
 
         liveUpdateJob = lifecycleScope.launch {
-            while (isLiveMode && isActive) { // isActive hier auch prüfen
+            while (isLiveMode && isActive) {
                 try {
                     val fetchedCounts = mutableListOf<Pair<Int, String?>>()
 
-                    // Aktualisiere nur verfügbare Zellen sequenziell mit Verzögerung
-                    for ((index, cellNumber) in availableCells.withIndex()) {
+                    // Aktualisiere nur die Zellen, die beim Refresh erreichbar waren
+                    for ((index, cellNumber) in cellsToQueryInLiveMode.withIndex()) {
                         if (!isLiveMode || !isActive) break
 
                         val counts = fetchSingleCellCounts(cellNumber)
                         fetchedCounts.add(cellNumber to counts)
 
-                        if (isLiveMode && isActive && index < availableCells.size - 1) {
+                        if (isLiveMode && isActive && index < cellsToQueryInLiveMode.size - 1) {
                             Log.d("MultiCellOverview_Live", "Warte ${CELL_QUERY_DELAY_MS}ms bis zur nächsten Zelle im Live-Modus.")
                             delay(CELL_QUERY_DELAY_MS)
                         }
@@ -255,7 +280,9 @@ class MultiCellOverviewFragment : Fragment() {
                             animateCellCountsUpdate(arrayIndex, newCounts)
                             updateCellStatus(arrayIndex, StatusType.LIVE)
                         } else if (arrayIndex < maxCellsToDisplay) {
+                            // Wenn eine Zelle im Live-Modus plötzlich nicht mehr antwortet
                             updateCellStatus(arrayIndex, StatusType.ERROR)
+                            Log.w("MultiCellOverview_Live", "Zelle $cellNumber hat im Live-Modus nicht geantwortet.")
                         }
                     }
 
@@ -281,21 +308,30 @@ class MultiCellOverviewFragment : Fragment() {
         liveUpdateJob?.cancel()
         liveUpdateJob = null
         updateButtonStates()
-        updateOverallStatus("Live-Modus gestoppt", StatusType.CONNECTED)
 
-        for (i in 0 until maxCellsToDisplay) {
-            val cellNumber = i + 1
-            if (availableCells.contains(cellNumber) && cellDataArray[i].counts.isNotEmpty() && cellDataArray[i].counts != "N/A" && cellDataArray[i].counts != "Fehler") {
-                updateCellStatus(i, StatusType.CONNECTED)
-            } else if (availableCells.contains(cellNumber) && (cellDataArray[i].counts == "Fehler" || cellDataArray[i].counts.isEmpty())) {
-                updateCellStatus(i, StatusType.ERROR)
+        // Setze Status basierend auf dem letzten Refresh-Zustand
+        var responsiveCount = 0
+        configuredCells.forEach { cellNum ->
+            val index = cellNum -1
+            if (index < maxCellsToDisplay) {
+                if (!unresponsiveCellsDuringRefresh.contains(cellNum) && cellDataArray[index].counts != "Fehler" && cellDataArray[index].counts != "N/A") {
+                    updateCellStatus(index, StatusType.CONNECTED)
+                    responsiveCount++
+                } else if (cellDataArray[index].counts != "N/A") { // Wenn konfiguriert, aber fehlerhaft
+                    updateCellStatus(index, StatusType.ERROR)
+                }
             }
+        }
+        if (configuredCells.isNotEmpty()) {
+            updateOverallStatus("$responsiveCount/${configuredCells.size} Zellen verbunden", StatusType.CONNECTED)
+        } else {
+            updateOverallStatus("Keine Zellen konfiguriert", StatusType.PENDING)
         }
     }
 
     private suspend fun fetchCellData(cellNumber: Int): CellDisplayData? {
         return withContext(Dispatchers.IO) {
-            if (!isActive) return@withContext null // Frühe Prüfung
+            if (!isActive) return@withContext null
             Log.d("MultiCellOverview", "fetchCellData für Zelle $cellNumber - Thread: ${Thread.currentThread().name}")
             try {
                 Socket().use { socket ->
@@ -314,10 +350,13 @@ class MultiCellOverviewFragment : Fragment() {
                         outputStream,
                         inputStream,
                         cellNumber
-                    ) ?: "0" // Default "0" wenn null
+                    ) ?: "0"
                     if (!isActive) return@withContext null
 
-                    if (cellNumber == availableCells.firstOrNull()) {
+                    // Lade gemeinsame Daten nur für die erste *konfigurierte und erreichbare* Zelle
+                    // Diese Logik wird nun in loadCommonData() zentralisiert, basierend auf unresponsiveCellsDuringRefresh
+                    if (cellNumber == configuredCells.firstOrNull { !unresponsiveCellsDuringRefresh.contains(it) } ) {
+                        Log.d("MultiCellOverview", "Lade gemeinsame Daten von Zelle $cellNumber")
                         data.temperature = fetchSingleCellCommand(
                             "Temperatur",
                             FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.TEMPERATURE),
@@ -371,7 +410,7 @@ class MultiCellOverviewFragment : Fragment() {
 
     private suspend fun fetchSingleCellCounts(cellNumber: Int): String? {
         return withContext(Dispatchers.IO) {
-            if (!isActive) return@withContext null // Frühe Prüfung
+            if (!isActive) return@withContext null
             Log.d("MultiCellOverview_Live", "fetchSingleCellCounts für Zelle $cellNumber - Thread: ${Thread.currentThread().name}")
             try {
                 Socket().use { socket ->
@@ -400,30 +439,35 @@ class MultiCellOverviewFragment : Fragment() {
     }
 
     private suspend fun loadCommonData() {
-        val firstConfiguredCellNumber = availableCells.firstOrNull()
-        if (firstConfiguredCellNumber != null) {
-            val firstCellIndex = firstConfiguredCellNumber - 1
-            if (firstCellIndex >= 0 && firstCellIndex < cellDataArray.size) { // Sicherstellen, dass der Index gültig ist
-                val firstCellData = cellDataArray[firstCellIndex]
-                // Nur aktualisieren, wenn die Daten tatsächlich erfolgreich geladen wurden
-                if (firstCellData.counts != "0" && firstCellData.counts != "N/A" && firstCellData.counts != "Fehler") {
-                    commonData.temperature = firstCellData.temperature
-                    commonData.baudrate = firstCellData.baudrate
-                    commonData.filter = firstCellData.filter
-                    commonData.version = firstCellData.version
-                    commonData.lastUpdate = firstCellData.lastUpdate
+        // Finde die erste konfigurierte Zelle, die beim letzten Refresh erreichbar war
+        val firstResponsiveConfiguredCellNumber = configuredCells.firstOrNull {
+            !unresponsiveCellsDuringRefresh.contains(it) &&
+                    (cellDataArray.getOrNull(it - 1)?.counts?.let { c -> c != "0" && c != "N/A" && c != "Fehler" } == true)
+        }
 
-                    withContext(Dispatchers.Main) {
-                        updateCommonUI()
-                    }
-                } else {
-                    Log.w("MultiCellOverview", "Erste konfigurierte Zelle ($firstConfiguredCellNumber) hat keine gültigen Daten für CommonDisplay (Counts: ${firstCellData.counts}).")
+        if (firstResponsiveConfiguredCellNumber != null) {
+            val firstCellIndex = firstResponsiveConfiguredCellNumber - 1
+            // Es wird angenommen, dass die Daten bereits in cellDataArray[firstCellIndex] geladen wurden,
+            // da fetchCellData die gemeinsamen Daten für die erste ERFOLGREICHE Zelle lädt.
+            // Wir müssen hier sicherstellen, dass wir die Daten von einer Zelle nehmen, die auch erfolgreich war.
+            val firstCellData = cellDataArray.getOrNull(firstCellIndex)
+
+            if (firstCellData != null && firstCellData.counts != "0" && firstCellData.counts != "N/A" && firstCellData.counts != "Fehler") {
+                commonData.temperature = firstCellData.temperature
+                commonData.baudrate = firstCellData.baudrate
+                commonData.filter = firstCellData.filter
+                commonData.version = firstCellData.version
+                commonData.lastUpdate = firstCellData.lastUpdate // Nimm die LastUpdate Zeit der Zelle
+
+                withContext(Dispatchers.Main) {
+                    updateCommonUI()
                 }
+                Log.i("MultiCellOverview", "Gemeinsame Daten von Zelle $firstResponsiveConfiguredCellNumber geladen.")
             } else {
-                Log.w("MultiCellOverview", "Ungültiger Index $firstCellIndex für erste konfigurierte Zelle $firstConfiguredCellNumber.")
+                Log.w("MultiCellOverview", "Erste responsive Zelle ($firstResponsiveConfiguredCellNumber) hat keine gültigen Daten für CommonDisplay (Counts: ${firstCellData?.counts}). Gemeinsame Daten werden nicht aktualisiert.")
             }
         } else {
-            Log.w("MultiCellOverview", "Keine Zellen konfiguriert, um CommonData zu laden.")
+            Log.w("MultiCellOverview", "Keine responsive Zelle gefunden, um CommonData zu laden.")
         }
     }
 
@@ -434,7 +478,7 @@ class MultiCellOverviewFragment : Fragment() {
         inputStream: InputStream,
         cellNumber: Int
     ): String? {
-        if (!coroutineContext.isActive) { // Prüft den Context der aufrufenden Coroutine
+        if (!coroutineContext.isActive) {
             Log.d("MultiCellOverview", "fetchSingleCellCommand für Zelle $cellNumber ($commandName) abgebrochen (Coroutine nicht aktiv).")
             return null
         }
@@ -445,7 +489,7 @@ class MultiCellOverviewFragment : Fragment() {
             outputStream.flush()
 
             val rawResponse = readFlintecResponse(inputStream)
-            if (!coroutineContext.isActive && rawResponse.isEmpty()) { // Prüft erneut nach dem Lesen
+            if (!coroutineContext.isActive && rawResponse.isEmpty()) {
                 Log.d("MultiCellOverview", "fetchSingleCellCommand für Zelle $cellNumber ($commandName) abgebrochen während readFlintecResponse.")
                 return null
             }
@@ -454,54 +498,34 @@ class MultiCellOverviewFragment : Fragment() {
                 Log.d("MultiCellOverview", "Zelle $cellNumber Antwort ($commandName): '$rawResponse'")
 
                 val parsedData = FlintecRC3DMultiCellCommands.parseMultiCellResponse(rawResponse, cellNumber)
-                val result: String? = when (parsedData) {
-                    is FlintecData.Counts -> parsedData.value
-                    is FlintecData.Temperature -> parsedData.value
-                    is FlintecData.Version -> parsedData.value
-                    is FlintecData.Baudrate -> "${parsedData.value} bps"
-                    is FlintecData.Filter -> parsedData.value
-                    // TODO: Definiere FlintecData.Error mit einer 'message'-Eigenschaft in deiner FlintecData sealed class/interface
-                    // is FlintecData.Error -> {
-                    //     Log.w("MultiCellOverview", "Fehler von Zelle $cellNumber ($commandName) geparsed: ${parsedData.message}")
-                    //     null // Oder einen spezifischen Fehlerstring zurückgeben
-                    // }
+                var valueToReturn: String? = null
+
+                when (parsedData) {
+                    is FlintecData.Counts -> valueToReturn = parsedData.value
+                    is FlintecData.Temperature -> valueToReturn = parsedData.value
+                    is FlintecData.Version -> valueToReturn = parsedData.value
+                    is FlintecData.Baudrate -> valueToReturn = "${parsedData.value} bps"
+                    is FlintecData.Filter -> valueToReturn = parsedData.value
                     else -> {
-                        Log.w("MultiCellOverview", "Unbekannter oder nicht behandelter Datentyp von Zelle $cellNumber ($commandName) geparsed: '$rawResponse'. Typ: ${parsedData?.javaClass?.simpleName}")
-                        val stringToClean = parsedData?.toString() ?: rawResponse
-
-                        // Nur bereinigen, wenn es nicht bereits ein bekannter, sauber geparster Typ war
-                        if (parsedData !is FlintecData.Counts &&
-                            parsedData !is FlintecData.Temperature &&
-                            parsedData !is FlintecData.Version &&
-                            parsedData !is FlintecData.Baudrate &&
-                            parsedData !is FlintecData.Filter) {
-
-                            // Versuche, nur führende numerische Zeichen zu extrahieren, bevor nicht-numerische Zeichen kommen
-                            val potentialNumericPrefix = stringToClean.takeWhile { it.isDigit() || it == '.' || it == '-' || it == '+' }
-                            if (potentialNumericPrefix.isNotEmpty() && potentialNumericPrefix.any {it.isDigit()}) {
-                                Log.d("MultiCellOverview", "Extrahierter potenziell numerischer Teil aus '$stringToClean': '$potentialNumericPrefix'")
-                                potentialNumericPrefix
-                            } else {
-                                Log.d("MultiCellOverview", "Kein numerischer Teil in '$stringToClean' gefunden, verwende rohe Antwort: '$rawResponse'")
-                                rawResponse
-                            }
-                        } else {
-                            Log.d("MultiCellOverview", "Bekannter Typ oder bereits String im Else-Zweig: '$stringToClean'")
-                            stringToClean
-                        }
+                        Log.w("MultiCellOverview", "Unbekannter oder nicht behandelter Datentyp von Zelle $cellNumber ($commandName). Parser gab zurück: ${parsedData?.javaClass?.simpleName}. Rohantwort: '$rawResponse'")
+                        valueToReturn = rawResponse
                     }
                 }
-                if (result != null) {
-                    Log.i("MultiCellOverview", "Zelle $cellNumber $commandName erfolgreich: $result")
+
+                if (valueToReturn != null) {
+                    Log.i("MultiCellOverview", "Zelle $cellNumber $commandName erfolgreich verarbeitet: '$valueToReturn'")
+                } else {
+                    Log.w("MultiCellOverview", "Zelle $cellNumber $commandName - valueToReturn ist null nach Parsing.")
+                    valueToReturn = rawResponse
                 }
-                return result
+                return valueToReturn
             } else {
                 Log.w("MultiCellOverview", "Zelle $cellNumber $commandName: Keine (gültige) Antwort")
                 return null
             }
         } catch (e: CancellationException) {
             Log.i("MultiCellOverview", "Befehl $commandName für Zelle $cellNumber abgebrochen (CancellationException).")
-            throw e // Wichtig, damit die äußere Coroutine den Abbruch mitbekommt
+            throw e
         }
         catch (e: Exception) {
             Log.e("MultiCellOverview", "Befehl $commandName für Zelle $cellNumber fehlgeschlagen: ${e.message}", e)
@@ -512,66 +536,62 @@ class MultiCellOverviewFragment : Fragment() {
 
     private suspend fun readFlintecResponse(inputStream: InputStream): String {
         return withContext(Dispatchers.IO) {
-            if(!isActive) return@withContext "" // Frühe Prüfung
+            if(!isActive) return@withContext ""
             try {
                 val responseBuffer = mutableListOf<Byte>()
                 var stxFound = false
                 var etxFound = false
-                val tempReadBuffer = ByteArray(64) // Puffer für read()
+                val tempReadBuffer = ByteArray(64)
 
                 val startTime = System.currentTimeMillis()
-                // Lese-Timeout für die gesamte Antwort, nicht pro Byte
                 val readOverallTimeout = MultiCellConfig.READ_TIMEOUT
 
                 while (isActive && System.currentTimeMillis() - startTime < readOverallTimeout && !etxFound) {
                     if (inputStream.available() > 0) {
                         val bytesRead = inputStream.read(tempReadBuffer)
-                        if (bytesRead == -1) { // End of stream erreicht
+                        if (bytesRead == -1) {
                             Log.w("MultiCellOverview", "End of stream erreicht beim Lesen der Antwort.")
                             break
                         }
 
                         for (k in 0 until bytesRead) {
-                            if(!isActive) return@withContext "" // Prüfung innerhalb der Schleife
+                            if(!isActive) return@withContext ""
 
                             val byte = tempReadBuffer[k]
                             if (byte.toInt() == 0x02 /* STX */) {
                                 stxFound = true
-                                responseBuffer.clear() // Beginne neue Nachricht
-                                // STX wird nicht Teil des Inhalts
+                                responseBuffer.clear()
                                 continue
                             }
 
                             if (stxFound) {
                                 if (byte.toInt() == 0x03 /* ETX */) {
-                                    etxFound = true // ETX gefunden, Nachricht komplett
-                                    break // Innere Schleife beenden
+                                    etxFound = true
+                                    break
                                 }
                                 responseBuffer.add(byte)
                             }
                         }
                     } else {
-                        // Kurze Pause, um CPU nicht zu überlasten, wenn keine Daten verfügbar sind
                         delay(50)
                     }
                 }
 
-                if(!isActive && !etxFound) { // Wenn Coroutine abgebrochen wurde, bevor ETX kam
+                if(!isActive && !etxFound) {
                     Log.i("MultiCellOverview", "readFlintecResponse abgebrochen, bevor ETX gefunden wurde.")
                     return@withContext ""
                 }
 
                 if (stxFound && etxFound) {
-                    // Nur wenn STX und ETX gefunden wurden, ist die Nachricht gültig (kann auch leer sein)
                     val responseString = String(responseBuffer.toByteArray(), Charsets.US_ASCII)
-                    Log.d("MultiCellOverview", "Gültige Antwort empfangen: '$responseString'")
+                    Log.d("MultiCellOverview", "Gültige Antwort empfangen (kann leer sein): '$responseString'")
                     return@withContext responseString
                 } else if (stxFound && !etxFound) {
                     Log.w("MultiCellOverview", "Antwort begonnen (STX) aber nicht beendet (ETX) innerhalb Timeout. Buffer: ${responseBuffer.joinToString("") { "%02X".format(it) }}")
                 } else if (!stxFound) {
                     Log.w("MultiCellOverview", "Kein STX in der Antwort gefunden innerhalb Timeout.")
                 }
-                return@withContext "" // Fallback: leere Antwort
+                return@withContext ""
             } catch (e: CancellationException) {
                 Log.i("MultiCellOverview", "readFlintecResponse abgebrochen (CancellationException).")
                 return@withContext ""
@@ -654,11 +674,9 @@ class MultiCellOverviewFragment : Fragment() {
         val currentText = textView.text.toString()
 
         if (currentText == newValueString) {
-            // Log.d("AnimCounts", "Keine Änderung für Zelle $cellIndex: $newValueString")
             return
         }
 
-        // Logge den Wert, der hier ankommt, um sicherzustellen, dass er bereits bereinigt ist.
         Log.d("AnimCounts", "Zelle $cellIndex: Animation von '$currentText' zu '$newValueString'.")
 
         textView.alpha = 0.0f
