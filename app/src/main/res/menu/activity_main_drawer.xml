@@ -18,6 +18,11 @@
             android:id="@+id/nav_digitale_zellen"
             android:icon="@drawable/ic_digital_24"
             android:title="Digitale Zellen" />
+
+        <item
+            android:id="@+id/nav_multicell_overview"
+            android:icon="@drawable/ic_live_24"
+            android:title="Multi-Cell Übersicht" />
     </group>
 
     <group android:id="@+id/group_settings">
@@ -26,5 +31,6 @@
             android:icon="@drawable/ic_settings_24"
             android:title="Einstellungen" />
     </group>
+
 
 </menu>
