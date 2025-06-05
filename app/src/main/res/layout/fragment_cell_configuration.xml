@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Titel -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Zellen Konfiguration"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="24dp"
+            android:textColor="@android:color/holo_blue_dark" />
+
+        <!-- Adressänderung Sektion -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Zellenadresse ändern"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="16dp"
+                    android:textColor="@android:color/black" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Geben Sie die Seriennummer der Zelle ein und wählen Sie die neue Adresse:"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="16dp"
+                    android:textColor="@android:color/darker_gray" />
+
+                <!-- GEÄNDERT: Seriennummer-Eingabe statt Dropdown -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayoutSerialNumber"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:hint="Seriennummer"
+                    app:helperText="8 Zeichen (z.B. 14149487)"
+                    app:counterEnabled="true"
+                    app:counterMaxLength="12">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/editTextSerialNumber"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="text"
+                        android:textAllCaps="true" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Neue Zelle (bleibt Dropdown) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="20dp"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Neue Adresse:"
+                        android:textSize="16sp"
+                        android:textColor="@android:color/black" />
+
+                    <Spinner
+                        android:id="@+id/spinner_new_cell"
+                        android:layout_width="177dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp" />
+
+                </LinearLayout>
+
+                <!-- Button und Progress -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <Button
+                        android:id="@+id/button_change_address"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Adresse ändern"
+                        android:backgroundTint="@android:color/holo_blue_bright"
+                        android:textColor="@android:color/white"
+                        android:textStyle="bold"
+                        android:enabled="false" />
+
+                    <ProgressBar
+                        android:id="@+id/progress_bar"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginStart="12dp"
+                        android:visibility="gone" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Status Anzeige -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Status"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp"
+                    android:textColor="@android:color/black" />
+
+                <TextView
+                    android:id="@+id/text_status"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Bereit für Konfiguration"
+                    android:textSize="14sp"
+                    android:minHeight="48dp"
+                    android:gravity="center_vertical"
+                    android:background="@android:color/transparent"
+                    android:padding="8dp"
+                    android:textColor="@android:color/darker_gray" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- Erweiterte Warnung für den neuen Use Case -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@android:color/holo_orange_light">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="⚠️ Wichtige Hinweise für Serienkonfiguration"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp"
+                    android:textColor="@android:color/black" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="• Neue Zellen sind standardmäßig auf Adresse 1 (A) konfiguriert&#10;• Verwenden Sie die Seriennummer der Zelle (8 Zeichen)&#10;• Nach erfolgreicher Konfiguration wird das Eingabefeld automatisch geleert"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/black" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- NEU: Tipps für Seriennummer-Ermittlung -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@android:color/holo_blue_light">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="💡 Seriennummer ermitteln"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp"
+                    android:textColor="@android:color/white" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="• Multi-Cell Übersicht → Seriennummern werden dort angezeigt&#10;• Neue Zellen: Probieren Sie bekannte Seriennummern aus&#10;• Die App zeigt nach erfolgreicher Verbindung die Seriennummer an"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/white" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+    </LinearLayout>
+
+</ScrollView>

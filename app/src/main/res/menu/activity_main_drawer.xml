@@ -3,34 +3,45 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
-    <group android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_beautiful_flintec"
-            android:icon="@drawable/ic_weight_24"
-            android:title="Flintec RC3D" />
+    <!-- Hauptnavigation -->
+    <group
+        android:id="@+id/group_main"
+        android:checkableBehavior="single">
 
         <item
-            android:id="@+id/nav_live_zellen"
-            android:icon="@drawable/ic_live_24"
-            android:title="Live Zellen" />
-
-        <item
-            android:id="@+id/nav_digitale_zellen"
-            android:icon="@drawable/ic_digital_24"
-            android:title="Digitale Zellen" />
+            android:id="@+id/nav_dashboard"
+            android:icon="@drawable/ic_info_24"
+            android:title="Dashboard" />
 
         <item
             android:id="@+id/nav_multicell_overview"
-            android:icon="@drawable/ic_live_24"
+            android:icon="@drawable/ic_weight_24"
             android:title="Multi-Cell Übersicht" />
+
+        <item
+            android:id="@+id/cellConfigurationFragment"
+            android:icon="@android:drawable/ic_menu_manage"
+            android:title="Zellen Konfiguration" />
+
     </group>
 
-    <group android:id="@+id/group_settings">
+    <!-- Einstellungen-Gruppe -->
+    <group
+        android:id="@+id/group_settings"
+        android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/nav_moxa_settings"
+            android:icon="@drawable/ic_digital_24"
+            android:title="Moxa Einstellungen" />
+
         <item
             android:id="@+id/nav_settings"
             android:icon="@drawable/ic_settings_24"
-            android:title="Einstellungen" />
-    </group>
+            android:title="App Einstellungen" />
 
+
+
+    </group>
 
 </menu>

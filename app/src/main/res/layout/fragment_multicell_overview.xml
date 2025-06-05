@@ -80,7 +80,7 @@
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- NEU: Card für Zellenanzahl-Auswahl -->
+        <!-- Zellenanzahl-Auswahl Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -94,6 +94,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:padding="16dp">
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -112,8 +113,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-
-        <!-- 8-Zellen Grid (4x2) -->
+        <!-- 8-Zellen Grid (4x2) - Kompaktes Design -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -145,17 +145,17 @@
                     android:layout_marginBottom="12dp"
                     android:orientation="horizontal">
 
-                    <!-- Zelle 1 -->
+                    <!-- Zelle 1 - Kompakt -->
                     <LinearLayout
                         android:id="@+id/layoutCell1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="4dp"
+                        android:layout_marginEnd="6dp"
                         android:layout_weight="1"
                         android:background="@drawable/rounded_background_light"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="12dp"
+                        android:padding="10dp"
                         android:visibility="gone"
                         tools:visibility="visible">
 
@@ -164,7 +164,20 @@
                             android:layout_height="wrap_content"
                             android:text="Zelle 1"
                             android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="12sp" />
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textSerialCell1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="1dp"
+                            android:text="S/N: 123456"
+                            android:textColor="?android:attr/textColorSecondary"
+                            android:textSize="9sp"
+                            android:textStyle="italic"
+                            android:gravity="center"
+                            tools:text="S/N: 123456" />
 
                         <TextView
                             android:id="@+id/textCountsCell1"
@@ -173,7 +186,7 @@
                             android:layout_marginTop="4dp"
                             android:text="0"
                             android:textColor="@color/status_live_color"
-                            android:textSize="20sp"
+                            android:textSize="18sp"
                             android:textStyle="bold"
                             tools:text="95" />
 
@@ -181,22 +194,22 @@
                             android:id="@+id/statusIndicatorCell1"
                             android:layout_width="8dp"
                             android:layout_height="8dp"
-                            android:layout_marginTop="4dp"
+                            android:layout_marginTop="3dp"
                             android:src="@drawable/ic_status_pending" />
                     </LinearLayout>
 
-                    <!-- Zelle 2 -->
+                    <!-- Zelle 2 - Kompakt -->
                     <LinearLayout
                         android:id="@+id/layoutCell2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:layout_marginEnd="4dp"
+                        android:layout_marginStart="3dp"
+                        android:layout_marginEnd="3dp"
                         android:layout_weight="1"
                         android:background="@drawable/rounded_background_light"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="12dp"
+                        android:padding="10dp"
                         android:visibility="gone"
                         tools:visibility="visible">
 
@@ -205,7 +218,20 @@
                             android:layout_height="wrap_content"
                             android:text="Zelle 2"
                             android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="12sp" />
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textSerialCell2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="1dp"
+                            android:text="S/N: 654321"
+                            android:textColor="?android:attr/textColorSecondary"
+                            android:textSize="9sp"
+                            android:textStyle="italic"
+                            android:gravity="center"
+                            tools:text="S/N: 654321" />
 
                         <TextView
                             android:id="@+id/textCountsCell2"
@@ -214,7 +240,7 @@
                             android:layout_marginTop="4dp"
                             android:text="0"
                             android:textColor="@color/status_live_color"
-                            android:textSize="20sp"
+                            android:textSize="18sp"
                             android:textStyle="bold"
                             tools:text="87" />
 
@@ -222,22 +248,22 @@
                             android:id="@+id/statusIndicatorCell2"
                             android:layout_width="8dp"
                             android:layout_height="8dp"
-                            android:layout_marginTop="4dp"
+                            android:layout_marginTop="3dp"
                             android:src="@drawable/ic_status_pending" />
                     </LinearLayout>
 
-                    <!-- Zelle 3 -->
+                    <!-- Zelle 3 - Kompakt -->
                     <LinearLayout
                         android:id="@+id/layoutCell3"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:layout_marginEnd="4dp"
+                        android:layout_marginStart="3dp"
+                        android:layout_marginEnd="3dp"
                         android:layout_weight="1"
                         android:background="@drawable/rounded_background_light"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="12dp"
+                        android:padding="10dp"
                         android:visibility="gone"
                         tools:visibility="visible">
 
@@ -246,7 +272,20 @@
                             android:layout_height="wrap_content"
                             android:text="Zelle 3"
                             android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="12sp" />
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textSerialCell3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="1dp"
+                            android:text="S/N: 789012"
+                            android:textColor="?android:attr/textColorSecondary"
+                            android:textSize="9sp"
+                            android:textStyle="italic"
+                            android:gravity="center"
+                            tools:text="S/N: 789012" />
 
                         <TextView
                             android:id="@+id/textCountsCell3"
@@ -255,7 +294,7 @@
                             android:layout_marginTop="4dp"
                             android:text="0"
                             android:textColor="@color/status_live_color"
-                            android:textSize="20sp"
+                            android:textSize="18sp"
                             android:textStyle="bold"
                             tools:text="112" />
 
@@ -263,21 +302,21 @@
                             android:id="@+id/statusIndicatorCell3"
                             android:layout_width="8dp"
                             android:layout_height="8dp"
-                            android:layout_marginTop="4dp"
+                            android:layout_marginTop="3dp"
                             android:src="@drawable/ic_status_pending" />
                     </LinearLayout>
 
-                    <!-- Zelle 4 -->
+                    <!-- Zelle 4 - Kompakt -->
                     <LinearLayout
                         android:id="@+id/layoutCell4"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
+                        android:layout_marginStart="6dp"
                         android:layout_weight="1"
                         android:background="@drawable/rounded_background_light"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="12dp"
+                        android:padding="10dp"
                         android:visibility="gone"
                         tools:visibility="visible">
 
@@ -286,7 +325,20 @@
                             android:layout_height="wrap_content"
                             android:text="Zelle 4"
                             android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="12sp" />
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textSerialCell4"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="1dp"
+                            android:text="S/N: 345678"
+                            android:textColor="?android:attr/textColorSecondary"
+                            android:textSize="9sp"
+                            android:textStyle="italic"
+                            android:gravity="center"
+                            tools:text="S/N: 345678" />
 
                         <TextView
                             android:id="@+id/textCountsCell4"
@@ -295,7 +347,7 @@
                             android:layout_marginTop="4dp"
                             android:text="0"
                             android:textColor="@color/status_live_color"
-                            android:textSize="20sp"
+                            android:textSize="18sp"
                             android:textStyle="bold"
                             tools:text="78" />
 
@@ -303,7 +355,7 @@
                             android:id="@+id/statusIndicatorCell4"
                             android:layout_width="8dp"
                             android:layout_height="8dp"
-                            android:layout_marginTop="4dp"
+                            android:layout_marginTop="3dp"
                             android:src="@drawable/ic_status_pending" />
                     </LinearLayout>
                 </LinearLayout>
@@ -315,17 +367,17 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
-                    <!-- Zelle 5 -->
+                    <!-- Zelle 5 - Kompakt -->
                     <LinearLayout
                         android:id="@+id/layoutCell5"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="4dp"
+                        android:layout_marginEnd="6dp"
                         android:layout_weight="1"
                         android:background="@drawable/rounded_background_light"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="12dp"
+                        android:padding="10dp"
                         android:visibility="gone"
                         tools:visibility="visible">
 
@@ -334,7 +386,20 @@
                             android:layout_height="wrap_content"
                             android:text="Zelle 5"
                             android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="12sp" />
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textSerialCell5"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="1dp"
+                            android:text="S/N: 901234"
+                            android:textColor="?android:attr/textColorSecondary"
+                            android:textSize="9sp"
+                            android:textStyle="italic"
+                            android:gravity="center"
+                            tools:text="S/N: 901234" />
 
                         <TextView
                             android:id="@+id/textCountsCell5"
@@ -343,7 +408,7 @@
                             android:layout_marginTop="4dp"
                             android:text="0"
                             android:textColor="@color/status_live_color"
-                            android:textSize="20sp"
+                            android:textSize="18sp"
                             android:textStyle="bold"
                             tools:text="103" />
 
@@ -351,22 +416,22 @@
                             android:id="@+id/statusIndicatorCell5"
                             android:layout_width="8dp"
                             android:layout_height="8dp"
-                            android:layout_marginTop="4dp"
+                            android:layout_marginTop="3dp"
                             android:src="@drawable/ic_status_pending" />
                     </LinearLayout>
 
-                    <!-- Zelle 6 -->
+                    <!-- Zelle 6 - Kompakt -->
                     <LinearLayout
                         android:id="@+id/layoutCell6"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:layout_marginEnd="4dp"
+                        android:layout_marginStart="3dp"
+                        android:layout_marginEnd="3dp"
                         android:layout_weight="1"
                         android:background="@drawable/rounded_background_light"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="12dp"
+                        android:padding="10dp"
                         android:visibility="gone"
                         tools:visibility="visible">
 
@@ -375,7 +440,20 @@
                             android:layout_height="wrap_content"
                             android:text="Zelle 6"
                             android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="12sp" />
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textSerialCell6"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="1dp"
+                            android:text="S/N: 567890"
+                            android:textColor="?android:attr/textColorSecondary"
+                            android:textSize="9sp"
+                            android:textStyle="italic"
+                            android:gravity="center"
+                            tools:text="S/N: 567890" />
 
                         <TextView
                             android:id="@+id/textCountsCell6"
@@ -384,7 +462,7 @@
                             android:layout_marginTop="4dp"
                             android:text="0"
                             android:textColor="@color/status_live_color"
-                            android:textSize="20sp"
+                            android:textSize="18sp"
                             android:textStyle="bold"
                             tools:text="89" />
 
@@ -392,22 +470,22 @@
                             android:id="@+id/statusIndicatorCell6"
                             android:layout_width="8dp"
                             android:layout_height="8dp"
-                            android:layout_marginTop="4dp"
+                            android:layout_marginTop="3dp"
                             android:src="@drawable/ic_status_pending" />
                     </LinearLayout>
 
-                    <!-- Zelle 7 -->
+                    <!-- Zelle 7 - Kompakt -->
                     <LinearLayout
                         android:id="@+id/layoutCell7"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:layout_marginEnd="4dp"
+                        android:layout_marginStart="3dp"
+                        android:layout_marginEnd="3dp"
                         android:layout_weight="1"
                         android:background="@drawable/rounded_background_light"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="12dp"
+                        android:padding="10dp"
                         android:visibility="gone"
                         tools:visibility="visible">
 
@@ -416,7 +494,20 @@
                             android:layout_height="wrap_content"
                             android:text="Zelle 7"
                             android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="12sp" />
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textSerialCell7"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="1dp"
+                            android:text="S/N: 234567"
+                            android:textColor="?android:attr/textColorSecondary"
+                            android:textSize="9sp"
+                            android:textStyle="italic"
+                            android:gravity="center"
+                            tools:text="S/N: 234567" />
 
                         <TextView
                             android:id="@+id/textCountsCell7"
@@ -425,7 +516,7 @@
                             android:layout_marginTop="4dp"
                             android:text="0"
                             android:textColor="@color/status_live_color"
-                            android:textSize="20sp"
+                            android:textSize="18sp"
                             android:textStyle="bold"
                             tools:text="94" />
 
@@ -433,21 +524,21 @@
                             android:id="@+id/statusIndicatorCell7"
                             android:layout_width="8dp"
                             android:layout_height="8dp"
-                            android:layout_marginTop="4dp"
+                            android:layout_marginTop="3dp"
                             android:src="@drawable/ic_status_pending" />
                     </LinearLayout>
 
-                    <!-- Zelle 8 -->
+                    <!-- Zelle 8 - Kompakt -->
                     <LinearLayout
                         android:id="@+id/layoutCell8"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
+                        android:layout_marginStart="6dp"
                         android:layout_weight="1"
                         android:background="@drawable/rounded_background_light"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="12dp"
+                        android:padding="10dp"
                         android:visibility="gone"
                         tools:visibility="visible">
 
@@ -456,7 +547,20 @@
                             android:layout_height="wrap_content"
                             android:text="Zelle 8"
                             android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="12sp" />
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textSerialCell8"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="1dp"
+                            android:text="S/N: 890123"
+                            android:textColor="?android:attr/textColorSecondary"
+                            android:textSize="9sp"
+                            android:textStyle="italic"
+                            android:gravity="center"
+                            tools:text="S/N: 890123" />
 
                         <TextView
                             android:id="@+id/textCountsCell8"
@@ -465,7 +569,7 @@
                             android:layout_marginTop="4dp"
                             android:text="0"
                             android:textColor="@color/status_live_color"
-                            android:textSize="20sp"
+                            android:textSize="18sp"
                             android:textStyle="bold"
                             tools:text="101" />
 
@@ -473,7 +577,7 @@
                             android:id="@+id/statusIndicatorCell8"
                             android:layout_width="8dp"
                             android:layout_height="8dp"
-                            android:layout_marginTop="4dp"
+                            android:layout_marginTop="3dp"
                             android:src="@drawable/ic_status_pending" />
                     </LinearLayout>
                 </LinearLayout>

@@ -3,36 +3,102 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/nav_beautiful_flintec">
+    app:startDestination="@id/nav_dashboard">
 
     <fragment
-        android:id="@+id/nav_beautiful_flintec"
-        android:name="com.example.servicetool.BeautifulFlintecFragment"
-        android:label="Flintec RC3D"
-        tools:layout="@layout/fragment_beautiful_flintec" />
+        android:id="@+id/nav_dashboard"
+        android:name="com.example.servicetool.DashboardFragment"
+        android:label="Dashboard"
+        tools:layout="@layout/fragment_dashboard">
 
-    <fragment
-        android:id="@+id/nav_live_zellen"
-        android:name="com.example.servicetool.LiveCellsFragment"
-        android:label="Live Zellen"
-        tools:layout="@layout/fragment_live_cells" />
+        <action
+            android:id="@+id/action_dashboard_to_multicell"
+            app:destination="@id/nav_multicell_overview" />
 
-    <fragment
-        android:id="@+id/nav_digitale_zellen"
-        android:name="com.example.servicetool.DigitalCellsFragment"
-        android:label="Digitale Zellen"
-        tools:layout="@layout/fragment_digital_cells" />
+        <action
+            android:id="@+id/action_dashboard_to_settings"
+            app:destination="@id/nav_settings" />
 
-    <fragment
-        android:id="@+id/nav_settings"
-        android:name="com.example.servicetool.SettingsFragment"
-        android:label="Settings"
-        tools:layout="@layout/fragment_settings" />
+        <action
+            android:id="@+id/action_dashboard_to_moxa_settings"
+            app:destination="@id/nav_moxa_settings" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_multicell_overview"
         android:name="com.example.servicetool.MultiCellOverviewFragment"
         android:label="Multi-Cell Übersicht"
-        tools:layout="@layout/fragment_multicell_overview" />
+        tools:layout="@layout/fragment_multicell_overview">
+
+        <action
+            android:id="@+id/action_multicell_to_dashboard"
+            app:destination="@id/nav_dashboard" />
+
+        <action
+            android:id="@+id/action_multicell_to_settings"
+            app:destination="@id/nav_settings" />
+
+        <action
+            android:id="@+id/action_multicell_to_moxa_settings"
+            app:destination="@id/nav_moxa_settings" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_settings"
+        android:name="com.example.servicetool.SettingsFragment"
+        android:label="App Einstellungen"
+        tools:layout="@layout/fragment_enhanced_settings">
+
+        <action
+            android:id="@+id/action_settings_to_dashboard"
+            app:destination="@id/nav_dashboard" />
+
+        <action
+            android:id="@+id/action_settings_to_multicell"
+            app:destination="@id/nav_multicell_overview" />
+
+        <action
+            android:id="@+id/action_settings_to_moxa_settings"
+            app:destination="@id/nav_moxa_settings" />
+    </fragment>
+
+    <!-- NEU: Moxa Settings Fragment -->
+    <fragment
+        android:id="@+id/nav_moxa_settings"
+        android:name="com.example.servicetool.MoxaSettingsFragment"
+        android:label="Moxa Einstellungen"
+        tools:layout="@layout/fragment_moxa_settings">
+
+        <action
+            android:id="@+id/action_moxa_settings_to_dashboard"
+            app:destination="@id/nav_dashboard" />
+
+        <action
+            android:id="@+id/action_moxa_settings_to_multicell"
+            app:destination="@id/nav_multicell_overview" />
+
+        <action
+            android:id="@+id/action_moxa_settings_to_settings"
+            app:destination="@id/nav_settings" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/cellConfigurationFragment"
+        android:name="com.example.servicetool.CellConfigurationFragment"
+        android:label="Zellen Konfiguration"
+        tools:layout="@layout/fragment_cell_configuration">
+
+        <action
+            android:id="@+id/action_cell_config_to_dashboard"
+            app:destination="@id/nav_dashboard" />
+
+        <action
+            android:id="@+id/action_cell_config_to_multicell"
+            app:destination="@id/nav_multicell_overview" />
+
+        <action
+            android:id="@+id/action_cell_config_to_moxa_settings"
+            app:destination="@id/nav_moxa_settings" />
+    </fragment>
 
 </navigation>
