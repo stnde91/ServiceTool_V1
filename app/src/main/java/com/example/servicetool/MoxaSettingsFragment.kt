@@ -60,8 +60,9 @@ class MoxaSettingsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initializeServices()
+        // WICHTIG: Reihenfolge geändert - Views zuerst initialisieren
         initializeViews(view)
+        initializeServices()
         setupSpinners()
         setupListeners()
         loadCurrentSettings()
@@ -77,15 +78,31 @@ class MoxaSettingsFragment : Fragment() {
         settingsManager = SettingsManager.getInstance(requireContext())
         loggingManager = LoggingManager.getInstance(requireContext())
 
+        // Jetzt sind die Views initialisiert, updateMoxaController ist sicher
         updateMoxaController()
 
         loggingManager.logInfo("MoxaSettings", "Moxa-Einstellungen Fragment gestartet")
     }
 
     private fun updateMoxaController() {
-        val ip = editTextMoxaIp?.text?.toString() ?: settingsManager.getMoxaIpAddress()
-        val username = editTextUsername?.text?.toString() ?: "admin"
-        val password = editTextPassword?.text?.toString() ?: "moxa"
+        // Sichere Überprüfung ob Views initialisiert sind
+        val ip = if (::editTextMoxaIp.isInitialized) {
+            editTextMoxaIp.text?.toString() ?: settingsManager.getMoxaIpAddress()
+        } else {
+            settingsManager.getMoxaIpAddress()
+        }
+
+        val username = if (::editTextUsername.isInitialized) {
+            editTextUsername.text?.toString() ?: "admin"
+        } else {
+            "admin"
+        }
+
+        val password = if (::editTextPassword.isInitialized) {
+            editTextPassword.text?.toString() ?: "moxa"
+        } else {
+            "moxa"
+        }
 
         moxaController = Moxa5232Controller(ip, username, password)
     }
