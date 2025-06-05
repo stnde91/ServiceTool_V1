@@ -38,13 +38,14 @@ class MainActivity : AppCompatActivity() {
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
 
-        // Define top-level destinations - CELLCONFIGURATION HINZUGEFÜGT
+        // ERWEITERT: Alle Top-Level Destinations definieren (inkl. Moxa Settings)
         appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.nav_dashboard,
                 R.id.nav_multicell_overview,
                 R.id.nav_settings,
-                R.id.cellConfigurationFragment  // <-- NEU HINZUGEFÜGT
+                R.id.nav_moxa_settings,          // NEU: Moxa Settings als Top-Level
+                R.id.cellConfigurationFragment
             ), drawerLayout
         )
 
@@ -53,7 +54,7 @@ class MainActivity : AppCompatActivity() {
         // WICHTIG: Navigation View Setup NACH AppBarConfiguration
         navView.setupWithNavController(navController)
 
-        // Debug: Log navigation events mit mehr Details
+        // Debug: Log navigation events mit Details
         navController.addOnDestinationChangedListener { controller, destination, _ ->
             Log.d("MainActivity", "=== NAVIGATION EVENT ===")
             Log.d("MainActivity", "Von: ${controller.previousBackStackEntry?.destination?.label ?: "START"}")
@@ -62,76 +63,27 @@ class MainActivity : AppCompatActivity() {
             Log.d("MainActivity", "========================")
         }
 
-        // EXTRA: Manueller Navigation Listener für Menu Items
+        // ERWEITERT: Manueller Navigation Listener für alle Menu Items
         navView.setNavigationItemSelectedListener { menuItem ->
             Log.d("MainActivity", "Menu Item geklickt: ${menuItem.title} (ID: ${menuItem.itemId})")
             Log.d("MainActivity", "Aktuelle Destination: ${navController.currentDestination?.label} (ID: ${navController.currentDestination?.id})")
 
             val handled = when (menuItem.itemId) {
                 R.id.nav_dashboard -> {
-                    Log.d("MainActivity", "Navigiere zu Dashboard")
-                    if (navController.currentDestination?.id != R.id.nav_dashboard) {
-                        try {
-                            navController.navigate(R.id.nav_dashboard)
-                            Log.d("MainActivity", "Navigation zu Dashboard erfolgreich")
-                            true
-                        } catch (e: Exception) {
-                            Log.e("MainActivity", "Fehler bei Navigation zu Dashboard: ${e.message}")
-                            false
-                        }
-                    } else {
-                        Log.d("MainActivity", "Bereits im Dashboard")
-                        true // Still handled, just don't navigate
-                    }
+                    navigateIfNeeded(R.id.nav_dashboard, "Dashboard")
                 }
                 R.id.nav_multicell_overview -> {
-                    Log.d("MainActivity", "Navigiere zu Multi-Cell")
-                    if (navController.currentDestination?.id != R.id.nav_multicell_overview) {
-                        try {
-                            navController.navigate(R.id.nav_multicell_overview)
-                            Log.d("MainActivity", "Navigation zu Multi-Cell erfolgreich")
-                            true
-                        } catch (e: Exception) {
-                            Log.e("MainActivity", "Fehler bei Navigation zu Multi-Cell: ${e.message}")
-                            false
-                        }
-                    } else {
-                        Log.d("MainActivity", "Bereits in Multi-Cell")
-                        true
-                    }
+                    navigateIfNeeded(R.id.nav_multicell_overview, "Multi-Cell Übersicht")
                 }
                 R.id.nav_settings -> {
-                    Log.d("MainActivity", "Navigiere zu Settings")
-                    if (navController.currentDestination?.id != R.id.nav_settings) {
-                        try {
-                            navController.navigate(R.id.nav_settings)
-                            Log.d("MainActivity", "Navigation zu Settings erfolgreich")
-                            true
-                        } catch (e: Exception) {
-                            Log.e("MainActivity", "Fehler bei Navigation zu Settings: ${e.message}")
-                            false
-                        }
-                    } else {
-                        Log.d("MainActivity", "Bereits in Settings")
-                        true
-                    }
+                    navigateIfNeeded(R.id.nav_settings, "App Einstellungen")
                 }
-                // NEU: Zellen Konfiguration Navigation
+                // NEU: Moxa Settings Navigation
+                R.id.nav_moxa_settings -> {
+                    navigateIfNeeded(R.id.nav_moxa_settings, "Moxa Einstellungen")
+                }
                 R.id.cellConfigurationFragment -> {
-                    Log.d("MainActivity", "Navigiere zu Zellen Konfiguration")
-                    if (navController.currentDestination?.id != R.id.cellConfigurationFragment) {
-                        try {
-                            navController.navigate(R.id.cellConfigurationFragment)
-                            Log.d("MainActivity", "Navigation zu Zellen Konfiguration erfolgreich")
-                            true
-                        } catch (e: Exception) {
-                            Log.e("MainActivity", "Fehler bei Navigation zu Zellen Konfiguration: ${e.message}")
-                            false
-                        }
-                    } else {
-                        Log.d("MainActivity", "Bereits in Zellen Konfiguration")
-                        true
-                    }
+                    navigateIfNeeded(R.id.cellConfigurationFragment, "Zellen Konfiguration")
                 }
                 else -> {
                     Log.w("MainActivity", "Unbekanntes Menu Item: ${menuItem.title} (ID: ${menuItem.itemId})")
@@ -146,6 +98,26 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Hilfsmethode für saubere Navigation mit Fehlerbehandlung
+     */
+    private fun navigateIfNeeded(destinationId: Int, destinationName: String): Boolean {
+        return try {
+            if (navController.currentDestination?.id != destinationId) {
+                Log.d("MainActivity", "Navigiere zu $destinationName")
+                navController.navigate(destinationId)
+                Log.d("MainActivity", "Navigation zu $destinationName erfolgreich")
+                true
+            } else {
+                Log.d("MainActivity", "Bereits in $destinationName")
+                true // Still handled, just don't navigate
+            }
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Fehler bei Navigation zu $destinationName: ${e.message}", e)
+            false
+        }
+    }
+
     private fun initializeServices() {
         // Initialize settings manager
         SettingsManager.getInstance(this)
@@ -153,18 +125,21 @@ class MainActivity : AppCompatActivity() {
         // WICHTIG: MultiCellConfig mit Settings initialisieren
         MultiCellConfig.initialize(this)
 
-        // Initialize logging
+        // Initialize logging mit erweiterten Informationen
         LoggingManager.getInstance(this).apply {
-            logInfo("MainActivity", "Service Tool gestartet")
+            logInfo("MainActivity", "Service Tool gestartet mit Moxa-Unterstützung")
             logInfo("Settings", "Moxa Konfiguration: ${MultiCellConfig.getMoxaIpAddress()}:${MultiCellConfig.getMoxaPort()}")
 
             // Get version info safely
             try {
                 val versionName = packageManager.getPackageInfo(packageName, 0).versionName
-                logInfo("System", "Version: $versionName")
+                logInfo("System", "App Version: $versionName")
             } catch (e: Exception) {
-                logInfo("System", "Version: Unbekannt")
+                logInfo("System", "App Version: Unbekannt")
             }
+
+            // Log verfügbare Navigation-Ziele
+            logInfo("Navigation", "Verfügbare Bereiche: Dashboard, Multi-Cell, Zellen-Config, App-Settings, Moxa-Settings")
         }
     }
 

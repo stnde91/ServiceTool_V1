@@ -74,7 +74,7 @@ class DashboardFragment : Fragment() {
         settingsManager = SettingsManager.getInstance(requireContext())
         loggingManager = LoggingManager.getInstance(requireContext())
 
-        loggingManager.logInfo("Dashboard", "Dashboard gestartet")
+        loggingManager.logInfo("Dashboard", "Dashboard gestartet mit Moxa-Integration")
     }
 
     private fun initializeViews(view: View) {
@@ -115,7 +115,7 @@ class DashboardFragment : Fragment() {
 
             QuickAction(
                 title = "System-Diagnose",
-                description = "Verbindung und Zellen-Status prüfen",
+                description = "Verbindung und Hardware-Status prüfen",
                 iconRes = R.drawable.ic_diagnostic_24,
                 action = {
                     loggingManager.logInfo("Dashboard", "System-Diagnose gestartet")
@@ -123,23 +123,33 @@ class DashboardFragment : Fragment() {
                 }
             ),
 
+            // NEU: Moxa Einstellungen als prominente Quick Action
             QuickAction(
-                title = "Live-Monitoring",
-                description = "Kontinuierliche Überwachung starten",
-                iconRes = R.drawable.ic_live_24,
+                title = "Moxa Einstellungen",
+                description = "Device Server konfigurieren und steuern",
+                iconRes = R.drawable.ic_digital_24,
                 action = {
-                    loggingManager.logInfo("Dashboard", "Live-Monitoring über Multi-Cell gestartet")
-                    // Navigate to MultiCell and start live mode
-                    findNavController().navigate(R.id.nav_multicell_overview)
+                    loggingManager.logInfo("Dashboard", "Navigation zu Moxa Einstellungen")
+                    findNavController().navigate(R.id.nav_moxa_settings)
                 }
             ),
 
             QuickAction(
-                title = "Einstellungen",
-                description = "System konfigurieren und anpassen",
+                title = "Zellen Konfiguration",
+                description = "Zelladressen ändern und konfigurieren",
                 iconRes = R.drawable.ic_settings_24,
                 action = {
-                    loggingManager.logInfo("Dashboard", "Navigation zu Einstellungen")
+                    loggingManager.logInfo("Dashboard", "Navigation zu Zellen Konfiguration")
+                    findNavController().navigate(R.id.cellConfigurationFragment)
+                }
+            ),
+
+            QuickAction(
+                title = "App Einstellungen",
+                description = "Anwendung konfigurieren und anpassen",
+                iconRes = R.drawable.ic_settings_24,
+                action = {
+                    loggingManager.logInfo("Dashboard", "Navigation zu App Einstellungen")
                     findNavController().navigate(R.id.nav_settings)
                 }
             )
@@ -238,16 +248,11 @@ class DashboardFragment : Fragment() {
         return withContext(Dispatchers.IO) {
             try {
                 val startTime = System.currentTimeMillis()
-                val communicationManager = CommunicationManager()
-                val success = communicationManager.connect(
-                    settingsManager.getMoxaIpAddress(),
-                    settingsManager.getMoxaPort()
-                )
-                val responseTime = System.currentTimeMillis() - startTime
 
-                if (success) {
-                    communicationManager.disconnect()
-                }
+                // NEU: Verwende Moxa5232Controller für besseren Test
+                val moxaController = Moxa5232Controller(settingsManager.getMoxaIpAddress())
+                val success = moxaController.testConnection()
+                val responseTime = System.currentTimeMillis() - startTime
 
                 MoxaStatus(
                     connected = success,
@@ -328,14 +333,14 @@ class DashboardFragment : Fragment() {
                 else -> R.color.status_error_color
             }
 
-            textMoxaStatus.text = "${status.ipAddress}:${status.port}"
+            textMoxaStatus.text = "NPort 5232 - ${status.ipAddress}:${status.port}"
             textMoxaStatus.setTextColor(ContextCompat.getColor(requireContext(), R.color.status_success_color))
             textMoxaPing.text = ping
             textMoxaPing.setTextColor(ContextCompat.getColor(requireContext(), pingColor))
             iconMoxaStatus.setImageResource(R.drawable.ic_status_success)
         } else {
             val errorMsg = status.error?.let { " ($it)" } ?: ""
-            textMoxaStatus.text = "Verbindung fehlgeschlagen$errorMsg"
+            textMoxaStatus.text = "Moxa nicht erreichbar$errorMsg"
             textMoxaStatus.setTextColor(ContextCompat.getColor(requireContext(), R.color.status_error_color))
             textMoxaPing.text = "---"
             textMoxaPing.setTextColor(ContextCompat.getColor(requireContext(), R.color.status_error_color))
@@ -375,21 +380,76 @@ class DashboardFragment : Fragment() {
     private fun runSystemDiagnosis() {
         lifecycleScope.launch {
             try {
-                loggingManager.logInfo("Dashboard", "System-Diagnose läuft...")
+                loggingManager.logInfo("Dashboard", "Erweiterte System-Diagnose läuft...")
+
+                // NEU: Erweiterte Diagnose mit Moxa-Test
+                val communicationManager = CommunicationManager()
+                val diagnostic = communicationManager.performConnectionDiagnostic(
+                    settingsManager.getMoxaIpAddress(),
+                    settingsManager.getMoxaPort()
+                )
+
+                // Moxa-Hardware-Test
+                val moxaController = Moxa5232Controller(settingsManager.getMoxaIpAddress())
+                val moxaReachable = moxaController.testConnection()
+
+                // Ergebnisse anzeigen
+                showDiagnosticResults(diagnostic, moxaReachable)
 
                 // Force immediate status update
                 updateSystemStatus()
 
                 // Log current system state
                 val activeCells = MultiCellConfig.availableCells
-                loggingManager.logInfo("Dashboard", "Diagnose abgeschlossen - ${activeCells.size} Zellen konfiguriert")
-
-                // TODO: Could show a detailed diagnosis dialog here
+                loggingManager.logInfo("Dashboard", "Diagnose abgeschlossen - ${activeCells.size} Zellen konfiguriert, Moxa: ${if (moxaReachable) "OK" else "Fehler"}")
 
             } catch (e: Exception) {
                 loggingManager.logError("Dashboard", "System-Diagnose fehlgeschlagen", e)
+                showToast("Diagnose fehlgeschlagen: ${e.message}")
             }
         }
+    }
+
+    private fun showDiagnosticResults(diagnostic: CommunicationManager.ConnectionDiagnostic, moxaReachable: Boolean) {
+        val message = buildString {
+            appendLine("🔍 System-Diagnose Ergebnisse:")
+            appendLine()
+            appendLine("📡 Netzwerk: ${if (diagnostic.networkReachable) "✅ Erreichbar" else "❌ Nicht erreichbar"}")
+            appendLine("🌐 Moxa Web-Interface: ${if (moxaReachable) "✅ Erreichbar" else "❌ Nicht erreichbar"}")
+            appendLine("📞 Moxa Datenport: ${if (diagnostic.moxaReachable) "✅ Verbunden" else "❌ Nicht verbunden"}")
+            appendLine("⚖️ Zell-Kommunikation: ${if (diagnostic.cellCommunication) "✅ Funktioniert" else "❌ Fehlgeschlagen"}")
+
+            if (diagnostic.detectedBaudrate != null) {
+                appendLine("🔧 Erkannte Baudrate: ${diagnostic.detectedBaudrate} bps")
+            }
+
+            if (diagnostic.error != null) {
+                appendLine("❌ Fehler: ${diagnostic.error}")
+            }
+
+            appendLine()
+            appendLine("💡 Empfehlung:")
+            when {
+                !diagnostic.networkReachable -> appendLine("• Netzwerkverbindung prüfen")
+                !moxaReachable -> appendLine("• Moxa IP-Adresse in Einstellungen prüfen")
+                !diagnostic.moxaReachable -> appendLine("• Moxa Port-Konfiguration prüfen")
+                !diagnostic.cellCommunication -> appendLine("• Baudrate in Moxa-Einstellungen anpassen")
+                else -> appendLine("• System funktioniert einwandfrei")
+            }
+        }
+
+        androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle("System-Diagnose")
+            .setMessage(message)
+            .setPositiveButton("OK", null)
+            .setNeutralButton("Moxa Einstellungen") { _, _ ->
+                findNavController().navigate(R.id.nav_moxa_settings)
+            }
+            .show()
+    }
+
+    private fun showToast(message: String) {
+        android.widget.Toast.makeText(requireContext(), message, android.widget.Toast.LENGTH_LONG).show()
     }
 
     override fun onDestroyView() {

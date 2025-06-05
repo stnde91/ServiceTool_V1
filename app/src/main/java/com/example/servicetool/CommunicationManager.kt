@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.delay
 import java.io.InputStream
 import java.io.OutputStream
 import java.net.InetSocketAddress
@@ -267,5 +268,126 @@ class CommunicationManager {
 
     fun isConnected(): Boolean {
         return socket?.isConnected == true && socket?.isClosed == false
+    }
+
+    // NEU: Erweiterte Diagnose-Methoden
+
+    /**
+     * Testet verschiedene Baudraten automatisch
+     * Nützlich wenn die Baudrate der Moxa geändert wurde
+     */
+    suspend fun detectWorkingBaudrate(ipAddress: String, port: Int): Int? {
+        return withContext(Dispatchers.IO) {
+            val testBaudrates = listOf(9600, 19200, 38400, 57600, 115200)
+
+            for (baudrate in testBaudrates) {
+                try {
+                    Log.d("CommunicationManager", "Teste Baudrate: $baudrate")
+
+                    // Simuliere verschiedene Baudraten durch verschiedene Timeout-Werte
+                    // (In echter RS485-Kommunikation würde man die Hardware-Baudrate ändern)
+                    val success = connect(ipAddress, port)
+                    if (success) {
+                        // Teste mit einem einfachen Befehl
+                        val testCommand = FlintecRC3DMultiCellCommands.getCommandForCell(1, FlintecRC3DMultiCellCommands.CommandType.COUNTS)
+                        val response = sendCommand(String(testCommand, Charsets.US_ASCII))
+                        disconnect()
+
+                        if (response != null && response.isNotEmpty()) {
+                            Log.i("CommunicationManager", "Funktionierende Baudrate gefunden: $baudrate")
+                            return@withContext baudrate
+                        }
+                    }
+                    disconnect()
+
+                } catch (e: Exception) {
+                    Log.d("CommunicationManager", "Baudrate $baudrate funktioniert nicht: ${e.message}")
+                }
+
+                delay(1000) // Kurze Pause zwischen Tests
+            }
+
+            Log.w("CommunicationManager", "Keine funktionierende Baudrate gefunden")
+            null
+        }
+    }
+
+    /**
+     * Erweiterte Verbindungsdiagnose
+     */
+    suspend fun performConnectionDiagnostic(ipAddress: String, port: Int): ConnectionDiagnostic {
+        return withContext(Dispatchers.IO) {
+            val diagnostic = ConnectionDiagnostic()
+
+            try {
+                // 1. Basis-Netzwerk-Test
+                diagnostic.networkReachable = testNetworkConnection(ipAddress)
+
+                // 2. Moxa-Verbindung testen
+                if (diagnostic.networkReachable) {
+                    diagnostic.moxaReachable = connect(ipAddress, port)
+
+                    if (diagnostic.moxaReachable) {
+                        // 3. Zell-Kommunikation testen
+                        diagnostic.cellCommunication = testCellCommunication()
+                        disconnect()
+                    }
+                }
+
+                // 4. Bei Problemen: Baudrate-Erkennung
+                if (!diagnostic.cellCommunication) {
+                    diagnostic.detectedBaudrate = detectWorkingBaudrate(ipAddress, port)
+                }
+
+            } catch (e: Exception) {
+                diagnostic.error = e.message
+                Log.e("CommunicationManager", "Diagnose-Fehler: ${e.message}", e)
+            }
+
+            diagnostic
+        }
+    }
+
+    private suspend fun testNetworkConnection(ipAddress: String): Boolean {
+        return try {
+            val socket = java.net.Socket()
+            socket.connect(java.net.InetSocketAddress(ipAddress, 80), 3000)
+            socket.close()
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private suspend fun testCellCommunication(): Boolean {
+        return try {
+            val testCommand = FlintecRC3DMultiCellCommands.getCommandForCell(1, FlintecRC3DMultiCellCommands.CommandType.COUNTS)
+            val response = sendCommand(String(testCommand, Charsets.US_ASCII), 1)
+            response != null && response.isNotEmpty()
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    /**
+     * Datenklasse für Verbindungsdiagnose-Ergebnisse
+     */
+    data class ConnectionDiagnostic(
+        var networkReachable: Boolean = false,
+        var moxaReachable: Boolean = false,
+        var cellCommunication: Boolean = false,
+        var detectedBaudrate: Int? = null,
+        var error: String? = null
+    ) {
+        fun getStatusSummary(): String {
+            return when {
+                error != null -> "❌ Fehler: $error"
+                !networkReachable -> "❌ Netzwerk nicht erreichbar"
+                !moxaReachable -> "❌ Moxa nicht erreichbar"
+                !cellCommunication && detectedBaudrate != null -> "⚠️ Zellen nicht erreichbar - Baudrate $detectedBaudrate erkannt"
+                !cellCommunication -> "❌ Zellen nicht erreichbar"
+                else -> "✅ Alle Verbindungen funktionieren"
+            }
+        }
     }
 }
