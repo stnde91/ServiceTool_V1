@@ -47,36 +47,32 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Wählen Sie die aktuelle Zellenadresse und die gewünschte neue Adresse:"
+                    android:text="Geben Sie die Seriennummer der Zelle ein und wählen Sie die neue Adresse:"
                     android:textSize="14sp"
                     android:layout_marginBottom="16dp"
                     android:textColor="@android:color/darker_gray" />
 
-                <!-- Aktuelle Zelle -->
-                <LinearLayout
+                <!-- GEÄNDERT: Seriennummer-Eingabe statt Dropdown -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/textInputLayoutSerialNumber"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginBottom="12dp"
-                    android:gravity="center_vertical">
+                    android:layout_marginBottom="16dp"
+                    android:hint="Seriennummer"
+                    app:helperText="8 Zeichen (z.B. 14149487)"
+                    app:counterEnabled="true"
+                    app:counterMaxLength="12">
 
-                    <TextView
-                        android:layout_width="0dp"
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/editTextSerialNumber"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Aktuelle Zelle:"
-                        android:textSize="16sp"
-                        android:textColor="@android:color/black" />
+                        android:inputType="text"
+                        android:textAllCaps="true" />
 
-                    <Spinner
-                        android:id="@+id/spinner_current_cell"
-                        android:layout_width="80dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp" />
+                </com.google.android.material.textfield.TextInputLayout>
 
-                </LinearLayout>
-
-                <!-- Neue Zelle -->
+                <!-- Neue Zelle (bleibt Dropdown) -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -94,7 +90,7 @@
 
                     <Spinner
                         android:id="@+id/spinner_new_cell"
-                        android:layout_width="80dp"
+                        android:layout_width="177dp"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp" />
 
@@ -115,7 +111,8 @@
                         android:text="Adresse ändern"
                         android:backgroundTint="@android:color/holo_blue_bright"
                         android:textColor="@android:color/white"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:enabled="false" />
 
                     <ProgressBar
                         android:id="@+id/progress_bar"
@@ -169,7 +166,7 @@
 
         </androidx.cardview.widget.CardView>
 
-        <!-- Warnung -->
+        <!-- Erweiterte Warnung für den neuen Use Case -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -186,7 +183,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="⚠️ Wichtiger Hinweis"
+                    android:text="⚠️ Wichtige Hinweise für Serienkonfiguration"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:layout_marginBottom="8dp"
@@ -195,9 +192,44 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="• Stellen Sie sicher, dass die zu ändernde Zelle angeschlossen ist\n• Nach einer Adressänderung müssen Sie möglicherweise die Verbindung neu aufbauen\n• Notieren Sie sich die neue Adresse für zukünftige Referenz"
+                    android:text="• Neue Zellen sind standardmäßig auf Adresse 1 (A) konfiguriert&#10;• Verwenden Sie die Seriennummer der Zelle (8 Zeichen)&#10;• Nach erfolgreicher Konfiguration wird das Eingabefeld automatisch geleert"
                     android:textSize="14sp"
                     android:textColor="@android:color/black" />
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
+        <!-- NEU: Tipps für Seriennummer-Ermittlung -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@android:color/holo_blue_light">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="💡 Seriennummer ermitteln"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp"
+                    android:textColor="@android:color/white" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="• Multi-Cell Übersicht → Seriennummern werden dort angezeigt&#10;• Neue Zellen: Probieren Sie bekannte Seriennummern aus&#10;• Die App zeigt nach erfolgreicher Verbindung die Seriennummer an"
+                    android:textSize="14sp"
+                    android:textColor="@android:color/white" />
 
             </LinearLayout>
 

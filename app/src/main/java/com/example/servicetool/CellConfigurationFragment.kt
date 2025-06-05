@@ -1,6 +1,9 @@
 package com.example.servicetool
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.InputFilter
+import android.text.TextWatcher
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -8,16 +11,18 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
-import java.io.InputStream
-import java.io.OutputStream
 
 class CellConfigurationFragment : Fragment() {
 
-    private lateinit var spinnerCurrentCell: Spinner
+    // UI Components
+    private lateinit var textInputLayoutSerialNumber: TextInputLayout
+    private lateinit var editTextSerialNumber: TextInputEditText
     private lateinit var spinnerNewCell: Spinner
     private lateinit var buttonChangeAddress: Button
     private lateinit var textViewStatus: TextView
@@ -33,14 +38,16 @@ class CellConfigurationFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_cell_configuration, container, false)
 
         initializeViews(view)
-        setupSpinners()
+        setupSpinner()
+        setupInputValidation()
         setupClickListeners()
 
         return view
     }
 
     private fun initializeViews(view: View) {
-        spinnerCurrentCell = view.findViewById(R.id.spinner_current_cell)
+        textInputLayoutSerialNumber = view.findViewById(R.id.textInputLayoutSerialNumber)
+        editTextSerialNumber = view.findViewById(R.id.editTextSerialNumber)
         spinnerNewCell = view.findViewById(R.id.spinner_new_cell)
         buttonChangeAddress = view.findViewById(R.id.button_change_address)
         textViewStatus = view.findViewById(R.id.text_status)
@@ -48,10 +55,11 @@ class CellConfigurationFragment : Fragment() {
 
         // Initial ausblenden
         progressBar.visibility = View.GONE
+        showStatus("Bereit für Konfiguration", false)
     }
 
-    private fun setupSpinners() {
-        // Zellnummern 1-8 für beide Spinner
+    private fun setupSpinner() {
+        // Zellnummern 1-8 für Spinner
         val cellNumbers = arrayOf("1", "2", "3", "4", "5", "6", "7", "8")
 
         val adapter = ArrayAdapter(
@@ -61,35 +69,146 @@ class CellConfigurationFragment : Fragment() {
         )
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
-        spinnerCurrentCell.adapter = adapter
         spinnerNewCell.adapter = adapter
+        spinnerNewCell.setSelection(1) // Standard: Zelle 2 (Index 1)
+    }
 
-        // Standard-Auswahl setzen
-        spinnerCurrentCell.setSelection(0) // Zelle 1
-        spinnerNewCell.setSelection(1)     // Zelle 2
+    private fun setupInputValidation() {
+        // CODE-BASIERTE HEX-FILTERUNG (statt android:digits)
+        val hexFilter = InputFilter { source, start, end, dest, dstart, dend ->
+            val filtered = StringBuilder()
+            for (i in start until end) {
+                val char = source[i]
+                // Nur Hex-Zeichen (0-9, A-F) erlauben
+                if (char.isDigit() || char.uppercaseChar() in 'A'..'F') {
+                    filtered.append(char.uppercaseChar())
+                } else {
+                    Log.d("CellConfig", "Ungültiges Zeichen gefiltert: '$char'")
+                }
+            }
+
+            val result = filtered.toString()
+            if (result == source.subSequence(start, end).toString()) {
+                null // Keine Änderung nötig
+            } else {
+                result // Gefilterte Version
+            }
+        }
+
+        // Filter anwenden
+        editTextSerialNumber.filters = arrayOf(
+            hexFilter,
+            InputFilter.LengthFilter(12) // Max 12 Zeichen
+        )
+
+        // TextWatcher für Validierung
+        editTextSerialNumber.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable?) {
+                validateInput()
+            }
+        })
+
+        // Focus-Listener für Dezimal-zu-Hex Konvertierung
+        editTextSerialNumber.setOnFocusChangeListener { _, hasFocus ->
+            if (!hasFocus) {
+                val input = editTextSerialNumber.text.toString().trim()
+                val converted = tryConvertDecimalToHex(input)
+                if (converted != input && converted.isNotEmpty()) {
+                    editTextSerialNumber.setText(converted)
+                    showStatus("Konvertiert: $input → $converted", false)
+                }
+            }
+        }
+    }
+
+    // Intelligente Dezimal-zu-Hex Konvertierung
+    private fun tryConvertDecimalToHex(input: String): String {
+        if (input.isEmpty()) return input
+
+        // Ist es bereits Hex? (enthält A-F)
+        val hasHexChars = input.any { it.uppercaseChar() in 'A'..'F' }
+        if (hasHexChars) {
+            return input.uppercase()
+        }
+
+        // Ist es reine Dezimalzahl?
+        val isDecimal = input.all { it.isDigit() }
+        if (isDecimal) {
+            try {
+                val decimalValue = input.toLong()
+                val hexValue = decimalValue.toString(16).uppercase()
+                Log.d("CellConfig", "Dezimal zu Hex: $decimalValue → $hexValue")
+                return hexValue
+            } catch (e: NumberFormatException) {
+                Log.e("CellConfig", "Dezimal-Konvertierung fehlgeschlagen: ${e.message}")
+            }
+        }
+
+        return input.uppercase()
+    }
+
+    private fun validateInput() {
+        val input = editTextSerialNumber.text.toString().trim()
+
+        when {
+            input.isEmpty() -> {
+                textInputLayoutSerialNumber.error = null
+                textInputLayoutSerialNumber.helperText = "Seriennummer eingeben (Hex oder Dezimal)"
+                buttonChangeAddress.isEnabled = false
+            }
+            input.length < 4 -> {
+                textInputLayoutSerialNumber.error = "Zu kurz (mindestens 4 Zeichen)"
+                buttonChangeAddress.isEnabled = false
+            }
+            input.all { it.isDigit() } -> {
+                // Reine Dezimalzahl
+                textInputLayoutSerialNumber.error = null
+                textInputLayoutSerialNumber.helperText = "Dezimalzahl erkannt - wird zu Hex konvertiert"
+                buttonChangeAddress.isEnabled = true
+            }
+            input.length > 12 -> {
+                textInputLayoutSerialNumber.error = "Zu lang (maximal 12 Zeichen)"
+                buttonChangeAddress.isEnabled = false
+            }
+            else -> {
+                // Hex-Format
+                textInputLayoutSerialNumber.error = null
+                textInputLayoutSerialNumber.helperText = "✓ Hex-Seriennummer erkannt"
+                buttonChangeAddress.isEnabled = true
+            }
+        }
     }
 
     private fun setupClickListeners() {
         buttonChangeAddress.setOnClickListener {
-            val currentCell = spinnerCurrentCell.selectedItem.toString().toInt()
-            val newCell = spinnerNewCell.selectedItem.toString().toInt()
+            val rawInput = editTextSerialNumber.text.toString().trim()
 
-            if (currentCell == newCell) {
-                showStatus("Fehler: Aktuelle und neue Zellenadresse sind identisch!", true)
+            if (rawInput.isEmpty()) {
+                showStatus("Fehler: Keine Eingabe!", true)
                 return@setOnClickListener
             }
 
-            changeAddress(currentCell, newCell)
+            val serialNumber = tryConvertDecimalToHex(rawInput)
+            val newCell = spinnerNewCell.selectedItem.toString().toInt()
+
+            if (serialNumber != rawInput) {
+                showStatus("Verwende: $rawInput → $serialNumber", false)
+                editTextSerialNumber.setText(serialNumber)
+            }
+
+            changeAddressBySerialNumber(serialNumber, newCell)
         }
     }
 
-    private fun changeAddress(fromCell: Int, toCell: Int) {
+    private fun changeAddressBySerialNumber(serialNumber: String, toCell: Int) {
         showStatus("Adresse wird geändert...", false)
         setUIEnabled(false)
 
         lifecycleScope.launch(Dispatchers.IO) {
             try {
-                // Verbindung herstellen falls nicht vorhanden
                 if (!ensureConnection()) {
                     withContext(Dispatchers.Main) {
                         showStatus("Fehler: Keine Verbindung zur Hardware!", true)
@@ -98,18 +217,16 @@ class CellConfigurationFragment : Fragment() {
                     return@launch
                 }
 
-                Log.i("CellConfig", "Ändere Zellenadresse von $fromCell auf $toCell")
+                Log.i("CellConfig", "Ändere Zellenadresse für S/N: $serialNumber auf Zelle $toCell")
 
-                // Befehl für Adressänderung senden
-                val success = sendAddressChangeCommand(fromCell, toCell)
+                val success = sendAddressChangeCommandWithSerial(serialNumber, toCell)
 
                 withContext(Dispatchers.Main) {
                     if (success) {
-                        showStatus("✅ Zellenadresse erfolgreich von $fromCell auf $toCell geändert!", false)
-                        Log.i("CellConfig", "Adressänderung erfolgreich: $fromCell → $toCell")
+                        showStatus("✅ Zelle S/N $serialNumber → Adresse $toCell erfolgreich!", false)
+                        editTextSerialNumber.setText("")
                     } else {
                         showStatus("❌ Fehler bei der Adressänderung!", true)
-                        Log.e("CellConfig", "Adressänderung fehlgeschlagen: $fromCell → $toCell")
                     }
                     setUIEnabled(true)
                 }
@@ -124,29 +241,19 @@ class CellConfigurationFragment : Fragment() {
         }
     }
 
-    private suspend fun sendAddressChangeCommand(fromCell: Int, toCell: Int): Boolean {
+    private suspend fun sendAddressChangeCommandWithSerial(serialNumber: String, toCell: Int): Boolean {
         return withContext(Dispatchers.IO) {
             try {
                 val manager = communicationManager ?: return@withContext false
-
-                // Schritt 1: Seriennummer der aktuellen Zelle ermitteln
-                val serialNumber = getCurrentCellSerialNumber(fromCell)
-                if (serialNumber.isEmpty()) {
-                    Log.e("CellConfig", "Konnte Seriennummer von Zelle $fromCell nicht ermitteln")
-                    return@withContext false
-                }
-
-                Log.d("CellConfig", "Seriennummer von Zelle $fromCell: $serialNumber")
 
                 val STX = "\u0002"
                 val ETX = "\u0003"
 
                 // Schritt 1: Konfiguration setzen (S2-Befehl)
-                // Format: STX + "<" + Seriennummer + "S2" + NeueAdresse_CHAR + Baudrate + Databits + Checksum + ETX
                 val newAddressChar = when (toCell) {
                     1 -> "A"
                     2 -> "B"
-                    3 -> "C"  // WICHTIG: Buchstabe, nicht "03"!
+                    3 -> "C"
                     4 -> "D"
                     5 -> "E"
                     6 -> "F"
@@ -154,148 +261,68 @@ class CellConfigurationFragment : Fragment() {
                     8 -> "H"
                     else -> "A"
                 }
-                val baudrate = "96" // 9600 Baud (Standard)
+                val baudrate = "96" // 9600 Baud
                 val databits = "17" // 7 Databits, Even Parity
 
                 val configCommand = STX + "<" + serialNumber + "S2" + newAddressChar + baudrate + databits
                 val configWithChecksum = configCommand + calculateChecksum(configCommand) + ETX
 
-                Log.d("CellConfig", "Konfigurations-Befehl ohne Checksum: '$configCommand'")
-                Log.d("CellConfig", "Berechnete Checksum: '${calculateChecksum(configCommand)}'")
                 Log.d("CellConfig", "Sende Konfigurations-Befehl: '$configWithChecksum'")
 
-                // Konfiguration senden mit Timeout-Handling
                 val configResponse = try {
-                    withTimeout(5000) { // 5 Sekunden Timeout
+                    withTimeout(5000) {
                         manager.sendCommand(configWithChecksum) ?: ""
                     }
                 } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
-                    Log.w("CellConfig", "Timeout beim Senden des Konfigurations-Befehls")
+                    Log.w("CellConfig", "Timeout beim Konfigurations-Befehl")
                     ""
                 }
 
-                Log.d("CellConfig", "Konfigurations-Antwort: '$configResponse'")
-
-                if (configResponse.isNullOrEmpty()) {
-                    Log.w("CellConfig", "Keine Antwort auf Konfigurations-Befehl erhalten!")
-                    return@withContext false
-                }
-
-                // Sicherheitspause wie im Original
                 Thread.sleep(1000)
 
                 // Schritt 2: Schreibbefehl (w-Befehl)
-                // Format: STX + "<" + Seriennummer + "w" + Checksum + ETX
                 val writeCommand = STX + "<" + serialNumber + "w"
                 val writeWithChecksum = writeCommand + calculateChecksum(writeCommand) + ETX
 
                 Log.d("CellConfig", "Sende Schreib-Befehl: '$writeWithChecksum'")
 
-                // Schreibbefehl senden mit Timeout
                 val writeResponse = try {
-                    withTimeout(5000) { // 5 Sekunden Timeout
+                    withTimeout(5000) {
                         manager.sendCommand(writeWithChecksum) ?: ""
                     }
                 } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
-                    Log.w("CellConfig", "Timeout beim Senden des Schreib-Befehls")
+                    Log.w("CellConfig", "Timeout beim Schreib-Befehl")
                     ""
                 }
 
-                Log.d("CellConfig", "Schreib-Antwort: '$writeResponse'")
-
-                // Weitere Sicherheitspause
                 Thread.sleep(1000)
 
-                Log.i("CellConfig", "Adressänderung abgeschlossen: $fromCell → $toCell")
-
-                // Erfolg basierend auf gesendeten Befehlen (auch wenn Antworten fehlen)
+                Log.i("CellConfig", "Adressänderung abgeschlossen: $serialNumber → Zelle $toCell")
                 return@withContext true
 
             } catch (e: Exception) {
-                Log.e("CellConfig", "Fehler beim Senden des Adressänderungs-Befehls", e)
+                Log.e("CellConfig", "Fehler beim Senden der Befehle", e)
                 false
             }
         }
     }
 
-    private suspend fun getCurrentCellSerialNumber(cellNumber: Int): String {
-        return withContext(Dispatchers.IO) {
-            try {
-                val manager = communicationManager ?: return@withContext ""
-
-                // Seriennummer-Befehl von der bestehenden Implementierung verwenden
-                val command = FlintecRC3DMultiCellCommands.getCommandForCell(
-                    cellNumber,
-                    FlintecRC3DMultiCellCommands.CommandType.SERIAL_NUMBER
-                )
-
-                val commandStr = String(command, Charsets.ISO_8859_1)
-                val response = manager.sendCommand(commandStr)
-
-                if (!response.isNullOrEmpty()) {
-                    Log.d("CellConfig", "Rohe Seriennummer-Antwort: '$response'")
-
-                    // Direkte Verarbeitung der Rohantwort - erwarte Format wie "Bc01DF825692"
-                    var rawData = response
-
-                    // Entferne Präfix falls vorhanden (wie in Ihrer decodeSerialNumber Funktion)
-                    if (rawData.startsWith("01") && rawData.length > 2) {
-                        rawData = rawData.substring(2)
-                    } else if (rawData.length > 4 && rawData.substring(2, 4) == "01") {
-                        // Falls Format wie "Bc01DF825692" - entferne ersten Teil bis "01"
-                        val index = rawData.indexOf("01")
-                        if (index >= 0 && index + 2 < rawData.length) {
-                            rawData = rawData.substring(index + 2)
-                        }
-                    }
-
-                    // Bereinige und nimm erste 6 Hex-Zeichen
-                    rawData = rawData.takeWhile { it.isLetterOrDigit() }
-                    if (rawData.length >= 6) {
-                        val serialHex = rawData.take(6)
-                        Log.d("CellConfig", "Extrahierte Seriennummer (Hex): '$serialHex'")
-                        return@withContext serialHex
-                    }
-                }
-
-                Log.w("CellConfig", "Konnte Seriennummer von Zelle $cellNumber nicht ermitteln aus: '$response'")
-                return@withContext ""
-
-            } catch (e: Exception) {
-                Log.e("CellConfig", "Fehler beim Ermitteln der Seriennummer", e)
-                ""
-            }
-        }
-    }
-
     private fun calculateChecksum(command: String): String {
-        // XOR-Checksumme wie im VB.NET Original
         var checksum = 0
         for (char in command) {
             checksum = checksum xor char.code
         }
 
-        // WICHTIG: Spezielle Formatierung wie im VB.NET Original!
-        // Chr((iBCC Mod 16) + &H30) + Chr((iBCC \ 16) + &H30)
-        val lowNibble = (checksum % 16) + 0x30  // Mod 16 + '0'
-        val highNibble = (checksum / 16) + 0x30  // \ 16 + '0'
+        val lowNibble = (checksum % 16) + 0x30
+        val highNibble = (checksum / 16) + 0x30
 
-        val checksumStr = "${lowNibble.toChar()}${highNibble.toChar()}"
-
-        Log.d("CellConfig", "Checksum für '$command':")
-        Log.d("CellConfig", "  Raw XOR: $checksum (0x${checksum.toString(16)})")
-        Log.d("CellConfig", "  Low nibble: ${checksum % 16} + 48 = $lowNibble = '${lowNibble.toChar()}'")
-        Log.d("CellConfig", "  High nibble: ${checksum / 16} + 48 = $highNibble = '${highNibble.toChar()}'")
-        Log.d("CellConfig", "  Final checksum: '$checksumStr'")
-
-        return checksumStr
+        return "${lowNibble.toChar()}${highNibble.toChar()}"
     }
 
     private suspend fun ensureConnection(): Boolean {
         return withContext(Dispatchers.IO) {
             try {
                 if (communicationManager == null) {
-                    // Neue Verbindung erstellen
                     val settingsManager = SettingsManager.getInstance(requireContext())
                     val manager = CommunicationManager()
 
@@ -306,16 +333,12 @@ class CellConfigurationFragment : Fragment() {
 
                     if (connected) {
                         communicationManager = manager
-                        Log.d("CellConfig", "Verbindung hergestellt")
                         return@withContext true
-                    } else {
-                        Log.e("CellConfig", "Verbindung fehlgeschlagen")
-                        return@withContext false
                     }
                 }
                 true
             } catch (e: Exception) {
-                Log.e("CellConfig", "Fehler bei Verbindungsaufbau", e)
+                Log.e("CellConfig", "Verbindungsfehler", e)
                 false
             }
         }
@@ -332,15 +355,14 @@ class CellConfigurationFragment : Fragment() {
     }
 
     private fun setUIEnabled(enabled: Boolean) {
-        spinnerCurrentCell.isEnabled = enabled
+        editTextSerialNumber.isEnabled = enabled
         spinnerNewCell.isEnabled = enabled
-        buttonChangeAddress.isEnabled = enabled
+        buttonChangeAddress.isEnabled = enabled && editTextSerialNumber.text.toString().trim().length >= 4
         progressBar.visibility = if (enabled) View.GONE else View.VISIBLE
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        // Verbindung asynchron schließen
         lifecycleScope.launch {
             communicationManager?.disconnect()
             communicationManager = null
