@@ -590,7 +590,7 @@ class MultiCellOverviewFragment : Fragment() {
 
             if (rawResponse.isNotEmpty()) {
                 Log.d("MultiCellOverview", "Zelle $cellNumber Antwort ($commandName): '$rawResponse'")
-                val parsedData = FlintecRC3DMultiCellCommands.parseMultiCellResponse(rawResponse, cellNumber)
+                val parsedData = FlintecRC3DMultiCellCommands.parseMultiCellResponse(rawResponse)
                 val valueToReturn = when (parsedData) {
                     is FlintecData.Counts -> parsedData.value
                     is FlintecData.Temperature -> parsedData.value

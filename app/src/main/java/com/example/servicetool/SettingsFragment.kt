@@ -226,7 +226,7 @@ class SettingsFragment : Fragment() {
 
         lifecycleScope.launch {
             try {
-                val result = CommunicationManager().apply {
+                CommunicationManager().apply {
                     val success = connect(
                         settingsManager.getMoxaIpAddress(),
                         settingsManager.getMoxaPort()

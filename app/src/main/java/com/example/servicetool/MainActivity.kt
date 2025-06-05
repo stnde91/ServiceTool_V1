@@ -53,7 +53,7 @@ class MainActivity : AppCompatActivity() {
         navView.setupWithNavController(navController)
 
         // Debug: Log navigation events mit mehr Details
-        navController.addOnDestinationChangedListener { controller, destination, arguments ->
+        navController.addOnDestinationChangedListener { controller, destination, _ ->
             Log.d("MainActivity", "=== NAVIGATION EVENT ===")
             Log.d("MainActivity", "Von: ${controller.previousBackStackEntry?.destination?.label ?: "START"}")
             Log.d("MainActivity", "Zu: ${destination.label} (ID: ${destination.id})")

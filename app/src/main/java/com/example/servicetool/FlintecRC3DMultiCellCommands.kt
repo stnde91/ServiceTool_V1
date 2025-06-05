@@ -17,18 +17,6 @@ object FlintecRC3DMultiCellCommands {
 
     // Generische Funktion zur Befehlserstellung basierend auf Wireshark-Logs
     fun getCommandForCell(cellNumber: Int, commandType: CommandType): ByteArray {
-        val cellCharByte = when (cellNumber) {
-            1 -> 0x41 // 'A'
-            2 -> 0x42 // 'B'
-            3 -> 0x43 // 'C'
-            4 -> 0x44 // 'D'
-            5 -> 0x45 // 'E'
-            6 -> 0x46 // 'F'
-            7 -> 0x47 // 'G'
-            8 -> 0x48 // 'H'
-            else -> throw IllegalArgumentException("Ungültige Zellennummer: $cellNumber. Muss zwischen 1 und 8 liegen.")
-        }
-
         return when (commandType) {
             CommandType.SERIAL_NUMBER -> when (cellNumber) {
                 1 -> byteArrayOf(STX, 0x41, 0x63, 0x30, 0x31, 0x31, 0x32, ETX) // Ac0112
@@ -100,7 +88,7 @@ object FlintecRC3DMultiCellCommands {
     }
 
     // --- Antwort-Parsing ---
-    fun parseMultiCellResponse(response: String, expectedCell: Int = 0): FlintecData? {
+    fun parseMultiCellResponse(response: String): FlintecData? {
         if (response.length < 2) {
             android.util.Log.w("Parser", "Antwort zu kurz: '$response'")
             return null
