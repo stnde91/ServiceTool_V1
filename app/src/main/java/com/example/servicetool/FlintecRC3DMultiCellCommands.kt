@@ -128,19 +128,41 @@ object FlintecRC3DMultiCellCommands {
 
     private fun decodeSerialNumber(rawData: String): String {
         android.util.Log.d("DecoderSN", "Input: '$rawData'")
+
         var hexToConvert = rawData
+
+        // Entferne "01" Präfix falls vorhanden
         if (hexToConvert.startsWith("01") && hexToConvert.length > 2) {
             hexToConvert = hexToConvert.substring(2)
+            android.util.Log.d("DecoderSN", "Nach Präfix-Entfernung: '$hexToConvert'")
         }
+
+        // Bereinige den Hex-String
         hexToConvert = hexToConvert.takeWhile { it.isLetterOrDigit() }
 
-        if (hexToConvert.isEmpty()) return rawData
+        if (hexToConvert.isEmpty()) {
+            android.util.Log.w("DecoderSN", "Keine gültigen Hex-Zeichen gefunden in: '$rawData'")
+            return rawData
+        }
 
-        val decimalValue = hexToConvert.toLongOrNull(16)
-        val result = decimalValue?.toString() ?: hexToConvert
-        android.util.Log.d("DecoderSN", "Result: '$result' from hex: '$hexToConvert'")
-        return result
+        // LÖSUNG: Verwende die ersten 6 Zeichen für die Seriennummer
+        if (hexToConvert.length > 6) {
+            hexToConvert = hexToConvert.take(6)  // Erste 6 Zeichen
+            android.util.Log.d("DecoderSN", "Verwende erste 6 Zeichen: '$hexToConvert'")
+        }
+
+        return try {
+            val decimalValue = hexToConvert.toULong(16)
+            val result = decimalValue.toString()
+            android.util.Log.d("DecoderSN", "Konvertierung: '$hexToConvert' (hex) -> '$result' (decimal)")
+            result
+
+        } catch (e: NumberFormatException) {
+            android.util.Log.e("DecoderSN", "Fehler bei Hex-Konvertierung von '$hexToConvert': ${e.message}")
+            rawData // Fallback auf Original-String
+        }
     }
+
 
     private fun decodeCountsMultiCell(rawCountsData: String): String {
         android.util.Log.d("CountsDecoder", "Input Rohdaten: '$rawCountsData'")

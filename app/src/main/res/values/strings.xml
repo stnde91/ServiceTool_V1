@@ -77,4 +77,9 @@
     <string name="success_connection_ok">Verbindung erfolgreich</string>
     <string name="success_commands_working">Befehle funktionieren</string>
 
+    <string name="company_name">Waagen Döhrn GmbH Co KG</string>
+    <string name="company_slogan">Professionelle Wägetechnik</string>
+    <string name="app_description">Flintec RC3D Service Tool</string>
+    <string name="logo_content_description">Firmenlogo</string>
+
 </resources>
