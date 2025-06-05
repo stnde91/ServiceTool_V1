@@ -38,12 +38,13 @@ class MainActivity : AppCompatActivity() {
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
 
-        // Define top-level destinations
+        // Define top-level destinations - CELLCONFIGURATION HINZUGEFÜGT
         appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.nav_dashboard,
                 R.id.nav_multicell_overview,
-                R.id.nav_settings
+                R.id.nav_settings,
+                R.id.cellConfigurationFragment  // <-- NEU HINZUGEFÜGT
             ), drawerLayout
         )
 
@@ -112,6 +113,23 @@ class MainActivity : AppCompatActivity() {
                         }
                     } else {
                         Log.d("MainActivity", "Bereits in Settings")
+                        true
+                    }
+                }
+                // NEU: Zellen Konfiguration Navigation
+                R.id.cellConfigurationFragment -> {
+                    Log.d("MainActivity", "Navigiere zu Zellen Konfiguration")
+                    if (navController.currentDestination?.id != R.id.cellConfigurationFragment) {
+                        try {
+                            navController.navigate(R.id.cellConfigurationFragment)
+                            Log.d("MainActivity", "Navigation zu Zellen Konfiguration erfolgreich")
+                            true
+                        } catch (e: Exception) {
+                            Log.e("MainActivity", "Fehler bei Navigation zu Zellen Konfiguration: ${e.message}")
+                            false
+                        }
+                    } else {
+                        Log.d("MainActivity", "Bereits in Zellen Konfiguration")
                         true
                     }
                 }

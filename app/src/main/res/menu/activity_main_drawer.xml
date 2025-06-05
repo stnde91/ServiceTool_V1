@@ -4,6 +4,7 @@
     tools:showIn="navigation_view">
 
     <group android:checkableBehavior="single">
+        <!-- IDs exakt wie in nav_graph.xml -->
         <item
             android:id="@+id/nav_dashboard"
             android:icon="@drawable/ic_info_24"
@@ -13,6 +14,11 @@
             android:id="@+id/nav_multicell_overview"
             android:icon="@drawable/ic_weight_24"
             android:title="Multi-Cell Übersicht" />
+
+        <item
+            android:id="@+id/cellConfigurationFragment"
+            android:icon="@android:drawable/ic_menu_manage"
+            android:title="Zellen Konfiguration" />
     </group>
 
     <group android:id="@+id/group_settings">
