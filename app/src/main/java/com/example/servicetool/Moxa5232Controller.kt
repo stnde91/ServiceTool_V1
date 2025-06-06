@@ -15,7 +15,7 @@ import java.security.cert.X509Certificate
 
 /**
  * Controller für Moxa NPort 5232 Device Server
- * Korrigiert für token-basierte Authentifizierung und korrekten Restart
+ * Komplett neu geschrieben für optimalen Token-basierten Restart
  * Unterstützt Baudrate-Änderung und Hardware-Neustart über Web-Interface
  */
 class Moxa5232Controller(
@@ -52,22 +52,15 @@ class Moxa5232Controller(
 
                 val responseCode = connection.responseCode
                 Log.d(TAG, "Test Connection: HTTP Response Code = $responseCode")
-                val contentType = connection.contentType
-                Log.d(TAG, "Test Connection: Content-Type = $contentType")
 
                 var content = ""
-                var exceptionMessage: String? = null
-
                 if (responseCode == HttpURLConnection.HTTP_OK) {
                     try {
                         content = connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
                         Log.d(TAG, "Test Connection: Received content (first 300 chars): ${content.take(300).replace("\n", " ")}")
                     } catch (e: Exception) {
-                        exceptionMessage = e.message
                         Log.e(TAG, "Test Connection: Error reading response content: ${e.message}", e)
                     }
-                } else {
-                    Log.w(TAG, "Test Connection: Non-OK response ($responseCode)")
                 }
 
                 connection.disconnect()
@@ -77,8 +70,6 @@ class Moxa5232Controller(
                 val containsLogin = content.contains("login", ignoreCase = true)
                 val containsPassword = content.contains("password", ignoreCase = true)
                 val containsAdmin = content.contains("administration", ignoreCase = true)
-
-                Log.d(TAG, "Content checks: moxa=$containsMoxa, nport=$containsNport, login=$containsLogin, password=$containsPassword, admin=$containsAdmin")
 
                 val isSuccess = (responseCode == HttpURLConnection.HTTP_OK) &&
                         (containsMoxa || containsNport || containsLogin || containsPassword || containsAdmin)
@@ -144,12 +135,13 @@ class Moxa5232Controller(
     }
 
     /**
-     * Startet die Moxa 5232 neu - KORRIGIERTE VERSION
+     * HAUPTMETHODE: Startet die Moxa 5232 neu
+     * Verwendet optimierte Token-Extraktion und mehrere Fallback-Methoden
      */
     suspend fun restartDevice(): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                Log.d(TAG, "Starte Moxa 5232 neu mit korrigierter Methode")
+                Log.d(TAG, "=== Starte Moxa 5232 Neustart-Prozess ===")
 
                 val sessionId = login()
                 if (sessionId.isEmpty()) {
@@ -157,18 +149,44 @@ class Moxa5232Controller(
                     return@withContext false
                 }
 
-                val restarted = restartInternalCorrected(sessionId)
-                if (restarted) {
-                    Log.i(TAG, "Moxa 5232 Hardware-Neustart erfolgreich eingeleitet")
-                } else {
-                    Log.e(TAG, "Hardware-Neustart fehlgeschlagen")
+                // Methode 1: Optimierter Token-basierter Restart
+                Log.d(TAG, "Versuch 1: Optimierter Token-basierter Restart...")
+                val tokenRestartSuccess = performOptimizedTokenRestart(sessionId)
+                if (tokenRestartSuccess) {
+                    Log.i(TAG, "✅ Optimierter Token-Restart erfolgreich!")
+                    return@withContext true
                 }
 
-                restarted
+                // Methode 2: Direkte 09Set.htm Analyse
+                Log.d(TAG, "Versuch 2: Direkte 09Set.htm Analyse...")
+                val directRestartSuccess = performDirectSetPageRestart(sessionId)
+                if (directRestartSuccess) {
+                    Log.i(TAG, "✅ Direkter Set-Page Restart erfolgreich!")
+                    return@withContext true
+                }
+
+                // Methode 3: Form-basierter POST Restart
+                Log.d(TAG, "Versuch 3: Form-basierter POST Restart...")
+                val formRestartSuccess = performFormBasedRestart(sessionId)
+                if (formRestartSuccess) {
+                    Log.i(TAG, "✅ Form-basierter Restart erfolgreich!")
+                    return@withContext true
+                }
+
+                // Methode 4: Bekannte Restart-URLs
+                Log.d(TAG, "Versuch 4: Bekannte Restart-URLs...")
+                val knownUrlSuccess = tryKnownRestartUrls(sessionId)
+                if (knownUrlSuccess) {
+                    Log.i(TAG, "✅ Bekannte URL Restart erfolgreich!")
+                    return@withContext true
+                }
+
+                Log.e(TAG, "❌ Alle Restart-Methoden fehlgeschlagen")
+                return@withContext false
 
             } catch (e: Exception) {
-                Log.e(TAG, "Fehler beim Neustart: ${e.message}", e)
-                false
+                Log.e(TAG, "Restart-Fehler: ${e.message}", e)
+                return@withContext false
             }
         }
     }
@@ -193,118 +211,392 @@ class Moxa5232Controller(
         }
     }
 
+    // =======================================
+    // PRIVATE RESTART-METHODEN
+    // =======================================
+
     /**
-     * Debug-Methode um Login-Prozess zu analysieren
+     * METHODE 1: Optimierter Token-basierter Restart
      */
-    suspend fun debugLoginProcess(): String {
+    private suspend fun performOptimizedTokenRestart(sessionId: String): Boolean {
         return withContext(Dispatchers.IO) {
-            val debug = StringBuilder()
-
             try {
-                debug.appendLine("=== Moxa Password-Only Login Debug ===")
-                debug.appendLine("Target: http://$moxaIpAddress/")
-                debug.appendLine("Password: ${password.replace(Regex("."), "*")}")
-                debug.appendLine()
+                Log.d(TAG, "Extrahiere Token mit optimierter Methode...")
 
-                debug.appendLine("1. Testing basic connection...")
-                val connectionOk = testConnection()
-                debug.appendLine("   Result: $connectionOk")
-                debug.appendLine()
+                // Lade die Hauptseite um Token zu finden
+                val url = URL("http://$moxaIpAddress/")
+                val connection = url.openConnection() as HttpURLConnection
 
-                if (!connectionOk) {
-                    debug.appendLine("ERROR: Basic connection failed!")
-                    return@withContext debug.toString()
+                connection.requestMethod = "GET"
+                connection.connectTimeout = TIMEOUT_MS
+                connection.readTimeout = TIMEOUT_MS
+                setBrowserHeaders(connection)
+
+                if (sessionId != "MOXA_LOGIN_SUCCESS") {
+                    connection.setRequestProperty("Cookie", "JSESSIONID=$sessionId")
                 }
 
-                debug.appendLine("2. Testing password-only login process...")
-                val sessionId = login()
-                debug.appendLine("   Session ID: ${if (sessionId.isEmpty()) "FAILED" else "SUCCESS (${sessionId.take(10)}...)"}")
-                debug.appendLine()
+                val responseCode = connection.responseCode
 
-                if (sessionId.isNotEmpty()) {
-                    debug.appendLine("3. Testing administrative functions...")
+                if (responseCode == 200) {
+                    val content = connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+                    connection.disconnect()
 
-                    // Test Port-Konfiguration
-                    val portConfig = getPortConfigInternal(sessionId, 1)
-                    debug.appendLine("   Port 1 Config Access: ${if (portConfig != null) "SUCCESS" else "FAILED"}")
-
-                    // Test Token-Extraktion
-                    val token = extractToken()
-                    debug.appendLine("   Token Extraction: ${if (token != null) "SUCCESS (${token.take(10)}...)" else "FAILED"}")
-
-                    // Test Restart-Zugriff (ohne tatsächlichen Restart)
-                    debug.appendLine("   Restart Access: Testing...")
-                    val canRestart = testRestartAccess(sessionId)
-                    debug.appendLine("   Restart Access: ${if (canRestart) "SUCCESS" else "FAILED"}")
-                    debug.appendLine()
+                    // Token extrahieren mit verbessertem Algorithmus
+                    val token = extractOptimizedToken(content)
+                    if (token != null) {
+                        Log.d(TAG, "Optimierter Token gefunden: ${token.take(10)}...")
+                        return@withContext executeRestartWithToken(token, sessionId)
+                    } else {
+                        Log.w(TAG, "Kein Token mit optimierter Methode gefunden")
+                    }
+                } else {
+                    Log.e(TAG, "Hauptseite nicht zugänglich: HTTP $responseCode")
+                    connection.disconnect()
                 }
 
-                debug.appendLine("=== Debug Complete ===")
+                return@withContext false
 
             } catch (e: Exception) {
-                debug.appendLine("ERROR: ${e.message}")
+                Log.e(TAG, "Optimierter Token-Restart Fehler: ${e.message}", e)
+                return@withContext false
             }
-
-            debug.toString()
         }
     }
 
     /**
-     * Erweiterte Web-Diagnose
+     * METHODE 2: Direkte 09Set.htm Analyse
      */
-    suspend fun performDetailedWebDiagnostic(): WebDiagnosticResult {
+    private suspend fun performDirectSetPageRestart(sessionId: String): Boolean {
         return withContext(Dispatchers.IO) {
-            val result = WebDiagnosticResult()
+            try {
+                Log.d(TAG, "Analysiere 09Set.htm Seite direkt...")
 
-            val testUrls = listOf(
-                "http://$moxaIpAddress/",
-                "https://$moxaIpAddress/",
-                "http://$moxaIpAddress:80/",
-                "http://$moxaIpAddress:8080/"
+                val setPageUrl = URL("http://$moxaIpAddress/09Set.htm")
+                val connection = setPageUrl.openConnection() as HttpURLConnection
+
+                connection.requestMethod = "GET"
+                connection.connectTimeout = TIMEOUT_MS
+                connection.readTimeout = TIMEOUT_MS
+                setBrowserHeaders(connection)
+
+                if (sessionId != "MOXA_LOGIN_SUCCESS") {
+                    connection.setRequestProperty("Cookie", "JSESSIONID=$sessionId")
+                }
+
+                val responseCode = connection.responseCode
+
+                if (responseCode == 200) {
+                    val content = connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+                    connection.disconnect()
+
+                    Log.d(TAG, "09Set.htm Content (erste 500 Zeichen): ${content.take(500)}")
+
+                    // Token aus der Set-Seite extrahieren
+                    val token = extractOptimizedToken(content)
+                    if (token != null) {
+                        Log.d(TAG, "Token aus 09Set.htm extrahiert: ${token.take(10)}...")
+                        return@withContext executeRestartWithToken(token, sessionId)
+                    }
+
+                    // Auch ohne Token versuchen
+                    Log.d(TAG, "Versuche Restart auf 09Set.htm ohne Token...")
+                    return@withContext executeDirectSetPageRestart(sessionId)
+                } else {
+                    Log.e(TAG, "09Set.htm nicht zugänglich: HTTP $responseCode")
+                    connection.disconnect()
+                }
+
+                return@withContext false
+
+            } catch (e: Exception) {
+                Log.e(TAG, "Direkte Set-Page Restart Fehler: ${e.message}", e)
+                return@withContext false
+            }
+        }
+    }
+
+    /**
+     * METHODE 3: Form-basierter POST Restart
+     */
+    private suspend fun performFormBasedRestart(sessionId: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "Führe Form-basierten POST Restart durch...")
+
+                val url = URL("http://$moxaIpAddress/09Set.htm")
+                val connection = url.openConnection() as HttpURLConnection
+
+                connection.requestMethod = "POST"
+                connection.doOutput = true
+                connection.connectTimeout = TIMEOUT_MS
+                connection.readTimeout = TIMEOUT_MS
+                setBrowserHeaders(connection)
+                connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
+                connection.setRequestProperty("Referer", "http://$moxaIpAddress/09Set.htm")
+
+                if (sessionId != "MOXA_LOGIN_SUCCESS") {
+                    connection.setRequestProperty("Cookie", "JSESSIONID=$sessionId")
+                }
+
+                // POST-Daten für Restart
+                val postData = "Submit=Submit"
+
+                OutputStreamWriter(connection.outputStream).use { writer ->
+                    writer.write(postData)
+                    writer.flush()
+                }
+
+                val responseCode = connection.responseCode
+                Log.d(TAG, "Form-basierter Restart: HTTP $responseCode")
+
+                connection.disconnect()
+
+                if (responseCode in 200..399) {
+                    Log.i(TAG, "Form-basierter Restart erfolgreich")
+                    return@withContext true
+                }
+
+                return@withContext false
+
+            } catch (e: Exception) {
+                Log.e(TAG, "Form-basierter Restart Fehler: ${e.message}", e)
+                return@withContext false
+            }
+        }
+    }
+
+    /**
+     * METHODE 4: Bekannte Restart-URLs
+     */
+    private suspend fun tryKnownRestartUrls(sessionId: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            val knownUrls = listOf(
+                "http://$moxaIpAddress/restart",
+                "http://$moxaIpAddress/reboot",
+                "http://$moxaIpAddress/system_restart",
+                "http://$moxaIpAddress/admin/restart",
+                "http://$moxaIpAddress/cgi-bin/restart",
+                "http://$moxaIpAddress/forms/restart",
+                "http://$moxaIpAddress/home.htm?Submit=Restart"
             )
 
-            for (testUrl in testUrls) {
+            for (restartUrl in knownUrls) {
                 try {
-                    val url = URL(testUrl)
+                    Log.d(TAG, "Probiere bekannte URL: $restartUrl")
+
+                    val url = URL(restartUrl)
                     val connection = url.openConnection() as HttpURLConnection
+
                     connection.requestMethod = "GET"
                     connection.connectTimeout = 5000
                     connection.readTimeout = 5000
                     setBrowserHeaders(connection)
 
-                    if (testUrl.startsWith("https")) {
-                        setupHTTPS(connection as HttpsURLConnection)
+                    if (sessionId != "MOXA_LOGIN_SUCCESS") {
+                        connection.setRequestProperty("Cookie", "JSESSIONID=$sessionId")
                     }
 
                     val responseCode = connection.responseCode
-                    val responseMessage = connection.responseMessage
-
-                    result.testResults[testUrl] = "Code: $responseCode - $responseMessage"
-
-                    if (responseCode in 200..299) {
-                        result.workingUrl = testUrl
-                        result.responseCode = responseCode
-
-                        if (responseCode == 200) {
-                            val content = connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
-                            if (content.contains("password", ignoreCase = true)) {
-                                result.loginPageFound = true
-                            }
-                        }
-                    }
+                    Log.d(TAG, "Bekannte URL $restartUrl: HTTP $responseCode")
 
                     connection.disconnect()
 
+                    if (responseCode in 200..399) {
+                        Log.i(TAG, "Restart erfolgreich mit bekannter URL: $restartUrl")
+                        return@withContext true
+                    }
+
                 } catch (e: Exception) {
-                    result.testResults[testUrl] = "Fehler: ${e.message}"
+                    Log.w(TAG, "Bekannte URL $restartUrl fehlgeschlagen: ${e.message}")
                 }
             }
 
-            result
+            return@withContext false
         }
     }
 
-    // Private Helper-Methoden
+    // =======================================
+    // TOKEN-EXTRAKTION UND RESTART-AUSFÜHRUNG
+    // =======================================
+
+    /**
+     * OPTIMIERTE TOKEN-EXTRAKTION
+     * Basierend auf dem Browser-Screenshot: Token = C6TVZdZEd3f6UJg8
+     */
+    private fun extractOptimizedToken(content: String): String? {
+        try {
+            Log.d(TAG, "=== Starte optimierte Token-Extraktion ===")
+
+            // Pattern für alphanumerische Tokens (wie C6TVZdZEd3f6UJg8)
+            val tokenPatterns = listOf(
+                // Pattern 1: Direkte token_text= Zuweisung
+                Regex("""token_text\s*=\s*['"]*([A-Za-z0-9]{10,20})['"]*"""),
+
+                // Pattern 2: HTML Input Field
+                Regex("""<input[^>]*name=["']?token_text["']?[^>]*value=["']([A-Za-z0-9]{10,20})["']"""),
+
+                // Pattern 3: Verstecktes Input Field (umgekehrte Reihenfolge)
+                Regex("""<input[^>]*value=["']([A-Za-z0-9]{10,20})["'][^>]*name=["']?token_text["']?"""),
+
+                // Pattern 4: JavaScript Variable
+                Regex("""var\s+token_text\s*=\s*["']([A-Za-z0-9]{10,20})["']"""),
+
+                // Pattern 5: URL Parameter
+                Regex("""[?&]token_text=([A-Za-z0-9]{10,20})"""),
+
+                // Pattern 6: Meta Tag
+                Regex("""<meta[^>]*name=["']?token_text["']?[^>]*content=["']([A-Za-z0-9]{10,20})["']""")
+            )
+
+            // Durchsuche mit spezifischen Patterns
+            for ((index, pattern) in tokenPatterns.withIndex()) {
+                try {
+                    val match = pattern.find(content)
+                    if (match != null) {
+                        val token = match.groupValues[1]
+                        if (isValidToken(token)) {
+                            Log.i(TAG, "✅ Token mit Pattern ${index + 1} gefunden: ${token.take(10)}... (Länge: ${token.length})")
+                            return token
+                        }
+                    }
+                } catch (e: Exception) {
+                    Log.w(TAG, "Pattern ${index + 1} fehlgeschlagen: ${e.message}")
+                }
+            }
+
+            // Fallback: Suche nach allen alphanumerischen Strings der richtigen Länge
+            Log.d(TAG, "Fallback: Suche alle möglichen Token-Kandidaten...")
+            val candidatePattern = Regex("""([A-Za-z0-9]{12,18})""")
+            val candidates = candidatePattern.findAll(content)
+                .map { it.value }
+                .distinct()
+                .filter { isValidToken(it) }
+                .toList()
+
+            Log.d(TAG, "Token-Kandidaten gefunden: ${candidates.joinToString(", ")}")
+
+            // Wähle den besten Kandidaten
+            for (candidate in candidates) {
+                if (candidate.any { it.isDigit() } && candidate.any { it.isLetter() }) {
+                    Log.i(TAG, "✅ Bester Token-Kandidat ausgewählt: ${candidate.take(10)}...")
+                    return candidate
+                }
+            }
+
+            Log.w(TAG, "❌ Kein gültiger Token gefunden")
+            return null
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Token-Extraktion Fehler: ${e.message}", e)
+            return null
+        }
+    }
+
+    /**
+     * Validiert ob ein String ein gültiger Token ist
+     */
+    private fun isValidToken(token: String): Boolean {
+        return token.length in 10..20 &&
+                token.matches(Regex("[A-Za-z0-9]+")) &&
+                !token.equals("JavaScript", ignoreCase = true) &&
+                !token.contains("function", ignoreCase = true) &&
+                !token.contains("window", ignoreCase = true) &&
+                !token.contains("document", ignoreCase = true) &&
+                token.any { it.isDigit() } &&
+                token.any { it.isLetter() }
+    }
+
+    /**
+     * Führt Restart mit spezifischem Token aus
+     */
+    private fun executeRestartWithToken(token: String, sessionId: String): Boolean {
+        try {
+            // Verschiedene Token-URL-Formate probieren
+            val restartUrls = listOf(
+                "http://$moxaIpAddress/09Set.htm?Submit=Submit&token_text=$token",
+                "http://$moxaIpAddress/09Set.htm?token_text=$token&Submit=Submit",
+                "http://$moxaIpAddress/09Set.htm?Submit=Submit&token_text=$token&action=restart"
+            )
+
+            for (restartUrl in restartUrls) {
+                try {
+                    Log.d(TAG, "🚀 Führe Token-Restart aus: $restartUrl")
+
+                    val url = URL(restartUrl)
+                    val connection = url.openConnection() as HttpURLConnection
+
+                    connection.requestMethod = "GET"
+                    connection.connectTimeout = TIMEOUT_MS
+                    connection.readTimeout = TIMEOUT_MS
+                    setBrowserHeaders(connection)
+                    connection.setRequestProperty("Referer", "http://$moxaIpAddress/09Set.htm")
+
+                    if (sessionId != "MOXA_LOGIN_SUCCESS") {
+                        connection.setRequestProperty("Cookie", "JSESSIONID=$sessionId")
+                    }
+
+                    val responseCode = connection.responseCode
+                    Log.d(TAG, "Token-Restart Response: HTTP $responseCode")
+
+                    connection.disconnect()
+
+                    if (responseCode in 200..399) {
+                        Log.i(TAG, "✅ Token-Restart erfolgreich! URL: $restartUrl")
+                        return true
+                    }
+
+                } catch (e: Exception) {
+                    Log.w(TAG, "Token-URL $restartUrl fehlgeschlagen: ${e.message}")
+                }
+            }
+
+            return false
+
+        } catch (e: Exception) {
+            Log.e(TAG, "executeRestartWithToken Fehler: ${e.message}", e)
+            return false
+        }
+    }
+
+    /**
+     * Direkter Restart auf der Set-Seite ohne Token
+     */
+    private fun executeDirectSetPageRestart(sessionId: String): Boolean {
+        try {
+            val url = URL("http://$moxaIpAddress/09Set.htm?Submit=Submit")
+            val connection = url.openConnection() as HttpURLConnection
+
+            connection.requestMethod = "GET"
+            connection.connectTimeout = TIMEOUT_MS
+            connection.readTimeout = TIMEOUT_MS
+            setBrowserHeaders(connection)
+
+            if (sessionId != "MOXA_LOGIN_SUCCESS") {
+                connection.setRequestProperty("Cookie", "JSESSIONID=$sessionId")
+            }
+
+            val responseCode = connection.responseCode
+            Log.d(TAG, "Direkter Set-Page Restart: HTTP $responseCode")
+
+            connection.disconnect()
+
+            if (responseCode in 200..399) {
+                Log.i(TAG, "Direkter Set-Page Restart erfolgreich")
+                return true
+            }
+
+            return false
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Direkter Set-Page Restart Fehler: ${e.message}", e)
+            return false
+        }
+    }
+
+    // =======================================
+    // LOGIN UND HELPER-METHODEN
+    // =======================================
 
     /**
      * Browser-ähnliche Headers setzen
@@ -319,33 +611,14 @@ class Moxa5232Controller(
     }
 
     /**
-     * HTTPS-Verbindungen konfigurieren
-     */
-    private fun setupHTTPS(connection: HttpsURLConnection) {
-        try {
-            connection.hostnameVerifier = HostnameVerifier { _, _ -> true }
-            val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
-                override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
-                override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
-                override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
-            })
-            val sslContext = SSLContext.getInstance("SSL")
-            sslContext.init(null, trustAllCerts, SecureRandom())
-            connection.sslSocketFactory = sslContext.socketFactory
-        } catch (e: Exception) {
-            Log.w(TAG, "HTTPS setup failed: ${e.message}")
-        }
-    }
-
-    /**
-     * Korrigierte Login-Methode für passwort-basiertes Login
+     * Login-Methode für passwort-basiertes Login
      */
     private suspend fun login(): String {
         return withContext(Dispatchers.IO) {
             try {
-                Log.d(TAG, "Starting password-only login process...")
+                Log.d(TAG, "=== Starte Moxa Login-Prozess ===")
 
-                // Schritt 1: GET Login-Seite und analysiere das Formular
+                // Schritt 1: Erste Verbindung zur Hauptseite
                 val loginPageUrl = URL("http://$moxaIpAddress/")
                 val loginPageConnection = loginPageUrl.openConnection() as HttpURLConnection
 
@@ -357,45 +630,33 @@ class Moxa5232Controller(
                 val loginPageResponse = loginPageConnection.responseCode
                 val initialCookies = loginPageConnection.headerFields["Set-Cookie"]
 
-                Log.d(TAG, "Login page: HTTP $loginPageResponse")
+                Log.d(TAG, "Login-Seite Response: HTTP $loginPageResponse")
+                Log.d(TAG, "Initial Cookies: $initialCookies")
 
                 if (loginPageResponse == 200) {
-                    // Lese den HTML-Content um das Formular zu analysieren
                     val loginPageContent = loginPageConnection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
-
-                    // Suche nach dem Formular-Action
-                    val actionPattern = Regex("action=\"([^\"]*)\"|action='([^']*)'", RegexOption.IGNORE_CASE)
-                    val actionMatch = actionPattern.find(loginPageContent)
-                    val formAction = actionMatch?.groupValues?.get(1)?.takeIf { it.isNotEmpty() }
-                        ?: actionMatch?.groupValues?.get(2)?.takeIf { it.isNotEmpty() }
-                        ?: "home.htm" // Fallback basierend auf Browser-Logs
-
-                    Log.d(TAG, "Found form action: $formAction")
-
-                    // Suche nach Token-Parametern
-                    val tokenPattern = Regex("name=\"([^\"]*token[^\"]*)\"|name=\"([^\"]*challenge[^\"]*)\"|name=\"([^\"]*Challenge[^\"]*)", RegexOption.IGNORE_CASE)
-                    val tokenMatch = tokenPattern.find(loginPageContent)
-                    val tokenFieldName = tokenMatch?.groupValues?.find { it.isNotEmpty() && it != "name=" }
-
-                    // Suche nach dem Token-Wert
-                    var tokenValue = ""
-                    if (!tokenFieldName.isNullOrEmpty()) {
-                        val tokenValuePattern = Regex("name=\"$tokenFieldName\"[^>]*value=\"([^\"]*)\"", RegexOption.IGNORE_CASE)
-                        val tokenValueMatch = tokenValuePattern.find(loginPageContent)
-                        tokenValue = tokenValueMatch?.groupValues?.get(1) ?: ""
-                        Log.d(TAG, "Found token field: $tokenFieldName = $tokenValue")
-                    }
-
                     loginPageConnection.disconnect()
 
-                    // Schritt 2: POST das Passwort (ohne Benutzername)
+                    Log.d(TAG, "Login-Seite Content (erste 300 Zeichen): ${loginPageContent.take(300)}")
+
+                    // Prüfe ob bereits eingeloggt
+                    if (isAlreadyLoggedIn(loginPageContent)) {
+                        Log.i(TAG, "✅ Bereits eingeloggt!")
+                        return@withContext "ALREADY_LOGGED_IN"
+                    }
+
+                    // Suche Form-Action
+                    val formAction = extractFormAction(loginPageContent)
+                    Log.d(TAG, "Form Action gefunden: $formAction")
+
+                    // Schritt 2: Login POST ausführen
                     val loginUrl = if (formAction.startsWith("http")) {
                         URL(formAction)
                     } else {
                         URL("http://$moxaIpAddress/$formAction")
                     }
 
-                    Log.d(TAG, "Posting to: $loginUrl")
+                    Log.d(TAG, "Login POST URL: $loginUrl")
 
                     val loginConnection = loginUrl.openConnection() as HttpURLConnection
 
@@ -408,36 +669,18 @@ class Moxa5232Controller(
                     loginConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
                     loginConnection.setRequestProperty("Referer", "http://$moxaIpAddress/")
 
-                    // Initial Cookies mitschicken falls vorhanden
+                    // Initial Cookies übertragen
                     if (!initialCookies.isNullOrEmpty()) {
                         val cookieHeader = initialCookies.joinToString("; ") { cookie ->
                             cookie.substringBefore(";")
                         }
                         loginConnection.setRequestProperty("Cookie", cookieHeader)
-                        Log.d(TAG, "Sending initial cookies: $cookieHeader")
+                        Log.d(TAG, "Cookies gesendet: $cookieHeader")
                     }
 
-                    // Login-Daten zusammenstellen (nur Passwort + evtl. Token)
-                    val postDataBuilder = StringBuilder()
-
-                    // Verschiedene mögliche Passwort-Feldnamen probieren
-                    val possiblePasswordFields = listOf("Password", "password", "pass", "passwd", "pwd", "token_text")
-                    val passwordField = possiblePasswordFields.find { field ->
-                        loginPageContent.contains("name=\"$field\"", ignoreCase = true)
-                    } ?: "Password" // Fallback
-
-                    postDataBuilder.append("$passwordField=$password")
-
-                    // Token hinzufügen falls gefunden
-                    if (!tokenFieldName.isNullOrEmpty() && tokenValue.isNotEmpty()) {
-                        postDataBuilder.append("&$tokenFieldName=$tokenValue")
-                    }
-
-                    // Submit-Button
-                    postDataBuilder.append("&Submit=Submit")
-
-                    val postData = postDataBuilder.toString()
-                    Log.d(TAG, "Sending login data: $postData")
+                    // Login-Daten erstellen - ERWEITERTE VERSION
+                    val postData = createLoginPostData(loginPageContent)
+                    Log.d(TAG, "Login POST Data: $postData")
 
                     loginConnection.outputStream.use { output ->
                         output.write(postData.toByteArray(Charsets.UTF_8))
@@ -447,186 +690,260 @@ class Moxa5232Controller(
                     val responseCode = loginConnection.responseCode
                     val responseMessage = loginConnection.responseMessage
                     val location = loginConnection.getHeaderField("Location")
-                    val cookies = loginConnection.headerFields["Set-Cookie"]
+                    val responseCookies = loginConnection.headerFields["Set-Cookie"]
 
-                    Log.d(TAG, "Login attempt: HTTP $responseCode $responseMessage")
-                    Log.d(TAG, "Location header: $location")
-                    Log.d(TAG, "Response cookies: $cookies")
+                    Log.d(TAG, "Login Response: HTTP $responseCode $responseMessage")
+                    Log.d(TAG, "Location Header: $location")
+                    Log.d(TAG, "Response Cookies: $responseCookies")
 
-                    // Bei der Moxa könnte auch ein 200 OK mit Weiterleitung ein erfolgreicher Login sein
-                    val isSuccess = when {
-                        // Klassischer erfolgreicher Login mit Redirect
-                        responseCode == 302 && !cookies.isNullOrEmpty() -> true
-                        // Moxa-spezifisch: 200 OK und Content deutet auf Erfolg hin
-                        responseCode == 200 -> {
-                            try {
-                                val responseContent = loginConnection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
-                                val isMainPage = responseContent.contains("main.htm", ignoreCase = true) ||
-                                        responseContent.contains("home.htm", ignoreCase = true) ||
-                                        responseContent.contains("administration", ignoreCase = true) ||
-                                        responseContent.contains("serial port", ignoreCase = true) ||
-                                        responseContent.contains("configuration", ignoreCase = true) ||
-                                        responseContent.contains("restart", ignoreCase = true)
-                                Log.d(TAG, "Login response analysis: isMainPage = $isMainPage")
-                                isMainPage
-                            } catch (e: Exception) {
-                                Log.w(TAG, "Could not read login response content: ${e.message}")
-                                false
-                            }
-                        }
-                        else -> false
-                    }
+                    // ERWEITERTE LOGIN-VALIDIERUNG
+                    val loginSuccess = validateLoginSuccess(loginConnection, responseCode, location, responseCookies)
 
                     loginConnection.disconnect()
 
-                    if (isSuccess) {
-                        // Session-ID extrahieren oder Dummy verwenden
-                        val sessionId = cookies?.firstOrNull { cookie ->
-                            cookie.contains("JSESSIONID=", ignoreCase = true) ||
-                                    cookie.contains("sessionid=", ignoreCase = true) ||
-                                    cookie.contains("session", ignoreCase = true)
-                        }?.let { cookie ->
-                            cookie.substringAfter("=").substringBefore(";")
-                        } ?: "MOXA_LOGIN_SUCCESS" // Dummy-Session-ID
-
-                        Log.i(TAG, "Password-only login successful, session: ${sessionId.take(15)}...")
+                    if (loginSuccess.first) {
+                        val sessionId = loginSuccess.second
+                        Log.i(TAG, "✅ Login erfolgreich! Session: ${sessionId.take(15)}...")
                         return@withContext sessionId
                     } else {
-                        Log.e(TAG, "Password-only login failed: HTTP $responseCode")
+                        Log.e(TAG, "❌ Login fehlgeschlagen - Validierung negativ")
+
+                        // Debug: Versuche die Response zu lesen
+                        debugLoginFailure(responseCode, location, responseCookies)
+
                         return@withContext ""
                     }
 
                 } else {
-                    Log.e(TAG, "Login page not accessible: $loginPageResponse")
+                    Log.e(TAG, "Login-Seite nicht zugänglich: HTTP $loginPageResponse")
                     loginPageConnection.disconnect()
                     return@withContext ""
                 }
 
             } catch (e: Exception) {
-                Log.e(TAG, "Password-only login error: ${e.message}", e)
+                Log.e(TAG, "Login-Fehler: ${e.message}", e)
                 return@withContext ""
             }
         }
     }
 
     /**
-     * KORRIGIERTE RESTART-METHODE - Basierend auf Browser-Analyse
-     * Verwendet /09Set.htm mit token_text Parameter
+     * Prüft ob bereits eingeloggt
      */
-    private suspend fun restartInternalCorrected(sessionId: String): Boolean {
-        return withContext(Dispatchers.IO) {
-            try {
-                Log.d(TAG, "Führe korrigierten Restart durch...")
+    private fun isAlreadyLoggedIn(content: String): Boolean {
+        val loggedInIndicators = listOf(
+            "main.htm",
+            "administration",
+            "configuration",
+            "serial port",
+            "logout",
+            "system status",
+            "restart"
+        )
 
-                // 1. Token aus aktueller Seite extrahieren
-                val token = extractToken()
-                if (token.isNullOrEmpty()) {
-                    Log.e(TAG, "Restart-Token konnte nicht extrahiert werden")
-                    return@withContext false
+        return loggedInIndicators.any { indicator ->
+            content.contains(indicator, ignoreCase = true)
+        }
+    }
+    /**
+     * Extrahiert Form-Action aus HTML
+     */
+    private fun extractFormAction(content: String): String {
+        val patterns = listOf(
+            Regex("action=\"([^\"]*?)\"", RegexOption.IGNORE_CASE),
+            Regex("action='([^']*?)'", RegexOption.IGNORE_CASE),
+            Regex("action=([^\\s>]*)", RegexOption.IGNORE_CASE)
+        )
+
+        for (pattern in patterns) {
+            val match = pattern.find(content)
+            if (match != null) {
+                val action = match.groupValues[1]
+                if (action.isNotEmpty()) {
+                    return action
                 }
-
-                Log.d(TAG, "Restart-Token gefunden: ${token.take(10)}...")
-
-                // 2. Korrekten Restart-Request basierend auf Browser-Analyse
-                // Browser verwendet: /09Set.htm?Submit=Submit&token_text=TOKEN
-                val restartUrl = URL("http://$moxaIpAddress/09Set.htm?Submit=Submit&token_text=$token")
-
-                Log.d(TAG, "Sende korrigierten Restart-Request: ${restartUrl}")
-
-                val restartConnection = restartUrl.openConnection() as HttpURLConnection
-
-                restartConnection.requestMethod = "GET"
-                restartConnection.connectTimeout = TIMEOUT_MS
-                restartConnection.readTimeout = TIMEOUT_MS
-                setBrowserHeaders(restartConnection)
-                restartConnection.setRequestProperty("Referer", "http://$moxaIpAddress/")
-
-                // Session-Cookie setzen falls vorhanden
-                if (sessionId != "MOXA_LOGIN_SUCCESS") {
-                    restartConnection.setRequestProperty("Cookie", "JSESSIONID=$sessionId")
-                }
-
-                val responseCode = restartConnection.responseCode
-                val responseMessage = restartConnection.responseMessage
-
-                Log.d(TAG, "Korrigierter Restart: HTTP $responseCode $responseMessage")
-
-                restartConnection.disconnect()
-
-                if (responseCode in 200..399) {
-                    Log.i(TAG, "Hardware-Neustart erfolgreich eingeleitet mit korrigierter Methode")
-                    return@withContext true
-                } else {
-                    Log.e(TAG, "Korrigierter Restart fehlgeschlagen: HTTP $responseCode")
-                    return@withContext false
-                }
-
-            } catch (e: Exception) {
-                Log.e(TAG, "Korrigierter Restart-Fehler: ${e.message}", e)
-                return@withContext false
             }
+        }
+
+        return "home.htm" // Fallback
+    }
+
+    /**
+     * Erstellt Login POST-Daten basierend auf HTML-Form
+     */
+    private fun createLoginPostData(content: String): String {
+        val postDataBuilder = StringBuilder()
+
+        // Standard Moxa-Login
+        postDataBuilder.append("Password=$password")
+
+        // Suche nach versteckten Input-Feldern
+        val hiddenInputPattern = Regex("""<input[^>]*type=["']?hidden["']?[^>]*name=["']?([^"'\s>]+)["']?[^>]*value=["']?([^"'>\s]*)["']?""", RegexOption.IGNORE_CASE)
+        val hiddenInputs = hiddenInputPattern.findAll(content)
+
+        for (hiddenInput in hiddenInputs) {
+            val name = hiddenInput.groupValues[1]
+            val value = hiddenInput.groupValues[2]
+            if (name.isNotEmpty()) {
+                postDataBuilder.append("&$name=$value")
+                Log.d(TAG, "Hidden Input gefunden: $name=$value")
+            }
+        }
+
+        // Submit Button
+        postDataBuilder.append("&Submit=Submit")
+
+        return postDataBuilder.toString()
+    }
+
+    /**
+     * ERWEITERTE LOGIN-VALIDIERUNG
+     */
+    private fun validateLoginSuccess(
+        connection: HttpURLConnection,
+        responseCode: Int,
+        location: String?,
+        cookies: List<String>?
+    ): Pair<Boolean, String> {
+
+        Log.d(TAG, "=== Login-Validierung ===")
+        Log.d(TAG, "Response Code: $responseCode")
+        Log.d(TAG, "Location: $location")
+        Log.d(TAG, "Cookies: $cookies")
+
+        try {
+            // Methode 1: Redirect mit Session Cookie
+            if (responseCode == 302 && !cookies.isNullOrEmpty()) {
+                val sessionId = extractSessionId(cookies)
+                if (sessionId.isNotEmpty()) {
+                    Log.d(TAG, "✅ Validierung 1: Redirect + Session Cookie")
+                    return Pair(true, sessionId)
+                }
+            }
+
+            // Methode 2: HTTP 200 mit Login-Success-Content
+            if (responseCode == 200) {
+                try {
+                    val responseContent = connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+                    Log.d(TAG, "Response Content (erste 500 Zeichen): ${responseContent.take(500)}")
+
+                    // Prüfe auf Success-Indikatoren
+                    val successIndicators = listOf(
+                        "main.htm",
+                        "home.htm",
+                        "administration",
+                        "configuration",
+                        "serial port",
+                        "system status",
+                        "device server",
+                        "nport",
+                        "restart",
+                        "logout"
+                    )
+
+                    val hasSuccessIndicator = successIndicators.any { indicator ->
+                        responseContent.contains(indicator, ignoreCase = true)
+                    }
+
+                    if (hasSuccessIndicator) {
+                        Log.d(TAG, "✅ Validierung 2: HTTP 200 + Success Content")
+                        val sessionId = extractSessionId(cookies) ?: "MOXA_LOGIN_SUCCESS"
+                        return Pair(true, sessionId)
+                    }
+
+                    // Prüfe auf Fehler-Indikatoren
+                    val errorIndicators = listOf(
+                        "incorrect password",
+                        "invalid password",
+                        "password error",
+                        "login failed",
+                        "access denied"
+                    )
+
+                    val hasErrorIndicator = errorIndicators.any { indicator ->
+                        responseContent.contains(indicator, ignoreCase = true)
+                    }
+
+                    if (hasErrorIndicator) {
+                        Log.e(TAG, "❌ Login-Fehler in Response erkannt")
+                        return Pair(false, "")
+                    }
+
+                    // Wenn keine klaren Indikatoren: Als Success werten wenn kein Password-Feld mehr da ist
+                    val hasPasswordField = responseContent.contains("password", ignoreCase = true) &&
+                            responseContent.contains("input", ignoreCase = true)
+
+                    if (!hasPasswordField) {
+                        Log.d(TAG, "✅ Validierung 3: Kein Password-Feld mehr vorhanden")
+                        val sessionId = extractSessionId(cookies) ?: "MOXA_CONTENT_SUCCESS"
+                        return Pair(true, sessionId)
+                    }
+
+                } catch (e: Exception) {
+                    Log.w(TAG, "Fehler beim Lesen der Response: ${e.message}")
+                }
+            }
+
+            // Methode 3: Jeder 2xx Response mit Cookies als Erfolg werten
+            if (responseCode in 200..299 && !cookies.isNullOrEmpty()) {
+                Log.d(TAG, "✅ Validierung 4: 2xx Response + Cookies vorhanden")
+                val sessionId = extractSessionId(cookies) ?: "MOXA_COOKIE_SUCCESS"
+                return Pair(true, sessionId)
+            }
+
+            Log.w(TAG, "❌ Keine Validierung erfolgreich")
+            return Pair(false, "")
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Validierung-Fehler: ${e.message}", e)
+            return Pair(false, "")
         }
     }
 
     /**
-     * Extrahiert Token für Restart-Operationen
+     * Extrahiert Session-ID aus Cookies
      */
-    private suspend fun extractToken(): String? {
-        return withContext(Dispatchers.IO) {
-            try {
-                Log.d(TAG, "Extrahiere Token für Restart...")
+    private fun extractSessionId(cookies: List<String>?): String? {
+        if (cookies.isNullOrEmpty()) return null
 
-                // Lade Hauptseite um Token zu bekommen
-                val url = URL("http://$moxaIpAddress/")
-                val connection = url.openConnection() as HttpURLConnection
+        for (cookie in cookies) {
+            // Suche nach verschiedenen Session-Cookie-Namen
+            val sessionPatterns = listOf(
+                "JSESSIONID=([^;]+)",
+                "sessionid=([^;]+)",
+                "session=([^;]+)",
+                "SESSIONID=([^;]+)"
+            )
 
-                connection.requestMethod = "GET"
-                connection.connectTimeout = TIMEOUT_MS
-                connection.readTimeout = TIMEOUT_MS
-                setBrowserHeaders(connection)
-
-                val responseCode = connection.responseCode
-
-                if (responseCode == 200) {
-                    val content = connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
-                    connection.disconnect()
-
-                    // Verschiedene Token-Pattern probieren
-                    val tokenPatterns = listOf(
-                        Regex("""token_text[^"]*"([^"]*)")"""),
-                        Regex("""name="token_text"[^>]*value="([^"]*)")"""),
-                        Regex("""token_text=([^&\s"']+)"""),
-                        Regex("""&token_text=([^&\s"']+)""")
-                    )
-
-                    for (pattern in tokenPatterns) {
-                        val match = pattern.find(content)
-                        if (match != null) {
-                            val token = match.groupValues[1]
-                            if (token.isNotEmpty()) {
-                                Log.d(TAG, "Token gefunden mit Pattern: ${pattern.pattern}")
-                                Log.d(TAG, "Token-Wert: ${token.take(10)}...")
-                                return@withContext token
-                            }
-                        }
+            for (pattern in sessionPatterns) {
+                val match = Regex(pattern).find(cookie)
+                if (match != null) {
+                    val sessionId = match.groupValues[1]
+                    if (sessionId.isNotEmpty()) {
+                        return sessionId
                     }
-
-                    Log.w(TAG, "Kein Token in HTML-Content gefunden")
-                    Log.d(TAG, "Content preview: ${content.take(500)}")
-
-                } else {
-                    Log.e(TAG, "Token-Extraktion fehlgeschlagen: HTTP $responseCode")
-                    connection.disconnect()
                 }
-
-                return@withContext null
-
-            } catch (e: Exception) {
-                Log.e(TAG, "Token-Extraktion Fehler: ${e.message}", e)
-                return@withContext null
             }
         }
+
+        return null
     }
+
+    /**
+     * Debug-Funktion für Login-Fehler
+     */
+    private fun debugLoginFailure(responseCode: Int, location: String?, cookies: List<String>?) {
+        Log.e(TAG, "=== LOGIN FAILURE DEBUG ===")
+        Log.e(TAG, "Response Code: $responseCode")
+        Log.e(TAG, "Location Header: $location")
+        Log.e(TAG, "Cookies: $cookies")
+        Log.e(TAG, "Expected: HTTP 302 mit Session-Cookie ODER HTTP 200 mit Admin-Content")
+        Log.e(TAG, "========================")
+    }
+
+    // =======================================
+    // BAUDRATE UND KONFIGURATION
+    // =======================================
 
     private fun setBaudrateInternal(sessionId: String, port: Int, baudrate: Int): Boolean {
         try {
@@ -748,211 +1065,67 @@ class Moxa5232Controller(
         )
     }
 
-    /**
-     * Test ob Restart-Zugriff funktioniert (ohne tatsächlichen Restart)
-     */
-    private fun testRestartAccess(sessionId: String): Boolean {
-        return try {
-            val url = URL("http://$moxaIpAddress/home.htm")
-            val connection = url.openConnection() as HttpURLConnection
-
-            connection.requestMethod = "GET"
-            connection.connectTimeout = 5000
-            connection.readTimeout = 5000
-            setBrowserHeaders(connection)
-
-            if (sessionId != "MOXA_LOGIN_SUCCESS") {
-                connection.setRequestProperty("Cookie", "JSESSIONID=$sessionId")
-            }
-
-            val responseCode = connection.responseCode
-            val content = if (responseCode == 200) {
-                connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
-            } else ""
-
-            connection.disconnect()
-
-            responseCode == 200 && (content.contains("restart", ignoreCase = true) ||
-                    content.contains("reboot", ignoreCase = true))
-
-        } catch (e: Exception) {
-            Log.d(TAG, "Restart access test failed: ${e.message}")
-            false
-        }
-    }
+    // =======================================
+    // DEBUG UND ERWEITERTE FUNKTIONEN
+    // =======================================
 
     /**
-     * Fallback-Restart mit den alten Methoden (für Kompatibilität)
+     * Debug-Methode um Login-Prozess zu analysieren
      */
-    private suspend fun restartInternalFallback(sessionId: String): Boolean {
-        return withContext(Dispatchers.IO) {
-            // Fallback auf die ursprünglichen Restart-Pfade
-            val restartPaths = listOf(
-                "home.htm?Submit=Restart",
-                "forms/restart",
-                "restart.htm",
-                "admin/restart",
-                "cgi-bin/restart",
-                "forms/system_restart",
-                "restart.cgi",
-                "system/restart"
-            )
-
-            for (restartPath in restartPaths) {
-                try {
-                    Log.d(TAG, "Trying fallback restart path: $restartPath")
-                    val url = URL("http://$moxaIpAddress/$restartPath")
-                    val connection = url.openConnection() as HttpURLConnection
-
-                    connection.requestMethod = if (restartPath.contains("?")) "GET" else "POST"
-                    if (connection.requestMethod == "POST") {
-                        connection.doOutput = true
-                    }
-                    connection.connectTimeout = TIMEOUT_MS
-                    connection.readTimeout = TIMEOUT_MS
-                    setBrowserHeaders(connection)
-                    connection.setRequestProperty("Referer", "http://$moxaIpAddress/home.htm")
-
-                    // Session-Cookie setzen falls vorhanden
-                    if (sessionId != "MOXA_LOGIN_SUCCESS") {
-                        connection.setRequestProperty("Cookie", "JSESSIONID=$sessionId")
-                    }
-
-                    if (connection.requestMethod == "POST") {
-                        connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
-
-                        OutputStreamWriter(connection.outputStream).use { writer ->
-                            writer.write("Submit=Restart")
-                            writer.flush()
-                        }
-                    }
-
-                    val responseCode = connection.responseCode
-                    Log.d(TAG, "Fallback restart attempt on $restartPath: HTTP $responseCode")
-
-                    connection.disconnect()
-
-                    if (responseCode in 200..399) {
-                        Log.i(TAG, "Fallback restart successful via: $restartPath")
-                        return@withContext true
-                    }
-
-                } catch (e: Exception) {
-                    Log.d(TAG, "Fallback restart path $restartPath failed: ${e.message}")
-                }
-            }
-
-            Log.e(TAG, "All fallback restart paths failed")
-            return@withContext false
-        }
-    }
-
-    /**
-     * Erweiterte Restart-Methode mit mehreren Versuchen
-     */
-    suspend fun restartDeviceExtended(): Boolean {
-        return withContext(Dispatchers.IO) {
-            try {
-                Log.d(TAG, "Starte erweiterten Neustart-Prozess...")
-
-                val sessionId = login()
-                if (sessionId.isEmpty()) {
-                    Log.e(TAG, "Login für erweiterten Neustart fehlgeschlagen")
-                    return@withContext false
-                }
-
-                // 1. Versuch: Korrigierte Methode (mit Token)
-                Log.d(TAG, "Versuch 1: Token-basierter Restart...")
-                val correctedRestart = restartInternalCorrected(sessionId)
-                if (correctedRestart) {
-                    Log.i(TAG, "Token-basierter Restart erfolgreich")
-                    return@withContext true
-                }
-
-                // 2. Versuch: Fallback-Methoden
-                Log.d(TAG, "Versuch 2: Fallback-Restart-Methoden...")
-                val fallbackRestart = restartInternalFallback(sessionId)
-                if (fallbackRestart) {
-                    Log.i(TAG, "Fallback-Restart erfolgreich")
-                    return@withContext true
-                }
-
-                Log.e(TAG, "Alle Restart-Methoden fehlgeschlagen")
-                return@withContext false
-
-            } catch (e: Exception) {
-                Log.e(TAG, "Erweiterte Restart-Fehler: ${e.message}", e)
-                return@withContext false
-            }
-        }
-    }
-
-    /**
-     * Debug-Methode für alle Restart-Pfade
-     */
-    suspend fun debugAllRestartMethods(): String {
+    suspend fun debugLoginProcess(): String {
         return withContext(Dispatchers.IO) {
             val debug = StringBuilder()
 
             try {
-                debug.appendLine("=== Alle Restart-Methoden Debug ===")
+                debug.appendLine("=== Moxa Login Debug ===")
+                debug.appendLine("Target: http://$moxaIpAddress/")
+                debug.appendLine("Password: ${password.replace(Regex("."), "*")}")
                 debug.appendLine()
 
-                val sessionId = login()
-                if (sessionId.isEmpty()) {
-                    debug.appendLine("ERROR: Login fehlgeschlagen")
+                debug.appendLine("1. Testing basic connection...")
+                val connectionOk = testConnection()
+                debug.appendLine("   Result: $connectionOk")
+                debug.appendLine()
+
+                if (!connectionOk) {
+                    debug.appendLine("ERROR: Basic connection failed!")
                     return@withContext debug.toString()
                 }
 
-                debug.appendLine("Login erfolgreich: ${sessionId.take(10)}...")
+                debug.appendLine("2. Testing login process...")
+                val sessionId = login()
+                debug.appendLine("   Session ID: ${if (sessionId.isEmpty()) "FAILED" else "SUCCESS (${sessionId.take(10)}...)"}")
                 debug.appendLine()
 
-                // 1. Token-Extraktion testen
-                debug.appendLine("1. Token-Extraktion:")
-                val token = extractToken()
-                if (token != null) {
-                    debug.appendLine("   ✅ Token gefunden: ${token.take(10)}...")
+                if (sessionId.isNotEmpty()) {
+                    debug.appendLine("3. Testing token extraction...")
 
-                    // Korrigierte Restart-URL testen
-                    val correctUrl = "http://$moxaIpAddress/09Set.htm?Submit=Submit&token_text=$token"
-                    debug.appendLine("   🔗 Korrekte Restart-URL: $correctUrl")
-                } else {
-                    debug.appendLine("   ❌ Token nicht gefunden")
-                }
-                debug.appendLine()
+                    // Lade Hauptseite für Token-Test
+                    val url = URL("http://$moxaIpAddress/")
+                    val connection = url.openConnection() as HttpURLConnection
+                    connection.requestMethod = "GET"
+                    connection.connectTimeout = TIMEOUT_MS
+                    connection.readTimeout = TIMEOUT_MS
+                    setBrowserHeaders(connection)
 
-                // 2. Alle Restart-Pfade testen (ohne echten Restart)
-                debug.appendLine("2. Restart-Pfad Tests:")
-                val testPaths = listOf(
-                    "09Set.htm?Submit=Submit&token_text=$token",
-                    "home.htm?Submit=Restart",
-                    "forms/restart",
-                    "restart.htm",
-                    "admin/restart",
-                    "cgi-bin/restart"
-                )
+                    if (sessionId != "MOXA_LOGIN_SUCCESS") {
+                        connection.setRequestProperty("Cookie", "JSESSIONID=$sessionId")
+                    }
 
-                for (path in testPaths) {
-                    try {
-                        val url = URL("http://$moxaIpAddress/$path")
-                        val connection = url.openConnection() as HttpURLConnection
-
-                        connection.requestMethod = "GET"
-                        connection.connectTimeout = 5000
-                        connection.readTimeout = 5000
-                        setBrowserHeaders(connection)
-
-                        if (sessionId != "MOXA_LOGIN_SUCCESS") {
-                            connection.setRequestProperty("Cookie", "JSESSIONID=$sessionId")
-                        }
-
-                        val responseCode = connection.responseCode
+                    val responseCode = connection.responseCode
+                    if (responseCode == 200) {
+                        val content = connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
                         connection.disconnect()
 
-                        debug.appendLine("   $path: HTTP $responseCode")
+                        val token = extractOptimizedToken(content)
+                        debug.appendLine("   Token Extraction: ${if (token != null) "SUCCESS (${token.take(10)}...)" else "FAILED"}")
 
-                    } catch (e: Exception) {
-                        debug.appendLine("   $path: ERROR - ${e.message}")
+                        if (token != null) {
+                            debug.appendLine("   Token Details: Länge=${token.length}, Format=${if (isValidToken(token)) "VALID" else "INVALID"}")
+                        }
+                    } else {
+                        connection.disconnect()
+                        debug.appendLine("   Token Extraction: FAILED - HTTP $responseCode")
                     }
                 }
 
@@ -966,6 +1139,180 @@ class Moxa5232Controller(
             debug.toString()
         }
     }
+
+    /**
+     * Erweiterte Web-Diagnose
+     */
+    suspend fun performDetailedWebDiagnostic(): WebDiagnosticResult {
+        return withContext(Dispatchers.IO) {
+            val result = WebDiagnosticResult()
+
+            val testUrls = listOf(
+                "http://$moxaIpAddress/",
+                "https://$moxaIpAddress/",
+                "http://$moxaIpAddress:80/",
+                "http://$moxaIpAddress/09Set.htm"
+            )
+
+            for (testUrl in testUrls) {
+                try {
+                    val url = URL(testUrl)
+                    val connection = url.openConnection() as HttpURLConnection
+                    connection.requestMethod = "GET"
+                    connection.connectTimeout = 5000
+                    connection.readTimeout = 5000
+                    setBrowserHeaders(connection)
+
+                    if (testUrl.startsWith("https")) {
+                        setupHTTPS(connection as HttpsURLConnection)
+                    }
+
+                    val responseCode = connection.responseCode
+                    val responseMessage = connection.responseMessage
+
+                    result.testResults[testUrl] = "Code: $responseCode - $responseMessage"
+
+                    if (responseCode in 200..299) {
+                        result.workingUrl = testUrl
+                        result.responseCode = responseCode
+
+                        if (responseCode == 200) {
+                            val content = connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+                            if (content.contains("password", ignoreCase = true)) {
+                                result.loginPageFound = true
+                            }
+                        }
+                    }
+
+                    connection.disconnect()
+
+                } catch (e: Exception) {
+                    result.testResults[testUrl] = "Fehler: ${e.message}"
+                }
+            }
+
+            result
+        }
+    }
+
+    /**
+     * HTTPS-Verbindungen konfigurieren
+     */
+    private fun setupHTTPS(connection: HttpsURLConnection) {
+        try {
+            connection.hostnameVerifier = HostnameVerifier { _, _ -> true }
+            val trustAllCerts = arrayOf<TrustManager>(object : X509TrustManager {
+                override fun checkClientTrusted(chain: Array<X509Certificate>, authType: String) {}
+                override fun checkServerTrusted(chain: Array<X509Certificate>, authType: String) {}
+                override fun getAcceptedIssuers(): Array<X509Certificate> = arrayOf()
+            })
+            val sslContext = SSLContext.getInstance("SSL")
+            sslContext.init(null, trustAllCerts, SecureRandom())
+            connection.sslSocketFactory = sslContext.socketFactory
+        } catch (e: Exception) {
+            Log.w(TAG, "HTTPS setup failed: ${e.message}")
+        }
+    }
+
+    /**
+     * Debug-Methode für vollständige Restart-Analyse
+     */
+    suspend fun debugCompleteRestartProcess(): String {
+        return withContext(Dispatchers.IO) {
+            val debug = StringBuilder()
+
+            try {
+                debug.appendLine("=== Vollständige Restart-Prozess Debug ===")
+                debug.appendLine()
+
+                // 1. Login testen
+                debug.appendLine("1. Login-Test:")
+                val sessionId = login()
+                if (sessionId.isEmpty()) {
+                    debug.appendLine("   ❌ Login fehlgeschlagen")
+                    return@withContext debug.toString()
+                }
+                debug.appendLine("   ✅ Login erfolgreich: ${sessionId.take(10)}...")
+                debug.appendLine()
+
+                // 2. Token-Extraktion testen
+                debug.appendLine("2. Token-Extraktion von Hauptseite:")
+                val url = URL("http://$moxaIpAddress/")
+                val connection = url.openConnection() as HttpURLConnection
+                connection.requestMethod = "GET"
+                connection.connectTimeout = TIMEOUT_MS
+                connection.readTimeout = TIMEOUT_MS
+                setBrowserHeaders(connection)
+
+                if (sessionId != "MOXA_LOGIN_SUCCESS") {
+                    connection.setRequestProperty("Cookie", "JSESSIONID=$sessionId")
+                }
+
+                val responseCode = connection.responseCode
+                if (responseCode == 200) {
+                    val content = connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+                    connection.disconnect()
+
+                    val token = extractOptimizedToken(content)
+                    if (token != null) {
+                        debug.appendLine("   ✅ Token gefunden: ${token.take(10)}... (Länge: ${token.length})")
+                        debug.appendLine("   Token vollständig: $token")
+
+                        // 3. Restart-URL zusammenstellen
+                        val restartUrl = "http://$moxaIpAddress/09Set.htm?Submit=Submit&token_text=$token"
+                        debug.appendLine("   🔗 Restart-URL: $restartUrl")
+
+                        // 4. Restart-URL testen (ohne tatsächlichen Restart)
+                        debug.appendLine("   📡 URL-Test (ohne Restart)...")
+                        try {
+                            val testUrl = URL(restartUrl)
+                            val testConnection = testUrl.openConnection() as HttpURLConnection
+                            testConnection.requestMethod = "HEAD" // Nur Header abfragen
+                            testConnection.connectTimeout = 5000
+                            testConnection.readTimeout = 5000
+                            setBrowserHeaders(testConnection)
+
+                            if (sessionId != "MOXA_LOGIN_SUCCESS") {
+                                testConnection.setRequestProperty("Cookie", "JSESSIONID=$sessionId")
+                            }
+
+                            val testResponseCode = testConnection.responseCode
+                            testConnection.disconnect()
+
+                            debug.appendLine("   🎯 URL-Test Ergebnis: HTTP $testResponseCode")
+                            if (testResponseCode in 200..399) {
+                                debug.appendLine("   ✅ URL ist gültig und würde funktionieren!")
+                            } else {
+                                debug.appendLine("   ❌ URL würde nicht funktionieren")
+                            }
+                        } catch (e: Exception) {
+                            debug.appendLine("   ❌ URL-Test fehlgeschlagen: ${e.message}")
+                        }
+
+                    } else {
+                        debug.appendLine("   ❌ Kein Token gefunden")
+                        debug.appendLine("   📄 HTML-Content (erste 1000 Zeichen):")
+                        debug.appendLine(content.take(1000))
+                    }
+                } else {
+                    connection.disconnect()
+                    debug.appendLine("   ❌ Hauptseite nicht zugänglich: HTTP $responseCode")
+                }
+
+                debug.appendLine()
+                debug.appendLine("=== Debug Complete ===")
+
+            } catch (e: Exception) {
+                debug.appendLine("ERROR: ${e.message}")
+            }
+
+            debug.toString()
+        }
+    }
+
+    // =======================================
+    // DATENKLASSEN
+    // =======================================
 
     /**
      * Datenklasse für Port-Konfiguration
