@@ -15,8 +15,8 @@ import java.security.cert.X509Certificate
 
 /**
  * Controller für Moxa NPort 5232 Device Server
- * Korrigiert für passwort-basiertes Login (ohne Benutzername)
- * Unterstützt Baudrate-Änderung und Neustart über Web-Interface
+ * Korrigiert für token-basierte Authentifizierung und korrekten Restart
+ * Unterstützt Baudrate-Änderung und Hardware-Neustart über Web-Interface
  */
 class Moxa5232Controller(
     private val moxaIpAddress: String,
@@ -144,12 +144,12 @@ class Moxa5232Controller(
     }
 
     /**
-     * Startet die Moxa 5232 neu
+     * Startet die Moxa 5232 neu - KORRIGIERTE VERSION
      */
     suspend fun restartDevice(): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-                Log.d(TAG, "Starte Moxa 5232 neu")
+                Log.d(TAG, "Starte Moxa 5232 neu mit korrigierter Methode")
 
                 val sessionId = login()
                 if (sessionId.isEmpty()) {
@@ -157,11 +157,11 @@ class Moxa5232Controller(
                     return@withContext false
                 }
 
-                val restarted = restartInternal(sessionId)
+                val restarted = restartInternalCorrected(sessionId)
                 if (restarted) {
-                    Log.i(TAG, "Moxa 5232 Neustart eingeleitet")
+                    Log.i(TAG, "Moxa 5232 Hardware-Neustart erfolgreich eingeleitet")
                 } else {
-                    Log.e(TAG, "Neustart fehlgeschlagen")
+                    Log.e(TAG, "Hardware-Neustart fehlgeschlagen")
                 }
 
                 restarted
@@ -227,6 +227,10 @@ class Moxa5232Controller(
                     // Test Port-Konfiguration
                     val portConfig = getPortConfigInternal(sessionId, 1)
                     debug.appendLine("   Port 1 Config Access: ${if (portConfig != null) "SUCCESS" else "FAILED"}")
+
+                    // Test Token-Extraktion
+                    val token = extractToken()
+                    debug.appendLine("   Token Extraction: ${if (token != null) "SUCCESS (${token.take(10)}...)" else "FAILED"}")
 
                     // Test Restart-Zugriff (ohne tatsächlichen Restart)
                     debug.appendLine("   Restart Access: Testing...")
@@ -505,6 +509,125 @@ class Moxa5232Controller(
         }
     }
 
+    /**
+     * KORRIGIERTE RESTART-METHODE - Basierend auf Browser-Analyse
+     * Verwendet /09Set.htm mit token_text Parameter
+     */
+    private suspend fun restartInternalCorrected(sessionId: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "Führe korrigierten Restart durch...")
+
+                // 1. Token aus aktueller Seite extrahieren
+                val token = extractToken()
+                if (token.isNullOrEmpty()) {
+                    Log.e(TAG, "Restart-Token konnte nicht extrahiert werden")
+                    return@withContext false
+                }
+
+                Log.d(TAG, "Restart-Token gefunden: ${token.take(10)}...")
+
+                // 2. Korrekten Restart-Request basierend auf Browser-Analyse
+                // Browser verwendet: /09Set.htm?Submit=Submit&token_text=TOKEN
+                val restartUrl = URL("http://$moxaIpAddress/09Set.htm?Submit=Submit&token_text=$token")
+
+                Log.d(TAG, "Sende korrigierten Restart-Request: ${restartUrl}")
+
+                val restartConnection = restartUrl.openConnection() as HttpURLConnection
+
+                restartConnection.requestMethod = "GET"
+                restartConnection.connectTimeout = TIMEOUT_MS
+                restartConnection.readTimeout = TIMEOUT_MS
+                setBrowserHeaders(restartConnection)
+                restartConnection.setRequestProperty("Referer", "http://$moxaIpAddress/")
+
+                // Session-Cookie setzen falls vorhanden
+                if (sessionId != "MOXA_LOGIN_SUCCESS") {
+                    restartConnection.setRequestProperty("Cookie", "JSESSIONID=$sessionId")
+                }
+
+                val responseCode = restartConnection.responseCode
+                val responseMessage = restartConnection.responseMessage
+
+                Log.d(TAG, "Korrigierter Restart: HTTP $responseCode $responseMessage")
+
+                restartConnection.disconnect()
+
+                if (responseCode in 200..399) {
+                    Log.i(TAG, "Hardware-Neustart erfolgreich eingeleitet mit korrigierter Methode")
+                    return@withContext true
+                } else {
+                    Log.e(TAG, "Korrigierter Restart fehlgeschlagen: HTTP $responseCode")
+                    return@withContext false
+                }
+
+            } catch (e: Exception) {
+                Log.e(TAG, "Korrigierter Restart-Fehler: ${e.message}", e)
+                return@withContext false
+            }
+        }
+    }
+
+    /**
+     * Extrahiert Token für Restart-Operationen
+     */
+    private suspend fun extractToken(): String? {
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "Extrahiere Token für Restart...")
+
+                // Lade Hauptseite um Token zu bekommen
+                val url = URL("http://$moxaIpAddress/")
+                val connection = url.openConnection() as HttpURLConnection
+
+                connection.requestMethod = "GET"
+                connection.connectTimeout = TIMEOUT_MS
+                connection.readTimeout = TIMEOUT_MS
+                setBrowserHeaders(connection)
+
+                val responseCode = connection.responseCode
+
+                if (responseCode == 200) {
+                    val content = connection.inputStream.bufferedReader(Charsets.UTF_8).use { it.readText() }
+                    connection.disconnect()
+
+                    // Verschiedene Token-Pattern probieren
+                    val tokenPatterns = listOf(
+                        Regex("""token_text[^"]*"([^"]*)")"""),
+                        Regex("""name="token_text"[^>]*value="([^"]*)")"""),
+                        Regex("""token_text=([^&\s"']+)"""),
+                        Regex("""&token_text=([^&\s"']+)""")
+                    )
+
+                    for (pattern in tokenPatterns) {
+                        val match = pattern.find(content)
+                        if (match != null) {
+                            val token = match.groupValues[1]
+                            if (token.isNotEmpty()) {
+                                Log.d(TAG, "Token gefunden mit Pattern: ${pattern.pattern}")
+                                Log.d(TAG, "Token-Wert: ${token.take(10)}...")
+                                return@withContext token
+                            }
+                        }
+                    }
+
+                    Log.w(TAG, "Kein Token in HTML-Content gefunden")
+                    Log.d(TAG, "Content preview: ${content.take(500)}")
+
+                } else {
+                    Log.e(TAG, "Token-Extraktion fehlgeschlagen: HTTP $responseCode")
+                    connection.disconnect()
+                }
+
+                return@withContext null
+
+            } catch (e: Exception) {
+                Log.e(TAG, "Token-Extraktion Fehler: ${e.message}", e)
+                return@withContext null
+            }
+        }
+    }
+
     private fun setBaudrateInternal(sessionId: String, port: Int, baudrate: Int): Boolean {
         try {
             val url = URL("http://$moxaIpAddress/forms/serial_port$port")
@@ -583,69 +706,6 @@ class Moxa5232Controller(
         }
     }
 
-    /**
-     * Erweiterte Restart-Methode die verschiedene Pfade probiert
-     */
-    private fun restartInternal(sessionId: String): Boolean {
-        // Verschiedene mögliche Restart-Pfade für Moxa
-        val restartPaths = listOf(
-            "home.htm?Submit=Restart",
-            "forms/restart",
-            "restart.htm",
-            "admin/restart",
-            "main.htm?action=restart",
-            "forms/reboot"
-        )
-
-        for (restartPath in restartPaths) {
-            try {
-                Log.d(TAG, "Trying restart path: $restartPath")
-
-                val url = URL("http://$moxaIpAddress/$restartPath")
-                val connection = url.openConnection() as HttpURLConnection
-
-                connection.requestMethod = if (restartPath.contains("?")) "GET" else "POST"
-                if (connection.requestMethod == "POST") {
-                    connection.doOutput = true
-                }
-                connection.connectTimeout = TIMEOUT_MS
-                connection.readTimeout = TIMEOUT_MS
-                setBrowserHeaders(connection)
-                connection.setRequestProperty("Referer", "http://$moxaIpAddress/home.htm")
-
-                // Session-Cookie setzen falls vorhanden
-                if (sessionId != "MOXA_LOGIN_SUCCESS") {
-                    connection.setRequestProperty("Cookie", "JSESSIONID=$sessionId")
-                }
-
-                if (connection.requestMethod == "POST") {
-                    connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
-
-                    OutputStreamWriter(connection.outputStream).use { writer ->
-                        writer.write("Submit=Restart")
-                        writer.flush()
-                    }
-                }
-
-                val responseCode = connection.responseCode
-                Log.d(TAG, "Restart attempt on $restartPath: HTTP $responseCode")
-
-                connection.disconnect()
-
-                if (responseCode in 200..399) {
-                    Log.i(TAG, "Restart successful via: $restartPath")
-                    return true
-                }
-
-            } catch (e: Exception) {
-                Log.d(TAG, "Restart path $restartPath failed: ${e.message}")
-            }
-        }
-
-        Log.e(TAG, "All restart paths failed")
-        return false
-    }
-
     private fun getPortConfigInternal(sessionId: String, port: Int): PortConfiguration? {
         try {
             val url = URL("http://$moxaIpAddress/main/serial_port$port.htm")
@@ -718,6 +778,192 @@ class Moxa5232Controller(
         } catch (e: Exception) {
             Log.d(TAG, "Restart access test failed: ${e.message}")
             false
+        }
+    }
+
+    /**
+     * Fallback-Restart mit den alten Methoden (für Kompatibilität)
+     */
+    private suspend fun restartInternalFallback(sessionId: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            // Fallback auf die ursprünglichen Restart-Pfade
+            val restartPaths = listOf(
+                "home.htm?Submit=Restart",
+                "forms/restart",
+                "restart.htm",
+                "admin/restart",
+                "cgi-bin/restart",
+                "forms/system_restart",
+                "restart.cgi",
+                "system/restart"
+            )
+
+            for (restartPath in restartPaths) {
+                try {
+                    Log.d(TAG, "Trying fallback restart path: $restartPath")
+                    val url = URL("http://$moxaIpAddress/$restartPath")
+                    val connection = url.openConnection() as HttpURLConnection
+
+                    connection.requestMethod = if (restartPath.contains("?")) "GET" else "POST"
+                    if (connection.requestMethod == "POST") {
+                        connection.doOutput = true
+                    }
+                    connection.connectTimeout = TIMEOUT_MS
+                    connection.readTimeout = TIMEOUT_MS
+                    setBrowserHeaders(connection)
+                    connection.setRequestProperty("Referer", "http://$moxaIpAddress/home.htm")
+
+                    // Session-Cookie setzen falls vorhanden
+                    if (sessionId != "MOXA_LOGIN_SUCCESS") {
+                        connection.setRequestProperty("Cookie", "JSESSIONID=$sessionId")
+                    }
+
+                    if (connection.requestMethod == "POST") {
+                        connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
+
+                        OutputStreamWriter(connection.outputStream).use { writer ->
+                            writer.write("Submit=Restart")
+                            writer.flush()
+                        }
+                    }
+
+                    val responseCode = connection.responseCode
+                    Log.d(TAG, "Fallback restart attempt on $restartPath: HTTP $responseCode")
+
+                    connection.disconnect()
+
+                    if (responseCode in 200..399) {
+                        Log.i(TAG, "Fallback restart successful via: $restartPath")
+                        return@withContext true
+                    }
+
+                } catch (e: Exception) {
+                    Log.d(TAG, "Fallback restart path $restartPath failed: ${e.message}")
+                }
+            }
+
+            Log.e(TAG, "All fallback restart paths failed")
+            return@withContext false
+        }
+    }
+
+    /**
+     * Erweiterte Restart-Methode mit mehreren Versuchen
+     */
+    suspend fun restartDeviceExtended(): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                Log.d(TAG, "Starte erweiterten Neustart-Prozess...")
+
+                val sessionId = login()
+                if (sessionId.isEmpty()) {
+                    Log.e(TAG, "Login für erweiterten Neustart fehlgeschlagen")
+                    return@withContext false
+                }
+
+                // 1. Versuch: Korrigierte Methode (mit Token)
+                Log.d(TAG, "Versuch 1: Token-basierter Restart...")
+                val correctedRestart = restartInternalCorrected(sessionId)
+                if (correctedRestart) {
+                    Log.i(TAG, "Token-basierter Restart erfolgreich")
+                    return@withContext true
+                }
+
+                // 2. Versuch: Fallback-Methoden
+                Log.d(TAG, "Versuch 2: Fallback-Restart-Methoden...")
+                val fallbackRestart = restartInternalFallback(sessionId)
+                if (fallbackRestart) {
+                    Log.i(TAG, "Fallback-Restart erfolgreich")
+                    return@withContext true
+                }
+
+                Log.e(TAG, "Alle Restart-Methoden fehlgeschlagen")
+                return@withContext false
+
+            } catch (e: Exception) {
+                Log.e(TAG, "Erweiterte Restart-Fehler: ${e.message}", e)
+                return@withContext false
+            }
+        }
+    }
+
+    /**
+     * Debug-Methode für alle Restart-Pfade
+     */
+    suspend fun debugAllRestartMethods(): String {
+        return withContext(Dispatchers.IO) {
+            val debug = StringBuilder()
+
+            try {
+                debug.appendLine("=== Alle Restart-Methoden Debug ===")
+                debug.appendLine()
+
+                val sessionId = login()
+                if (sessionId.isEmpty()) {
+                    debug.appendLine("ERROR: Login fehlgeschlagen")
+                    return@withContext debug.toString()
+                }
+
+                debug.appendLine("Login erfolgreich: ${sessionId.take(10)}...")
+                debug.appendLine()
+
+                // 1. Token-Extraktion testen
+                debug.appendLine("1. Token-Extraktion:")
+                val token = extractToken()
+                if (token != null) {
+                    debug.appendLine("   ✅ Token gefunden: ${token.take(10)}...")
+
+                    // Korrigierte Restart-URL testen
+                    val correctUrl = "http://$moxaIpAddress/09Set.htm?Submit=Submit&token_text=$token"
+                    debug.appendLine("   🔗 Korrekte Restart-URL: $correctUrl")
+                } else {
+                    debug.appendLine("   ❌ Token nicht gefunden")
+                }
+                debug.appendLine()
+
+                // 2. Alle Restart-Pfade testen (ohne echten Restart)
+                debug.appendLine("2. Restart-Pfad Tests:")
+                val testPaths = listOf(
+                    "09Set.htm?Submit=Submit&token_text=$token",
+                    "home.htm?Submit=Restart",
+                    "forms/restart",
+                    "restart.htm",
+                    "admin/restart",
+                    "cgi-bin/restart"
+                )
+
+                for (path in testPaths) {
+                    try {
+                        val url = URL("http://$moxaIpAddress/$path")
+                        val connection = url.openConnection() as HttpURLConnection
+
+                        connection.requestMethod = "GET"
+                        connection.connectTimeout = 5000
+                        connection.readTimeout = 5000
+                        setBrowserHeaders(connection)
+
+                        if (sessionId != "MOXA_LOGIN_SUCCESS") {
+                            connection.setRequestProperty("Cookie", "JSESSIONID=$sessionId")
+                        }
+
+                        val responseCode = connection.responseCode
+                        connection.disconnect()
+
+                        debug.appendLine("   $path: HTTP $responseCode")
+
+                    } catch (e: Exception) {
+                        debug.appendLine("   $path: ERROR - ${e.message}")
+                    }
+                }
+
+                debug.appendLine()
+                debug.appendLine("=== Debug Complete ===")
+
+            } catch (e: Exception) {
+                debug.appendLine("ERROR: ${e.message}")
+            }
+
+            debug.toString()
         }
     }
 

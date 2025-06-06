@@ -60,7 +60,6 @@ class MoxaSettingsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // WICHTIG: Reihenfolge geändert - Views zuerst initialisieren
         initializeViews(view)
         initializeServices()
         setupSpinners()
@@ -77,15 +76,11 @@ class MoxaSettingsFragment : Fragment() {
     private fun initializeServices() {
         settingsManager = SettingsManager.getInstance(requireContext())
         loggingManager = LoggingManager.getInstance(requireContext())
-
-        // Jetzt sind die Views initialisiert, updateMoxaController ist sicher
         updateMoxaController()
-
         loggingManager.logInfo("MoxaSettings", "Moxa-Einstellungen Fragment gestartet")
     }
 
     private fun updateMoxaController() {
-        // Sichere Überprüfung ob Views initialisiert sind
         val ip = if (::editTextMoxaIp.isInitialized) {
             editTextMoxaIp.text?.toString() ?: settingsManager.getMoxaIpAddress()
         } else {
@@ -233,10 +228,7 @@ class MoxaSettingsFragment : Fragment() {
                 if (isReachable) {
                     updateConnectionStatus("✅ Moxa NPort 5232 erreichbar", true)
                     textViewMoxaModel.text = "Moxa NPort 5232"
-
-                    // Lade Port-Konfigurationen
                     loadPortConfigurations()
-
                     loggingManager.logInfo("MoxaSettings", "Moxa-Verbindungstest erfolgreich")
                 } else {
                     updateConnectionStatus("❌ Moxa nicht erreichbar", false)
@@ -328,42 +320,101 @@ class MoxaSettingsFragment : Fragment() {
     private fun showRestartConfirmation() {
         AlertDialog.Builder(requireContext())
             .setTitle("Moxa NPort 5232 neu starten")
-            .setMessage("Möchten Sie die Moxa wirklich neu starten?\n\n⚠️ Alle Zell-Verbindungen werden für ca. 45 Sekunden unterbrochen.")
+            .setMessage("Möchten Sie die Moxa wirklich neu starten?\n\n⚠️ Alle Zell-Verbindungen werden für ca. 45 Sekunden unterbrochen.\n\n🔧 Verwendet korrigierte Token-basierte Restart-Methode.")
             .setPositiveButton("Neu starten") { _, _ ->
-                restartMoxa()
+                restartMoxaWithCorrectMethod()
             }
             .setNegativeButton("Abbrechen", null)
             .show()
     }
 
-    private fun restartMoxa() {
+    private fun restartMoxaWithCorrectMethod() {
         setUIEnabled(false)
-        updateSystemStatus("Starte Moxa neu...")
+        updateSystemStatus("Starte Moxa mit korrigierter Methode neu...")
 
         lifecycleScope.launch {
             try {
+                // Verwende die korrigierte Restart-Methode
                 val success = moxaController.restartDevice()
 
                 if (success) {
-                    updateSystemStatus("✅ Neustart eingeleitet - warte 45 Sekunden...")
-                    loggingManager.logInfo("MoxaSettings", "Moxa Neustart eingeleitet")
-
-                    delay(45000) // 45 Sekunden warten
-
-                    updateSystemStatus("Teste Verbindung nach Neustart...")
-                    testMoxaConnection()
+                    updateSystemStatus("✅ Hardware-Neustart eingeleitet - warte 45 Sekunden...")
+                    loggingManager.logInfo("MoxaSettings", "Moxa Hardware-Neustart eingeleitet")
+                    monitorRestartProgress()
                 } else {
-                    updateSystemStatus("❌ Neustart fehlgeschlagen")
-                    loggingManager.logError("MoxaSettings", "Moxa Neustart fehlgeschlagen")
+                    updateSystemStatus("❌ Hardware-Neustart fehlgeschlagen")
+                    loggingManager.logError("MoxaSettings", "Moxa Hardware-Neustart fehlgeschlagen")
+                    showRestartTroubleshooting()
                 }
 
             } catch (e: Exception) {
                 updateSystemStatus("❌ Neustart-Fehler: ${e.message}")
                 loggingManager.logError("MoxaSettings", "Moxa Neustart-Fehler", e)
+                showRestartTroubleshooting()
             } finally {
                 setUIEnabled(true)
             }
         }
+    }
+
+    private suspend fun monitorRestartProgress() {
+        // Überwache den Restart-Fortschritt
+        for (attempt in 1..15) { // 15 Versuche = ca. 75 Sekunden
+            delay(5000) // 5 Sekunden warten
+
+            updateSystemStatus("🔍 Überwache Neustart... Versuch $attempt/15")
+
+            try {
+                val isOnline = moxaController.testConnection()
+                if (isOnline) {
+                    updateSystemStatus("✅ Moxa ist nach Neustart wieder online!")
+
+                    // Automatisch Port-Konfigurationen neu laden
+                    delay(2000)
+                    loadPortConfigurations()
+                    return
+                }
+            } catch (e: Exception) {
+                // Erwartet während Neustart
+            }
+        }
+
+        // Nach 75 Sekunden immer noch offline
+        updateSystemStatus("⚠️ Moxa antwortet nach Neustart nicht - prüfen Sie die Hardware")
+        showRestartTroubleshooting()
+    }
+
+    private fun showRestartTroubleshooting() {
+        val message = """
+            🔧 Neustart-Troubleshooting:
+            
+            1. ✅ Netzwerk-Ping testen:
+               ping ${settingsManager.getMoxaIpAddress()}
+               
+            2. 🔌 Hardware prüfen:
+               • Power-LED leuchtet?
+               • Ethernet-LED blinkt?
+               
+            3. 🔄 Manual Reset:
+               • Reset-Button 5 Sek drücken
+               • Stromkabel aus/einstecken
+               
+            4. 📡 IP-Adresse prüfen:
+               • DHCP könnte neue IP vergeben haben
+               • Standard-IP: 192.168.127.254
+               
+            5. 🌐 Browser-Test:
+               http://${settingsManager.getMoxaIpAddress()}
+        """.trimIndent()
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Neustart-Problembehebung")
+            .setMessage(message)
+            .setPositiveButton("OK", null)
+            .setNeutralButton("Erneut testen") { _, _ ->
+                testMoxaConnection()
+            }
+            .show()
     }
 
     private fun autoDetectBaudrates() {
@@ -518,21 +569,152 @@ class MoxaSettingsFragment : Fragment() {
     }
 
     private fun showFactoryResetConfirmation() {
-        // Placeholder - würde Factory Reset implementieren
         AlertDialog.Builder(requireContext())
             .setTitle("Factory Reset")
-            .setMessage("Factory Reset ist noch nicht implementiert.\n\nDiese Funktion würde die Moxa auf Werkseinstellungen zurücksetzen.")
+            .setMessage("Factory Reset ist noch nicht implementiert.\n\nDiese Funktion würde die Moxa auf Werkseinstellungen zurücksetzen.\n\n⚠️ WARNUNG: Alle Konfigurationen gehen verloren!")
             .setPositiveButton("OK", null)
+            .setNeutralButton("Mehr Info") { _, _ ->
+                showFactoryResetInfo()
+            }
+            .show()
+    }
+
+    private fun showFactoryResetInfo() {
+        val message = """
+            🏭 Factory Reset Informationen:
+            
+            📋 Was wird zurückgesetzt:
+            • IP-Adresse → 192.168.127.254
+            • Passwort → moxa (Standard)
+            • Baudrate → 9600 bps
+            • Alle Port-Konfigurationen
+            
+            🔧 Manuelle Reset-Methoden:
+            1. Hardware Reset-Button:
+               • 10 Sekunden gedrückt halten
+               • Bei laufender Moxa
+               
+            2. 30-30-30 Reset:
+               • 30s bei eingeschalteter Moxa
+               • 30s beim Ausschalten
+               • 30s bei ausgeschalteter Moxa
+               
+            3. Web-Interface:
+               • Administration → Factory Default
+               • Confirm → Reset
+               
+            ⚠️ Nach Reset: IP-Adresse ändern!
+        """.trimIndent()
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Factory Reset Anleitung")
+            .setMessage(message)
+            .setPositiveButton("Verstanden", null)
             .show()
     }
 
     private fun backupMoxaConfiguration() {
-        // Placeholder für Backup-Funktion
-        updateSystemStatus("⚠️ Backup-Funktion noch nicht implementiert")
+        updateSystemStatus("⚠️ Backup-Funktion ist geplant...")
+
+        val message = """
+            💾 Moxa-Konfiguration Backup:
+            
+            🔧 Manuelles Backup:
+            1. Web-Interface öffnen
+            2. Administration → Import/Export
+            3. "Export Configuration" klicken
+            4. .cfg Datei speichern
+            
+            📋 Was wird gesichert:
+            • Port-Konfigurationen
+            • Netzwerk-Einstellungen
+            • Benutzer-Konten
+            • Alle System-Parameter
+            
+            🔄 Automatisches Backup:
+            Diese Funktion wird in einem
+            zukünftigen Update implementiert.
+        """.trimIndent()
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Konfiguration Backup")
+            .setMessage(message)
+            .setPositiveButton("OK", null)
+            .setNeutralButton("Web-Interface öffnen") { _, _ ->
+                openMoxaWebInterface()
+            }
+            .show()
     }
 
     private fun restoreMoxaConfiguration() {
-        // Placeholder für Restore-Funktion
-        updateSystemStatus("⚠️ Restore-Funktion noch nicht implementiert")
+        updateSystemStatus("⚠️ Restore-Funktion ist geplant...")
+
+        val message = """
+            📥 Moxa-Konfiguration Restore:
+            
+            🔧 Manueller Restore:
+            1. Web-Interface öffnen
+            2. Administration → Import/Export
+            3. "Import Configuration" klicken
+            4. .cfg Datei auswählen
+            5. "Upload" und "Apply"
+            
+            ⚠️ Wichtige Hinweise:
+            • Moxa startet nach Import neu
+            • IP-Adresse kann sich ändern
+            • Alle aktuellen Einstellungen werden überschrieben
+            
+            🔄 Automatischer Restore:
+            Diese Funktion wird in einem
+            zukünftigen Update implementiert.
+        """.trimIndent()
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Konfiguration Restore")
+            .setMessage(message)
+            .setPositiveButton("OK", null)
+            .setNeutralButton("Web-Interface öffnen") { _, _ ->
+                openMoxaWebInterface()
+            }
+            .show()
+    }
+
+    private fun openMoxaWebInterface() {
+        try {
+            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW)
+            intent.data = android.net.Uri.parse("http://${settingsManager.getMoxaIpAddress()}")
+            startActivity(intent)
+
+            updateSystemStatus("Web-Interface in Browser geöffnet")
+
+        } catch (e: Exception) {
+            updateSystemStatus("Fehler beim Öffnen des Browsers: ${e.message}")
+
+            // Fallback: URL in Zwischenablage kopieren
+            try {
+                val clipboard = requireContext().getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                val clip = android.content.ClipData.newPlainText("Moxa URL", "http://${settingsManager.getMoxaIpAddress()}")
+                clipboard.setPrimaryClip(clip)
+
+                showToast("URL in Zwischenablage kopiert: http://${settingsManager.getMoxaIpAddress()}")
+            } catch (e2: Exception) {
+                showToast("Browser-Fehler: ${e.message}")
+            }
+        }
+    }
+
+    private fun showToast(message: String) {
+        android.widget.Toast.makeText(requireContext(), message, android.widget.Toast.LENGTH_LONG).show()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Aktualisiere Controller falls sich IP-Adresse geändert hat
+        updateMoxaController()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        loggingManager.logInfo("MoxaSettings", "Moxa-Einstellungen Fragment beendet")
     }
 }
