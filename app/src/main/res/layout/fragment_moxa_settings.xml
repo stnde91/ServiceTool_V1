@@ -193,12 +193,12 @@
                         android:textSize="16sp"
                         android:textStyle="bold" />
 
+                    <!-- Baudrate -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
                         android:orientation="horizontal">
-
                         <Spinner
                             android:id="@+id/spinnerPort1Baudrate"
                             android:layout_width="0dp"
@@ -208,7 +208,6 @@
                             android:background="@drawable/rounded_background_light"
                             android:paddingStart="12dp"
                             android:paddingEnd="12dp" />
-
                         <Button
                             android:id="@+id/buttonApplyPort1"
                             style="@style/Widget.Material3.Button"
@@ -218,7 +217,77 @@
                             android:text="Anwenden"
                             android:textSize="12sp"
                             app:icon="@drawable/ic_speed_24" />
+                    </LinearLayout>
 
+                    <!-- Data bits, Stop bits, Parity -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+
+                        <Spinner
+                            android:id="@+id/spinnerPort1DataBits"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="4dp"
+                            android:background="@drawable/rounded_background_light"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp" />
+                        <Spinner
+                            android:id="@+id/spinnerPort1StopBits"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="4dp"
+                            android:layout_marginEnd="4dp"
+                            android:background="@drawable/rounded_background_light"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp" />
+                        <Spinner
+                            android:id="@+id/spinnerPort1Parity"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="4dp"
+                            android:background="@drawable/rounded_background_light"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp" />
+                    </LinearLayout>
+
+                    <!-- Flow control, FIFO, Interface -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="8dp">
+
+                        <Spinner
+                            android:id="@+id/spinnerPort1FlowControl"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="2"
+                            android:layout_marginEnd="8dp"
+                            android:background="@drawable/rounded_background_light"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp" />
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchPort1Fifo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="FIFO" />
+
+                        <TextView
+                            android:id="@+id/textViewPort1Interface"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:text="RS-232"
+                            android:textColor="?android:attr/textColorSecondary"
+                            android:textSize="14sp" />
                     </LinearLayout>
 
                     <TextView
@@ -228,7 +297,6 @@
                         android:text="Port 1: Nicht geladen"
                         android:textColor="?android:attr/textColorSecondary"
                         android:textSize="12sp" />
-
                 </LinearLayout>
 
                 <!-- Port 2 Configuration -->
@@ -249,12 +317,12 @@
                         android:textSize="16sp"
                         android:textStyle="bold" />
 
+                    <!-- Baudrate -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="8dp"
                         android:orientation="horizontal">
-
                         <Spinner
                             android:id="@+id/spinnerPort2Baudrate"
                             android:layout_width="0dp"
@@ -264,7 +332,6 @@
                             android:background="@drawable/rounded_background_light"
                             android:paddingStart="12dp"
                             android:paddingEnd="12dp" />
-
                         <Button
                             android:id="@+id/buttonApplyPort2"
                             style="@style/Widget.Material3.Button.OutlinedButton"
@@ -274,7 +341,77 @@
                             android:text="Anwenden"
                             android:textSize="12sp"
                             app:icon="@drawable/ic_speed_24" />
+                    </LinearLayout>
 
+                    <!-- Data bits, Stop bits, Parity -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+
+                        <Spinner
+                            android:id="@+id/spinnerPort2DataBits"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="4dp"
+                            android:background="@drawable/rounded_background_light"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp" />
+                        <Spinner
+                            android:id="@+id/spinnerPort2StopBits"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="4dp"
+                            android:layout_marginEnd="4dp"
+                            android:background="@drawable/rounded_background_light"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp" />
+                        <Spinner
+                            android:id="@+id/spinnerPort2Parity"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="4dp"
+                            android:background="@drawable/rounded_background_light"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp" />
+                    </LinearLayout>
+
+                    <!-- Flow control, FIFO, Interface -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="8dp">
+
+                        <Spinner
+                            android:id="@+id/spinnerPort2FlowControl"
+                            android:layout_width="0dp"
+                            android:layout_height="48dp"
+                            android:layout_weight="2"
+                            android:layout_marginEnd="8dp"
+                            android:background="@drawable/rounded_background_light"
+                            android:paddingStart="12dp"
+                            android:paddingEnd="12dp" />
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchPort2Fifo"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="FIFO" />
+
+                        <TextView
+                            android:id="@+id/textViewPort2Interface"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:text="RS-232"
+                            android:textColor="?android:attr/textColorSecondary"
+                            android:textSize="14sp" />
                     </LinearLayout>
 
                     <TextView
@@ -284,7 +421,6 @@
                         android:text="Port 2: Nicht geladen"
                         android:textColor="?android:attr/textColorSecondary"
                         android:textSize="12sp" />
-
                 </LinearLayout>
 
             </LinearLayout>
@@ -343,7 +479,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
                     android:backgroundTint="@color/status_error_color"
-                    android:text="Moxa neu starten"
+                    android:text="Moxa Neustarten und Einstellungen übernehmen"
                     app:icon="@drawable/ic_refresh_24" />
 
                 <!-- Factory Reset Button -->
