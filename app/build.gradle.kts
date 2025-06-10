@@ -12,7 +12,7 @@ android {
         minSdk = 26 // ANGEPASST: Erhöht auf 26 wegen adaptiver Icons
         targetSdk = 35 // Sollte mit compileSdk übereinstimmen
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.1" // Version erhöht wegen Telnet-Funktion
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -27,12 +27,9 @@ android {
         }
         debug {
             // Spezifische Einstellungen für Debug-Builds, falls nötig
-            // applicationIdSuffix = ".debug" // z.B. um Debug- und Release-Versionen parallel zu installieren
-            // isMinifyEnabled = false // Ist standardmäßig false für debug
         }
     }
 
-    // WICHTIG: Hier wird View Binding aktiviert
     buildFeatures {
         viewBinding = true
     }
@@ -48,28 +45,28 @@ android {
 
 dependencies {
     // Kernbibliotheken
-    implementation("androidx.core:core-ktx:1.13.1") // KTX für Kotlin-freundlichere APIs
-    implementation("androidx.appcompat:appcompat:1.6.1") // Für Abwärtskompatibilität von UI-Komponenten
-    implementation("com.google.android.material:material:1.12.0") // Material Design Komponenten
+    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.google.android.material:material:1.12.0")
 
     // UI & Layout
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4") // Für ConstraintLayout
-    implementation("androidx.activity:activity-ktx:1.9.0") // KTX für Activity
-    implementation("androidx.fragment:fragment-ktx:1.7.1") // KTX für Fragment (wichtig für dich)
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.activity:activity-ktx:1.9.0")
+    implementation("androidx.fragment:fragment-ktx:1.7.1")
 
-    // Navigation (falls du die Jetpack Navigation Komponente verwendest)
+    // Navigation
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.7")
     implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
 
-    // RecyclerView (explizit hinzufügen, auch wenn es manchmal transitiv dabei ist)
+    // RecyclerView
     implementation("androidx.recyclerview:recyclerview:1.3.2")
 
+    // NEU: Telnet-Bibliothek (Apache Commons Net)
+    // Diese Bibliothek wird für die direkte Telnet-Kommunikation mit der Moxa benötigt.
+    implementation("commons-net:commons-net:3.11.0")
 
     // Testbibliotheken
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-
-    // Hier kannst du weitere Abhängigkeiten hinzufügen, die dein Projekt benötigt
-    // z.B. für Netzwerkaufrufe (Retrofit, Ktor), Bildladen (Glide, Coil), etc.
 }
