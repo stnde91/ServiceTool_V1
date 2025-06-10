@@ -693,40 +693,6 @@
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
-                <!-- Gemeinsame Temperatur -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_marginEnd="12dp"
-                        android:src="@drawable/ic_temperature_24"
-                        app:tint="?android:attr/textColorSecondary" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Temperatur"
-                        android:textColor="?android:attr/textColorSecondary"
-                        android:textSize="14sp" />
-
-                    <TextView
-                        android:id="@+id/textTemperatureAll"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Unbekannt"
-                        android:textColor="?android:attr/textColorPrimary"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        tools:text="24,2°C" />
-                </LinearLayout>
-
                 <!-- Gemeinsame Baudrate -->
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -761,72 +727,14 @@
                         tools:text="9600 bps" />
                 </LinearLayout>
 
-                <!-- Gemeinsamer Filter -->
+                <!-- NEU: Container für individuelle Zell-Details -->
                 <LinearLayout
+                    android:id="@+id/layoutIndividualDetailsContainer"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:orientation="vertical"
+                    android:animateLayoutChanges="true" />
 
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_marginEnd="12dp"
-                        android:src="@drawable/ic_filter_24"
-                        app:tint="?android:attr/textColorSecondary" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Digitalfilter"
-                        android:textColor="?android:attr/textColorSecondary"
-                        android:textSize="14sp" />
-
-                    <TextView
-                        android:id="@+id/textFilterAll"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Unbekannt"
-                        android:textColor="?android:attr/textColorPrimary"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        tools:text="Filter: 0" />
-                </LinearLayout>
-
-                <!-- Gemeinsame Version -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_marginEnd="12dp"
-                        android:src="@drawable/ic_info_24"
-                        app:tint="?android:attr/textColorSecondary" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Firmware-Version"
-                        android:textColor="?android:attr/textColorSecondary"
-                        android:textSize="14sp" />
-
-                    <TextView
-                        android:id="@+id/textVersionAll"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Unbekannt"
-                        android:textColor="?android:attr/textColorPrimary"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        tools:text="XRC1/331010645" />
-                </LinearLayout>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
     </LinearLayout>
