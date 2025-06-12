@@ -1,6 +1,20 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Dein existierendes Basis-Theme -->
     <style name="Base.Theme.ServiceTool" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Deine Anpassungen -->
     </style>
 
     <style name="Theme.ServiceTool" parent="Base.Theme.ServiceTool" />
+
+    <!-- NEU: Theme für den Splash Screen -->
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <!-- Hintergrundfarbe des Splash Screens -->
+        <item name="windowSplashScreenBackground">@color/white</item>
+
+        <!-- Das Icon, das angezeigt wird (verweist auf dein neues Launcher-Icon) -->
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+
+        <!-- Das Theme, das nach dem Splash Screen geladen wird -->
+        <item name="postSplashScreenTheme">@style/Theme.ServiceTool</item>
+    </style>
 </resources>

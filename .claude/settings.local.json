@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(claude config list)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(./gradlew:*)",
+      "Bash(gradle:*)",
+      "Bash(sed:*)",
+      "Bash(chmod:*)"
     ],
     "deny": []
   }

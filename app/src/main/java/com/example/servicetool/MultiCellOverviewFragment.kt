@@ -29,7 +29,7 @@ import kotlin.coroutines.coroutineContext
 
 class MultiCellOverviewFragment : Fragment() {
 
-    // UI Komponenten für den Header und die Steuerung
+    // UI Components
     private lateinit var textOverallStatus: TextView
     private lateinit var progressIndicatorOverall: CircularProgressIndicator
     private lateinit var buttonRefreshAll: Button
@@ -37,39 +37,35 @@ class MultiCellOverviewFragment : Fragment() {
     private lateinit var buttonStopLiveAll: Button
     private lateinit var textLastUpdateAll: TextView
     private lateinit var spinnerActiveCells: Spinner
-
-    // UI Komponenten für gemeinsame Details
     private lateinit var textBaudrateAll: TextView
-
-    // NEU: Container für individuelle Details
     private lateinit var layoutIndividualDetailsContainer: LinearLayout
 
-    // Arrays für die UI-Elemente der einzelnen Zellen (bis zu maxDisplayCells)
+    // UI Element Arrays
     private val cellCountsTextViews = arrayOfNulls<TextView>(MultiCellConfig.maxDisplayCells)
     private val cellStatusIndicators = arrayOfNulls<ImageView>(MultiCellConfig.maxDisplayCells)
     private val cellLayouts = arrayOfNulls<LinearLayout>(MultiCellConfig.maxDisplayCells)
     private val cellSerialTextViews = arrayOfNulls<TextView>(MultiCellConfig.maxDisplayCells)
 
-    // Datenhaltung
+    // Data and State
     private val cellDataArray = Array(MultiCellConfig.maxDisplayCells) { CellDisplayData() }
     private var commonData = CommonDisplayData()
     private var isLiveMode = false
     private var liveUpdateJob: Job? = null
+    private var configuredCells: List<Int> = emptyList()
 
-    // Konfiguration
-    private var configuredCells: List<Int> = MultiCellConfig.availableCells.toList()
-
-    // Settings und Logging Manager
+    // Services
     private lateinit var settingsManager: SettingsManager
     private lateinit var loggingManager: LoggingManager
 
-    // Multi-Cell Konfiguration (aus Settings)
-    private fun getMoxaIpAddress(): String = MultiCellConfig.getMoxaIpAddress()
-    private fun getMoxaPort(): Int = MultiCellConfig.getMoxaPort()
-    private fun getConnectionTimeout(): Int = MultiCellConfig.getConnectionTimeout()
-    private fun getReadTimeout(): Int = MultiCellConfig.getReadTimeout()
-    private val MAX_DISPLAY_CELLS = MultiCellConfig.maxDisplayCells
-    private val CELL_QUERY_DELAY_MS = MultiCellConfig.CELL_QUERY_DELAY_MS
+    // --- NEU: Konstante für die Verzögerung ---
+    // Diese Pause geben wir dem System zwischen jeder Zellen-Abfrage.
+    private val CELL_QUERY_DELAY_MS = 250L
+
+    // Helper to get settings
+    private fun getMoxaIpAddress(): String = settingsManager.getMoxaIpAddress()
+    private fun getMoxaPort(): Int = settingsManager.getMoxaPort()
+    private fun getConnectionTimeout(): Int = settingsManager.getConnectionTimeout()
+    private fun getReadTimeout(): Int = settingsManager.getReadTimeout()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -80,25 +76,17 @@ class MultiCellOverviewFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         initializeServices()
         initializeViews(view)
         setupSpinner()
         setupClickListeners()
-
-        val initialSpinnerPosition = spinnerActiveCells.selectedItemPosition
-        val initialCellCount = if (initialSpinnerPosition >= 0) initialSpinnerPosition + 1 else 1
-        MultiCellConfig.updateAvailableCells(initialCellCount)
-        configuredCells = MultiCellConfig.availableCells.toList()
-        updateActiveCellViews(initialCellCount)
-
+        updateConfiguredCells()
         initializeUIWithoutData()
     }
 
     private fun initializeServices() {
         settingsManager = SettingsManager.getInstance(requireContext())
         loggingManager = LoggingManager.getInstance(requireContext())
-        loggingManager.logInfo("MultiCellOverview", "Fragment gestartet mit Moxa: ${getMoxaIpAddress()}:${getMoxaPort()}")
     }
 
     private fun initializeViews(view: View) {
@@ -110,11 +98,9 @@ class MultiCellOverviewFragment : Fragment() {
         buttonStopLiveAll = view.findViewById(R.id.buttonStopLiveAll)
         textLastUpdateAll = view.findViewById(R.id.textLastUpdateAll)
         textBaudrateAll = view.findViewById(R.id.textBaudrateAll)
-
-        // NEU: Container finden
         layoutIndividualDetailsContainer = view.findViewById(R.id.layoutIndividualDetailsContainer)
 
-        for (i in 0 until MAX_DISPLAY_CELLS) {
+        for (i in 0 until MultiCellConfig.maxDisplayCells) {
             val cellNum = i + 1
             try {
                 val layoutResId = resources.getIdentifier("layoutCell$cellNum", "id", requireContext().packageName)
@@ -134,30 +120,27 @@ class MultiCellOverviewFragment : Fragment() {
     }
 
     private fun setupSpinner() {
-        val spinnerItems = (1..MAX_DISPLAY_CELLS).map {
-            if (it == 1) "$it Zelle" else "$it Zellen"
-        }
+        val spinnerItems = (1..MultiCellConfig.maxDisplayCells).map { if (it == 1) "$it Zelle" else "$it Zellen" }
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, spinnerItems)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerActiveCells.adapter = adapter
 
+        val currentCellCount = settingsManager.getActiveCellCount()
+        if (currentCellCount in 1..MultiCellConfig.maxDisplayCells) {
+            spinnerActiveCells.setSelection(currentCellCount - 1, false)
+        }
+
         spinnerActiveCells.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val selectedCellCount = position + 1
-                if (isLiveMode) stopLiveMode()
-                MultiCellConfig.updateAvailableCells(selectedCellCount)
-                configuredCells = MultiCellConfig.availableCells.toList()
-                updateActiveCellViews(selectedCellCount)
-                initializeUIWithoutData()
+                if (settingsManager.getActiveCellCount() != selectedCellCount) {
+                    if (isLiveMode) stopLiveMode()
+                    settingsManager.setActiveCellCount(selectedCellCount)
+                    updateConfiguredCells()
+                    initializeUIWithoutData()
+                }
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
-        }
-
-        val currentConfiguredCellsCount = MultiCellConfig.getAvailableCellCount()
-        if (currentConfiguredCellsCount > 0 && currentConfiguredCellsCount <= MAX_DISPLAY_CELLS) {
-            spinnerActiveCells.setSelection(currentConfiguredCellsCount - 1, false)
-        } else {
-            spinnerActiveCells.setSelection(0, false)
         }
     }
 
@@ -167,26 +150,118 @@ class MultiCellOverviewFragment : Fragment() {
         buttonStopLiveAll.setOnClickListener { stopLiveMode() }
     }
 
-    private fun initializeUIWithoutData() {
-        for (i in 0 until configuredCells.size) {
-            val cellIndex = configuredCells[i] - 1
-            if (cellIndex in 0 until MAX_DISPLAY_CELLS) {
-                cellDataArray[cellIndex] = CellDisplayData(
-                    cellNumber = configuredCells[i], counts = "---", serialNumber = "Noch nicht geladen",
-                    filter = "Unbekannt", version = "Unbekannt"
-                )
-                updateCellUI(cellIndex)
-                updateCellStatus(cellIndex, StatusType.PENDING)
+    private fun updateConfiguredCells() {
+        configuredCells = (1..settingsManager.getActiveCellCount()).toList()
+        updateActiveCellViews(configuredCells.size)
+    }
+
+    private fun updateActiveCellViews(activeCellCount: Int) {
+        // Alle Zellen zuerst ausblenden
+        for (i in 0 until MultiCellConfig.maxDisplayCells) {
+            val cellLayout = cellLayouts[i]
+            cellLayout?.visibility = View.GONE
+        }
+        
+        // Definiere welche physischen Layout-Positionen für welche Zellen verwendet werden
+        // Layout-Anordnung: [2,3,4,5] in erster Reihe, [1,8,7,6] in zweiter Reihe
+        when (activeCellCount) {
+            1 -> {
+                // Nur Zelle 1 anzeigen
+                cellLayouts[0]?.visibility = View.VISIBLE // Zelle 1 Layout
+            }
+            4 -> {
+                // Gewünschte Anordnung: Reihe 1: [2,3], Reihe 2: [1,4]
+                // Physische Layouts:   Reihe 1: [2,3,4,5], Reihe 2: [1,8,7,6]
+                cellLayouts[1]?.visibility = View.VISIBLE // Zelle 2 - Position 0 in Reihe 1
+                cellLayouts[2]?.visibility = View.VISIBLE // Zelle 3 - Position 1 in Reihe 1
+                cellLayouts[0]?.visibility = View.VISIBLE // Zelle 1 - Position 0 in Reihe 2
+                cellLayouts[7]?.visibility = View.VISIBLE // Layout Zelle 8, aber für Zelle 4 Daten
+                // Aktualisiere die Beschriftungen für die umgemappten Layouts
+                updateCellLabels(activeCellCount)
+            }
+            6 -> {
+                // Gewünschte Anordnung: Reihe 1: [2,3,4], Reihe 2: [1,6,5]  
+                // Physische Layouts:   Reihe 1: [2,3,4,5], Reihe 2: [1,8,7,6]
+                cellLayouts[1]?.visibility = View.VISIBLE // Zelle 2 - Position 0 in Reihe 1
+                cellLayouts[2]?.visibility = View.VISIBLE // Zelle 3 - Position 1 in Reihe 1
+                cellLayouts[3]?.visibility = View.VISIBLE // Zelle 4 - Position 2 in Reihe 1
+                cellLayouts[0]?.visibility = View.VISIBLE // Zelle 1 - Position 0 in Reihe 2
+                cellLayouts[7]?.visibility = View.VISIBLE // Layout Zelle 8, aber für Zelle 6 Daten
+                cellLayouts[6]?.visibility = View.VISIBLE // Layout Zelle 7, aber für Zelle 5 Daten
+                // Aktualisiere die Beschriftungen für die umgemappten Layouts
+                updateCellLabels(activeCellCount)
+            }
+            8 -> {
+                // Alle anzeigen
+                for (i in 0 until MultiCellConfig.maxDisplayCells) {
+                    cellLayouts[i]?.visibility = View.VISIBLE
+                }
+                updateCellLabels(activeCellCount)
+            }
+            else -> {
+                // Fallback
+                for (i in 0 until minOf(activeCellCount, MultiCellConfig.maxDisplayCells)) {
+                    cellLayouts[i]?.visibility = View.VISIBLE
+                }
+                updateCellLabels(activeCellCount)
             }
         }
+    }
+    
+    private fun updateCellLabels(activeCellCount: Int) {
+        // Finde die Label TextViews in den Layouts und aktualisiere sie
+        when (activeCellCount) {
+            4 -> {
+                // Layout 7 (Zelle 8 Layout) zeigt jetzt Zelle 4 Daten
+                val layout8 = cellLayouts[7]
+                layout8?.let { findCellLabelInLayout(it, "Zelle 4") }
+            }
+            6 -> {
+                // Layout 7 (Zelle 8 Layout) zeigt jetzt Zelle 6 Daten  
+                val layout8 = cellLayouts[7]
+                layout8?.let { findCellLabelInLayout(it, "Zelle 6") }
+                
+                // Layout 6 (Zelle 7 Layout) zeigt jetzt Zelle 5 Daten
+                val layout7 = cellLayouts[6]
+                layout7?.let { findCellLabelInLayout(it, "Zelle 5") }
+            }
+            8 -> {
+                // Standardbeschriftungen wiederherstellen
+                val layout8 = cellLayouts[7]
+                layout8?.let { findCellLabelInLayout(it, "Zelle 8") }
+                
+                val layout7 = cellLayouts[6]
+                layout7?.let { findCellLabelInLayout(it, "Zelle 7") }
+            }
+        }
+    }
+    
+    private fun findCellLabelInLayout(layout: LinearLayout, labelText: String) {
+        // Suche nach dem ersten TextView, das ein Zellen-Label ist (nicht Serial oder Counts)
+        for (i in 0 until layout.childCount) {
+            val child = layout.getChildAt(i)
+            if (child is TextView && child.text.toString().startsWith("Zelle")) {
+                child.text = labelText
+                break
+            }
+        }
+    }
 
-        commonData = CommonDisplayData(baudrate = "Noch nicht geladen", lastUpdate = 0L)
+    private fun initializeUIWithoutData() {
+        configuredCells.forEach { cellNumber ->
+            val cellIndex = cellNumber - 1
+            cellDataArray[cellIndex] = CellDisplayData(cellNumber = cellNumber, counts = "---", serialNumber = "Lädt...")
+            updateCellUI(cellIndex)
+            updateCellStatus(cellIndex, StatusType.PENDING)
+        }
+        commonData = CommonDisplayData(baudrate = "N/A", lastUpdate = 0L)
         updateCommonUI()
-        updateIndividualCellDetails() // NEU: Details-Bereich leeren/initialisieren
-
+        updateIndividualCellDetails()
         updateOverallStatus("Bereit - ${configuredCells.size} Zellen konfiguriert", StatusType.PENDING)
         updateButtonStates()
     }
+
+    // --- KERNLOGIK: Die Abfrage der Zellen ---
 
     private fun refreshAllCells() {
         if (isLiveMode) return
@@ -199,24 +274,29 @@ class MultiCellOverviewFragment : Fragment() {
         updateOverallStatus("Lade Daten für ${configuredCells.size} Zellen...", StatusType.CONNECTING)
 
         lifecycleScope.launch {
-            try {
-                val fetchedDataMap = configuredCells.map { cellNumber ->
-                    async(Dispatchers.IO) {
-                        if (!isActive) return@async null
-                        updateCellStatus(cellNumber - 1, StatusType.CONNECTING)
-                        cellNumber to fetchCellData(cellNumber)
-                    }
-                }.awaitAll().filterNotNull().toMap()
+            var successfulFetches = 0
+            val allFetchedData = mutableMapOf<Int, CellDisplayData>()
 
-                if (!isActive) return@launch
+            // --- WICHTIGSTE ÄNDERUNG: Sequenzielle Abfrage statt paralleler ---
+            // Wir gehen jetzt jede Zelle einzeln durch.
+            for (cellNumber in configuredCells) {
+                if (!isActive) break // Job abbrechen, wenn das Fragment zerstört wird
 
-                var successfulFetches = 0
-                configuredCells.forEach { cellNumber ->
+                // UI-Update, um zu zeigen, welche Zelle gerade abgefragt wird
+                withContext(Dispatchers.Main) {
+                    updateOverallStatus("Frage Zelle $cellNumber ab...", StatusType.CONNECTING)
+                    updateCellStatus(cellNumber - 1, StatusType.CONNECTING)
+                }
+
+                // Daten für die eine Zelle abrufen
+                val cellResult = fetchCellData(cellNumber)
+
+                // Ergebnis verarbeiten
+                withContext(Dispatchers.Main) {
                     val arrayIndex = cellNumber - 1
-                    val cellResult = fetchedDataMap[cellNumber]
-
                     if (cellResult != null) {
                         cellDataArray[arrayIndex] = cellResult
+                        allFetchedData[cellNumber] = cellResult
                         updateCellStatus(arrayIndex, StatusType.CONNECTED)
                         successfulFetches++
                     } else {
@@ -226,27 +306,29 @@ class MultiCellOverviewFragment : Fragment() {
                     updateCellUI(arrayIndex)
                 }
 
-                if (successfulFetches > 0) {
-                    loadCommonDataFromFetched(fetchedDataMap)
-                    updateOverallStatus("$successfulFetches/${configuredCells.size} Zellen erfolgreich geladen", StatusType.CONNECTED)
-                } else if (configuredCells.isNotEmpty()) {
-                    updateOverallStatus("Keine der ${configuredCells.size} Zellen erreichbar", StatusType.ERROR)
-                    commonData = CommonDisplayData(baudrate = "Fehler beim Laden")
+                // --- HIER IST DIE PAUSE ---
+                // Wir warten kurz, bevor wir die nächste Zelle abfragen.
+                delay(CELL_QUERY_DELAY_MS)
+            }
+
+            // Nach der Schleife die Gesamt-UI aktualisieren
+            withContext(Dispatchers.Main) {
+                if (isActive) {
+                    if (successfulFetches > 0) {
+                        loadCommonDataFromFetched(allFetchedData)
+                        updateOverallStatus("$successfulFetches/${configuredCells.size} Zellen erfolgreich geladen", StatusType.CONNECTED)
+                    } else if (configuredCells.isNotEmpty()) {
+                        updateOverallStatus("Keine der ${configuredCells.size} Zellen erreichbar", StatusType.ERROR)
+                        commonData = CommonDisplayData(baudrate = "Fehler")
+                    }
+                    updateCommonUI()
+                    updateIndividualCellDetails()
+                    animateDataUpdate()
+                    showLoading(false)
                 }
-
-                updateCommonUI()
-                updateIndividualCellDetails() // NEU: Details aktualisieren
-                animateDataUpdate()
-
-            } catch (e: Exception) {
-                updateOverallStatus("Fehler: ${e.localizedMessage}", StatusType.ERROR)
-            } finally {
-                if (isActive) showLoading(false)
             }
         }
     }
-
-    // ... (startLiveMode, stopLiveMode, fetchCellData etc. bleiben größtenteils gleich)
 
     private suspend fun fetchCellData(cellNumber: Int): CellDisplayData? {
         return withContext(Dispatchers.IO) {
@@ -262,18 +344,19 @@ class MultiCellOverviewFragment : Fragment() {
                     val data = CellDisplayData(cellNumber = cellNumber)
                     var commandSuccess = true
 
-                    data.serialNumber = fetchSingleCellCommand("SerialNumber", FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.SERIAL_NUMBER), outputStream, inputStream, cellNumber) ?: "S/N: Unbekannt"
-                    if (!isActive) return@withContext null
+                    // Wir fragen jetzt alle Daten pro Zelle in einer Verbindung ab
+                    data.serialNumber = fetchSingleCellCommand(FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.SERIAL_NUMBER), outputStream, inputStream) ?: "S/N: Fehler"
+                    delay(50) // Kleine Pause auch zwischen Befehlen
 
-                    data.counts = fetchSingleCellCommand("Counts", FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.COUNTS), outputStream, inputStream, cellNumber) ?: run { commandSuccess = false; "Fehler" }
-                    if (!isActive) return@withContext null
+                    data.counts = fetchSingleCellCommand(FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.COUNTS), outputStream, inputStream) ?: run { commandSuccess = false; "Fehler" }
+                    delay(50)
 
                     if (commandSuccess) {
-                        data.baudrate = fetchSingleCellCommand("Baudrate", FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.BAUDRATE), outputStream, inputStream, cellNumber) ?: "Unbekannt"
-                        if (!isActive) return@withContext null
-                        data.filter = fetchSingleCellCommand("Filter", FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.FILTER), outputStream, inputStream, cellNumber) ?: "Unbekannt"
-                        if (!isActive) return@withContext null
-                        data.version = fetchSingleCellCommand("Version", FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.VERSION), outputStream, inputStream, cellNumber) ?: "Unbekannt"
+                        data.baudrate = fetchSingleCellCommand(FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.BAUDRATE), outputStream, inputStream) ?: "Fehler"
+                        delay(50)
+                        data.filter = fetchSingleCellCommand(FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.FILTER), outputStream, inputStream) ?: "Fehler"
+                        delay(50)
+                        data.version = fetchSingleCellCommand(FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.VERSION), outputStream, inputStream) ?: "Fehler"
                     }
 
                     data.lastUpdate = System.currentTimeMillis()
@@ -286,42 +369,175 @@ class MultiCellOverviewFragment : Fragment() {
         }
     }
 
-    private suspend fun loadCommonDataFromFetched(fetchedDataMap: Map<Int, CellDisplayData?>) {
-        val firstSuccessfulCellNumber = configuredCells.firstOrNull { fetchedDataMap[it] != null }
-        if (firstSuccessfulCellNumber != null) {
-            val successfulCellData = fetchedDataMap[firstSuccessfulCellNumber]!!
-            commonData.baudrate = successfulCellData.baudrate
-            commonData.lastUpdate = successfulCellData.lastUpdate
+    private suspend fun fetchSingleCellCommand(commandBytes: ByteArray, outputStream: OutputStream, inputStream: InputStream): String? {
+        if (!coroutineContext.isActive) return null
+        return try {
+            outputStream.write(commandBytes)
+            outputStream.flush()
+            val rawResponse = readFlintecResponse(inputStream)
+            FlintecRC3DMultiCellCommands.parseMultiCellResponse(rawResponse)?.let { data ->
+                when (data) {
+                    is FlintecData.Counts -> data.value
+                    is FlintecData.SerialNumber -> data.value
+                    is FlintecData.Baudrate -> data.value
+                    is FlintecData.Filter -> data.value
+                    is FlintecData.Version -> data.value
+                    else -> rawResponse // Fallback
+                }
+            }
+        } catch (e: Exception) {
+            Log.w("MultiCellOverview", "Fehler beim Senden/Empfangen eines Befehls: ${e.message}")
+            null
+        }
+    }
+
+    // --- Live Modus ---
+    // Auch hier wird jetzt sequenziell abgefragt.
+    private fun startLiveMode() {
+        if (isLiveMode) return
+        val cellsWithData = configuredCells.filter { cellNum ->
+            val data = cellDataArray.getOrNull(cellNum - 1)
+            data != null && data.counts != "Fehler" && data.counts != "N/A" && data.counts != "---"
+        }
+        if (cellsWithData.isEmpty()) {
+            updateOverallStatus("Live-Modus: Zuerst 'Alle aktualisieren' drücken!", StatusType.ERROR)
+            return
+        }
+        isLiveMode = true
+        updateButtonStates()
+        updateOverallStatus("Live-Modus aktiv für ${cellsWithData.size} Zellen", StatusType.LIVE)
+
+        liveUpdateJob = lifecycleScope.launch {
+            while (isLiveMode && isActive) {
+                for (cellNumber in cellsWithData) {
+                    if (!isLiveMode || !isActive) break
+
+                    val counts = fetchSingleCellCounts(cellNumber)
+
+                    withContext(Dispatchers.Main) {
+                        val arrayIndex = cellNumber - 1
+                        if (counts != null) {
+                            cellDataArray[arrayIndex].counts = counts
+                            cellDataArray[arrayIndex].lastUpdate = System.currentTimeMillis()
+                            animateCellCountsUpdate(arrayIndex, counts)
+                            updateCellStatus(arrayIndex, StatusType.LIVE)
+                        } else {
+                            updateCellStatus(arrayIndex, StatusType.ERROR)
+                        }
+                    }
+                    if (isLiveMode && isActive) {
+                        delay(CELL_QUERY_DELAY_MS) // Auch hier die Pause einhalten
+                    }
+                }
+                if (isLiveMode && isActive) {
+                    delay(1000L) // Eine Sekunde Pause zwischen kompletten Durchläufen
+                }
+            }
+        }
+    }
+
+    private fun stopLiveMode() {
+        if (!isLiveMode && liveUpdateJob == null) return
+        isLiveMode = false
+        liveUpdateJob?.cancel()
+        liveUpdateJob = null
+        updateButtonStates()
+        val responsiveCount = configuredCells.count { cellNum ->
+            val data = cellDataArray.getOrNull(cellNum - 1)
+            data != null && data.counts != "Fehler" && data.counts != "N/A" && data.counts != "---"
+        }
+        configuredCells.forEach { cellNum ->
+            val idx = cellNum - 1
+            if (cellDataArray[idx].counts != "Fehler" && cellDataArray[idx].counts != "N/A" && cellDataArray[idx].counts != "---") {
+                updateCellStatus(idx, StatusType.CONNECTED)
+            } else if (cellDataArray[idx].counts != "N/A") {
+                updateCellStatus(idx, StatusType.ERROR)
+            }
+        }
+        if (configuredCells.isNotEmpty()) {
+            updateOverallStatus("$responsiveCount/${configuredCells.size} Zellen verbunden", StatusType.CONNECTED)
         } else {
-            commonData = CommonDisplayData()
+            updateOverallStatus("Keine Zellen ausgewählt", StatusType.PENDING)
+        }
+    }
+
+    private suspend fun fetchSingleCellCounts(cellNumber: Int): String? {
+        return withContext(Dispatchers.IO) {
+            if (!isActive) return@withContext null
+            try {
+                Socket().use { socket ->
+                    socket.connect(InetSocketAddress(getMoxaIpAddress(), getMoxaPort()), 3000)
+                    socket.soTimeout = 2000
+                    fetchSingleCellCommand(
+                        FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.COUNTS),
+                        socket.getOutputStream(), socket.getInputStream()
+                    )
+                }
+            } catch (e: Exception) {
+                null
+            }
+        }
+    }
+
+
+    // --- UI Update Funktionen ---
+    private fun updateCellUI(cellIndex: Int) {
+        if (cellIndex !in 0 until MultiCellConfig.maxDisplayCells) return
+        val cellNumber = cellIndex + 1
+        val cellData = cellDataArray[cellIndex]
+        
+        // Finde das korrekte Layout für diese Zelle basierend auf der Konfiguration
+        val layoutIndex = getPhysicalLayoutIndex(cellNumber, configuredCells.size)
+        if (layoutIndex == null) return
+        
+        val countsTextView = cellCountsTextViews[layoutIndex] ?: return
+        val serialTextView = cellSerialTextViews[layoutIndex] ?: return
+        
+        countsTextView.text = cellData.counts
+        serialTextView.text = formatSerialNumber(cellData.serialNumber)
+    }
+    
+    // Mapping von logischer Zellen-Nummer zu physischem Layout-Index
+    private fun getPhysicalLayoutIndex(cellNumber: Int, activeCellCount: Int): Int? {
+        return when (activeCellCount) {
+            4 -> when (cellNumber) {
+                1 -> 0  // Zelle 1 -> Layout Index 0 (layoutCell1)
+                2 -> 1  // Zelle 2 -> Layout Index 1 (layoutCell2)
+                3 -> 2  // Zelle 3 -> Layout Index 2 (layoutCell3)
+                4 -> 7  // Zelle 4 -> Layout Index 7 (layoutCell8 Position)
+                else -> null
+            }
+            6 -> when (cellNumber) {
+                1 -> 0  // Zelle 1 -> Layout Index 0 (layoutCell1)
+                2 -> 1  // Zelle 2 -> Layout Index 1 (layoutCell2)
+                3 -> 2  // Zelle 3 -> Layout Index 2 (layoutCell3)
+                4 -> 3  // Zelle 4 -> Layout Index 3 (layoutCell4)
+                5 -> 6  // Zelle 5 -> Layout Index 6 (layoutCell7 Position)
+                6 -> 7  // Zelle 6 -> Layout Index 7 (layoutCell8 Position)
+                else -> null
+            }
+            8 -> cellNumber - 1  // Standard 1:1 Mapping
+            else -> cellNumber - 1  // Standard Mapping für andere Konfigurationen
         }
     }
 
     private fun updateCommonUI() {
         textBaudrateAll.text = when (val baud = commonData.baudrate) {
-            "Noch nicht geladen", "Unbekannt", "Fehler beim Laden" -> baud
+            "N/A", "Unbekannt", "Fehler" -> baud
             else -> "$baud bps"
         }
-
-        if (commonData.lastUpdate > 0) {
-            val formatter = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
-            textLastUpdateAll.text = "Letzte Aktualisierung: ${formatter.format(Date(commonData.lastUpdate))}"
+        textLastUpdateAll.text = if (commonData.lastUpdate > 0) {
+            "Letzte Aktualisierung: ${SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date(commonData.lastUpdate))}"
         } else {
-            textLastUpdateAll.text = "Noch nicht aktualisiert"
+            "Noch nicht aktualisiert"
         }
     }
 
-    /**
-     * NEU: Erstellt und aktualisiert die individuellen Detail-Ansichten dynamisch.
-     */
     private fun updateIndividualCellDetails() {
-        if (!isAdded) return // Sicherstellen, dass das Fragment noch aktiv ist
-
+        if (!isAdded) return
         layoutIndividualDetailsContainer.removeAllViews()
-
         val activeAndLoadedCells = configuredCells.mapNotNull { cellDataArray.getOrNull(it - 1) }
             .filter { it.counts != "Fehler" && it.counts != "N/A" && it.counts != "---" }
-
         if (activeAndLoadedCells.isEmpty()){
             val noDataView = TextView(requireContext()).apply {
                 text = "Keine Detail-Daten geladen. Bitte 'Alle aktualisieren' drücken."
@@ -332,7 +548,6 @@ class MultiCellOverviewFragment : Fragment() {
             layoutIndividualDetailsContainer.addView(noDataView)
             return
         }
-
         activeAndLoadedCells.forEach { cellData ->
             val detailLayout = LinearLayout(requireContext()).apply {
                 orientation = LinearLayout.HORIZONTAL
@@ -388,51 +603,15 @@ class MultiCellOverviewFragment : Fragment() {
         }
     }
 
-    // === Unveränderte oder nur leicht angepasste Funktionen ===
-
-    private fun updateUI() { /* Diese Funktion wird nicht mehr direkt verwendet, die Logik ist jetzt aufgeteilt */ }
-    private fun updateCellUI(cellIndex: Int) {
-        if (cellIndex < 0 || cellIndex >= MAX_DISPLAY_CELLS) return
-        val countsTextView = cellCountsTextViews[cellIndex] ?: return
-        val serialTextView = cellSerialTextViews[cellIndex] ?: return
-        val cellData = cellDataArray[cellIndex]
-        countsTextView.text = cellData.counts
-        serialTextView.text = formatSerialNumber(cellData.serialNumber)
-    }
-    private fun animateDataUpdate() {
-        view?.animate()?.alpha(0.8f)?.setDuration(150)?.withEndAction {
-            view?.animate()?.alpha(1.0f)?.setDuration(150)?.start()
-        }?.start()
-    }
-    private fun updateActiveCellViews(activeCellCount: Int) {
-        for (i in 0 until MAX_DISPLAY_CELLS) {
-            cellLayouts[i]?.visibility = if (i < activeCellCount) View.VISIBLE else View.GONE
-        }
-    }
-    private fun showLoading(show: Boolean) {
-        progressIndicatorOverall.visibility = if (show) View.VISIBLE else View.GONE
-        buttonRefreshAll.isEnabled = !show
-        spinnerActiveCells.isEnabled = !show
-        updateButtonStates()
-    }
-    private fun updateButtonStates() {
-        val isLoading = progressIndicatorOverall.visibility == View.VISIBLE
-        buttonStartLiveAll.isEnabled = !isLiveMode && !isLoading
-        buttonStopLiveAll.isEnabled = isLiveMode && !isLoading
-        buttonRefreshAll.isEnabled = !isLiveMode && !isLoading
-        spinnerActiveCells.isEnabled = !isLiveMode && !isLoading
-    }
-    private fun formatSerialNumber(serialNumber: String): String {
-        return when {
-            serialNumber.isBlank() || serialNumber == "Unbekannt" -> ""
-            serialNumber == "Noch nicht geladen" -> "Noch nicht geladen"
-            serialNumber.startsWith("S/N:") -> serialNumber
-            else -> "S/N: $serialNumber"
-        }
-    }
     private fun updateCellStatus(cellIndex: Int, type: StatusType) {
-        if (cellIndex < 0 || cellIndex >= MAX_DISPLAY_CELLS) return
-        val indicator = cellStatusIndicators[cellIndex] ?: return
+        if (cellIndex !in 0 until MultiCellConfig.maxDisplayCells) return
+        val cellNumber = cellIndex + 1
+        
+        // Finde das korrekte Layout für diese Zelle basierend auf der Konfiguration
+        val layoutIndex = getPhysicalLayoutIndex(cellNumber, configuredCells.size)
+        if (layoutIndex == null) return
+        
+        val indicator = cellStatusIndicators[layoutIndex] ?: return
         val drawableId = when (type) {
             StatusType.CONNECTED -> R.drawable.ic_status_success
             StatusType.CONNECTING -> R.drawable.ic_status_pending
@@ -442,7 +621,9 @@ class MultiCellOverviewFragment : Fragment() {
         }
         indicator.setImageResource(drawableId)
     }
+
     private fun updateOverallStatus(status: String, type: StatusType) {
+        if (!isAdded) return
         textOverallStatus.text = status
         val colorId = when (type) {
             StatusType.CONNECTED -> R.color.status_success_color
@@ -451,87 +632,30 @@ class MultiCellOverviewFragment : Fragment() {
             StatusType.ERROR -> R.color.status_error_color
             StatusType.PENDING -> R.color.status_pending_color
         }
-        try {
-            textOverallStatus.setTextColor(ContextCompat.getColor(requireContext(), colorId))
-        } catch (e: IllegalStateException) {
-            Log.e("MultiCellOverview", "Fehler beim Setzen der Textfarbe für OverallStatus: ${e.message}")
-        }
-    }
-    override fun onDestroyView() {
-        super.onDestroyView()
-        stopLiveMode()
-        liveUpdateJob?.cancel()
+        textOverallStatus.setTextColor(ContextCompat.getColor(requireContext(), colorId))
     }
 
-    // ... Die restlichen Funktionen wie startLiveMode, fetchSingleCellCounts etc. bleiben unverändert ...
-
-    // === DATENKLASSEN ===
-    data class CellDisplayData(
-        var cellNumber: Int = 0,
-        var counts: String = "0",
-        var serialNumber: String = "Unbekannt",
-        var baudrate: String = "Unbekannt",
-        var filter: String = "Unbekannt",
-        var version: String = "Unbekannt",
-        var lastUpdate: Long = 0L
-    )
-
-    data class CommonDisplayData(
-        var baudrate: String = "Unbekannt",
-        var lastUpdate: Long = 0L
-    )
-
-    enum class StatusType {
-        CONNECTED, CONNECTING, LIVE, ERROR, PENDING
+    private fun showLoading(show: Boolean) {
+        progressIndicatorOverall.visibility = if (show) View.VISIBLE else View.GONE
+        buttonRefreshAll.isEnabled = !show
+        spinnerActiveCells.isEnabled = !show
+        updateButtonStates()
     }
 
-    // Unveränderte Funktionen hier einfügen...
-    // startLiveMode, stopLiveMode, fetchSingleCellCounts, readFlintecResponse, animateCellCountsUpdate
-
-    private suspend fun fetchSingleCellCounts(cellNumber: Int): String? {
-        return withContext(Dispatchers.IO) {
-            if (!isActive) return@withContext null
-            try {
-                Socket().use { socket ->
-                    socket.connect(InetSocketAddress(getMoxaIpAddress(), getMoxaPort()), 3000)
-                    socket.soTimeout = 2000
-                    fetchSingleCellCommand(
-                        "Counts (Live)",
-                        FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.COUNTS),
-                        socket.getOutputStream(), socket.getInputStream(), cellNumber
-                    )
-                }
-            } catch (e: Exception) {
-                null
-            }
-        }
+    private fun updateButtonStates() {
+        val isLoading = progressIndicatorOverall.visibility == View.VISIBLE
+        buttonStartLiveAll.isEnabled = !isLiveMode && !isLoading
+        buttonStopLiveAll.isEnabled = isLiveMode && !isLoading
+        buttonRefreshAll.isEnabled = !isLiveMode && !isLoading
+        spinnerActiveCells.isEnabled = !isLiveMode && !isLoading
     }
 
-    private suspend fun fetchSingleCellCommand(
-        commandName: String, commandBytes: ByteArray, outputStream: OutputStream,
-        inputStream: InputStream, cellNumber: Int
-    ): String? {
-        if (!coroutineContext.isActive) return null
-        return try {
-            outputStream.write(commandBytes)
-            outputStream.flush()
-            val rawResponse = readFlintecResponse(inputStream)
-            if (rawResponse.isNotEmpty()) {
-                val parsedData = FlintecRC3DMultiCellCommands.parseMultiCellResponse(rawResponse)
-                when (parsedData) {
-                    is FlintecData.Counts -> parsedData.value
-                    is FlintecData.Temperature -> parsedData.value // Existiert nicht mehr, aber für Vollständigkeit
-                    is FlintecData.Version -> parsedData.value
-                    is FlintecData.Baudrate -> parsedData.value
-                    is FlintecData.Filter -> parsedData.value
-                    is FlintecData.SerialNumber -> parsedData.value
-                    else -> rawResponse
-                }
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            null
+    // --- Utility & Lifecycle ---
+    private fun loadCommonDataFromFetched(fetchedDataMap: Map<Int, CellDisplayData?>) {
+        val firstSuccessfulData = fetchedDataMap.values.firstOrNull()
+        if (firstSuccessfulData != null) {
+            commonData.baudrate = firstSuccessfulData.baudrate
+            commonData.lastUpdate = System.currentTimeMillis()
         }
     }
 
@@ -578,8 +702,16 @@ class MultiCellOverviewFragment : Fragment() {
         }
     }
 
+    private fun animateDataUpdate() {
+        view?.animate()?.alpha(0.8f)?.setDuration(150)?.withEndAction {
+            view?.animate()?.alpha(1.0f)?.setDuration(150)?.start()
+        }?.start()
+    }
+
     private fun animateCellCountsUpdate(cellIndex: Int, newValueString: String) {
-        val textView = cellCountsTextViews[cellIndex] ?: return
+        val cellNumber = cellIndex + 1
+        val layoutIndex = getPhysicalLayoutIndex(cellNumber, configuredCells.size) ?: return
+        val textView = cellCountsTextViews[layoutIndex] ?: return
         if (textView.text.toString() != newValueString) {
             textView.animate().alpha(0.0f).setDuration(150).withEndAction {
                 textView.text = newValueString
@@ -588,110 +720,30 @@ class MultiCellOverviewFragment : Fragment() {
         }
     }
 
-    private fun startLiveMode() {
-        if (isLiveMode) return
-        val cellsWithData = configuredCells.filter { cellNum ->
-            val data = cellDataArray.getOrNull(cellNum - 1)
-            data != null && data.counts != "Fehler" && data.counts != "N/A" && data.counts != "---"
-        }
-        if (cellsWithData.isEmpty()) {
-            updateOverallStatus("Live-Modus: Zuerst 'Alle aktualisieren' drücken!", StatusType.ERROR)
-            return
-        }
-        isLiveMode = true
-        updateButtonStates()
-        updateOverallStatus("Live-Modus aktiv für ${cellsWithData.size} Zellen", StatusType.LIVE)
-        liveUpdateJob = lifecycleScope.launch {
-            while (isLiveMode && isActive) {
-                try {
-                    val fetchedCounts = mutableListOf<Pair<Int, String?>>()
-                    for ((index, cellNumber) in cellsWithData.withIndex()) {
-                        if (!isLiveMode || !isActive) break
-                        val counts = fetchSingleCellCounts(cellNumber)
-                        fetchedCounts.add(cellNumber to counts)
-                        if (isLiveMode && isActive && index < cellsWithData.size - 1) {
-                            delay(CELL_QUERY_DELAY_MS)
-                        }
-                    }
-                    if (!isLiveMode || !isActive) break
-                    var successfulLiveFetches = 0
-                    for ((cellNumber, newCounts) in fetchedCounts) {
-                        val arrayIndex = cellNumber - 1
-                        if (arrayIndex < 0 || arrayIndex >= MAX_DISPLAY_CELLS) continue
-                        if (newCounts != null) {
-                            cellDataArray[arrayIndex].counts = newCounts
-                            cellDataArray[arrayIndex].lastUpdate = System.currentTimeMillis()
-                            animateCellCountsUpdate(arrayIndex, newCounts)
-                            updateCellStatus(arrayIndex, StatusType.LIVE)
-                            successfulLiveFetches++
-                        } else {
-                            updateCellStatus(arrayIndex, StatusType.ERROR)
-                        }
-                    }
-                    if (successfulLiveFetches > 0) {
-                        commonData.lastUpdate = System.currentTimeMillis()
-                        updateCommonUI()
-                    }
-                } catch (e: CancellationException) {
-                    break
-                } catch (e: Exception) {
-                    delay(2000)
-                }
-                if (isLiveMode && isActive) {
-                    delay(MultiCellConfig.LIVE_UPDATE_INTERVAL)
-                }
-            }
-            if (isActive) {
-                updateButtonStates()
-                configuredCells.forEach { cellNum ->
-                    val idx = cellNum - 1
-                    if (idx >= 0 && idx < MAX_DISPLAY_CELLS) {
-                        if (cellDataArray[idx].counts != "Fehler" && cellDataArray[idx].counts != "N/A" && cellDataArray[idx].counts != "---") {
-                            updateCellStatus(idx, StatusType.CONNECTED)
-                        } else if (cellDataArray[idx].counts != "N/A") {
-                            updateCellStatus(idx, StatusType.ERROR)
-                        }
-                    }
-                }
-                val responsiveCount = configuredCells.count { cellNum ->
-                    cellDataArray.getOrNull(cellNum - 1)?.let {
-                        it.counts != "Fehler" && it.counts != "N/A" && it.counts != "---"
-                    } == true
-                }
-                if (configuredCells.isNotEmpty()) {
-                    updateOverallStatus("$responsiveCount/${configuredCells.size} Zellen verbunden", StatusType.CONNECTED)
-                } else {
-                    updateOverallStatus("Keine Zellen ausgewählt", StatusType.PENDING)
-                }
-            }
+    private fun formatSerialNumber(serialNumber: String): String {
+        return when {
+            serialNumber.isBlank() || serialNumber == "Unbekannt" || serialNumber == "Fehler" -> "S/N: ----"
+            serialNumber.startsWith("S/N:") -> serialNumber
+            else -> "S/N: $serialNumber"
         }
     }
 
-    private fun stopLiveMode() {
-        if (!isLiveMode && liveUpdateJob == null) return
-        isLiveMode = false
+    override fun onDestroyView() {
+        super.onDestroyView()
+        stopLiveMode()
         liveUpdateJob?.cancel()
-        liveUpdateJob = null
-        updateButtonStates()
-        val responsiveCount = configuredCells.count { cellNum ->
-            val data = cellDataArray.getOrNull(cellNum - 1)
-            data != null && data.counts != "Fehler" && data.counts != "N/A" && data.counts != "---"
-        }
-        configuredCells.forEach { cellNum ->
-            val idx = cellNum - 1
-            if (idx >= 0 && idx < MAX_DISPLAY_CELLS) {
-                if (cellDataArray[idx].counts != "Fehler" && cellDataArray[idx].counts != "N/A" && cellDataArray[idx].counts != "---") {
-                    updateCellStatus(idx, StatusType.CONNECTED)
-                } else if (cellDataArray[idx].counts != "N/A") {
-                    updateCellStatus(idx, StatusType.ERROR)
-                }
-            }
-        }
-        if (configuredCells.isNotEmpty()) {
-            updateOverallStatus("$responsiveCount/${configuredCells.size} Zellen verbunden", StatusType.CONNECTED)
-        } else {
-            updateOverallStatus("Keine Zellen ausgewählt", StatusType.PENDING)
-        }
     }
 
+    // Data Classes
+    data class CellDisplayData(
+        var cellNumber: Int = 0,
+        var counts: String = "0",
+        var serialNumber: String = "Unbekannt",
+        var baudrate: String = "Unbekannt",
+        var filter: String = "Unbekannt",
+        var version: String = "Unbekannt",
+        var lastUpdate: Long = 0L
+    )
+    data class CommonDisplayData(var baudrate: String = "Unbekannt", var lastUpdate: Long = 0L)
+    enum class StatusType { CONNECTED, CONNECTING, LIVE, ERROR, PENDING }
 }
