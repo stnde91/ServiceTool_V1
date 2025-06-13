@@ -4,113 +4,128 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8F9FA"
-    android:padding="16dp">
+    android:background="@color/background_light"
+    android:padding="20dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Header mit App Info -->
-        <com.google.android.material.card.MaterialCardView
+        <!-- Modern Header Section -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="4dp"
-            app:strokeWidth="0dp">
+            android:orientation="vertical"
+            android:layout_marginBottom="32dp"
+            android:gravity="center">
 
-            <LinearLayout
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⚙️"
+                android:textSize="48sp"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/gradient_primary"
-                android:orientation="vertical"
-                android:padding="24dp">
+                android:text="Service Tool Dashboard"
+                android:textSize="28sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:textColor="@color/primary_dark"
+                android:fontFamily="sans-serif-medium" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:layout_marginEnd="16dp"
-                        android:src="@drawable/ic_weight_24"
-                        app:tint="@android:color/white" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Service Tool"
-                            android:textColor="@android:color/white"
-                            android:textSize="28sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Flintec RC3D Management System"
-                            android:textColor="@android:color/white"
-                            android:textSize="14sp"
-                            android:alpha="0.9" />
-
-                    </LinearLayout>
-
-                    <TextView
-                        android:id="@+id/textCurrentTime"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="14:32"
-                        android:textColor="@android:color/white"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        tools:text="14:32" />
-
-                </LinearLayout>
-
-            </LinearLayout>
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- System Status Overview -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardSystemStatus"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:strokeWidth="0dp">
-
-            <LinearLayout
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
+                android:text="Flintec RC3D Management System"
+                android:textSize="16sp"
+                android:gravity="center"
+                android:layout_marginTop="4dp"
+                android:textColor="@color/text_secondary"
+                android:fontFamily="sans-serif-light" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/gradient_primary_enhanced"
+                android:padding="12dp"
+                android:gravity="center_vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    android:text="System Status"
-                    android:textColor="?android:attr/textColorPrimary"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:text="🕒"
+                    android:textSize="20sp"
+                    android:layout_marginEnd="8dp" />
+
+                <TextView
+                    android:id="@+id/textCurrentTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="14:32"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:fontFamily="sans-serif-medium"
+                    tools:text="14:32" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- System Status Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="@android:color/white">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp">
+
+                <!-- Card Header -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📊"
+                        android:textSize="24sp"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="System Status"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary_dark"
+                        android:fontFamily="sans-serif-medium" />
+
+                </LinearLayout>
 
                 <!-- Flintec Status -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginBottom="16dp"
                     android:background="@drawable/rounded_background_light"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
@@ -118,9 +133,9 @@
 
                     <ImageView
                         android:id="@+id/iconFlintecStatus"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginEnd="12dp"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_marginEnd="16dp"
                         android:src="@drawable/ic_status_pending"
                         tools:src="@drawable/ic_status_success" />
 
@@ -134,30 +149,50 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Flintec RC3D System"
-                            android:textColor="?android:attr/textColorPrimary"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
+                            android:textColor="@color/text_primary"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:fontFamily="sans-serif-medium" />
 
                         <TextView
                             android:id="@+id/textFlintecStatus"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="System wird geprüft..."
-                            android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="12sp"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="14sp"
+                            android:layout_marginTop="2dp"
+                            android:fontFamily="sans-serif-light"
                             tools:text="3/4 Zellen online" />
 
                     </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/textFlintecCount"
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="?/?"
-                        android:textColor="@color/status_pending_color"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        tools:text="3/4" />
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <TextView
+                            android:id="@+id/textFlintecCount"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="?/?"
+                            android:textColor="@color/status_pending_color"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:fontFamily="sans-serif-medium"
+                            tools:text="3/4" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Zellen"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp"
+                            android:fontFamily="sans-serif-light" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
@@ -172,9 +207,9 @@
 
                     <ImageView
                         android:id="@+id/iconMoxaStatus"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginEnd="12dp"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_marginEnd="16dp"
                         android:src="@drawable/ic_status_pending"
                         tools:src="@drawable/ic_status_success" />
 
@@ -188,30 +223,50 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Moxa Gateway"
-                            android:textColor="?android:attr/textColorPrimary"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
+                            android:textColor="@color/text_primary"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:fontFamily="sans-serif-medium" />
 
                         <TextView
                             android:id="@+id/textMoxaStatus"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Verbindung wird geprüft..."
-                            android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="12sp"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="14sp"
+                            android:layout_marginTop="2dp"
+                            android:fontFamily="sans-serif-light"
                             tools:text="192.168.50.3:4001" />
 
                     </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/textMoxaPing"
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="---"
-                        android:textColor="@color/status_pending_color"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        tools:text="12ms" />
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <TextView
+                            android:id="@+id/textMoxaPing"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="---"
+                            android:textColor="@color/status_pending_color"
+                            android:textSize="18sp"
+                            android:textStyle="bold"
+                            android:fontFamily="sans-serif-medium"
+                            tools:text="12ms" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Ping"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp"
+                            android:fontFamily="sans-serif-light" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
@@ -219,29 +274,48 @@
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Quick Actions -->
+        <!-- Quick Actions Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="24dp"
             app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:strokeWidth="0dp">
+            app:cardElevation="8dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="@android:color/white">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="24dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <!-- Card Header -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    android:text="Schnellaktionen"
-                    android:textColor="?android:attr/textColorPrimary"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="⚡"
+                        android:textSize="24sp"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Schnellaktionen"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary_dark"
+                        android:fontFamily="sans-serif-medium" />
+
+                </LinearLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recyclerViewQuickActions"
@@ -255,29 +329,49 @@
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Live Statistics from LoggingManager -->
+        <!-- Statistics Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:strokeWidth="0dp">
+            app:cardElevation="8dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="@android:color/white">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="24dp">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <!-- Card Header -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    android:text="System-Statistiken"
-                    android:textColor="?android:attr/textColorPrimary"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="20dp">
 
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📈"
+                        android:textSize="24sp"
+                        android:layout_marginEnd="12dp" />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="System-Statistiken"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/primary_dark"
+                        android:fontFamily="sans-serif-medium" />
+
+                </LinearLayout>
+
+                <!-- Statistics Grid -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -289,19 +383,20 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
                         android:layout_weight="1"
-                        android:background="@drawable/rounded_background_light"
+                        android:background="@drawable/gradient_primary_enhanced"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="16dp">
+                        android:padding="20dp">
 
                         <TextView
                             android:id="@+id/textSuccessfulConnections"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0"
-                            android:textColor="@color/status_success_color"
-                            android:textSize="24sp"
+                            android:textColor="@android:color/white"
+                            android:textSize="28sp"
                             android:textStyle="bold"
+                            android:fontFamily="sans-serif-medium"
                             tools:text="47" />
 
                         <TextView
@@ -309,8 +404,11 @@
                             android:layout_height="wrap_content"
                             android:text="Erfolgreiche Verbindungen"
                             android:textAlignment="center"
-                            android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="12sp" />
+                            android:textColor="@android:color/white"
+                            android:textSize="12sp"
+                            android:layout_marginTop="4dp"
+                            android:alpha="0.9"
+                            android:fontFamily="sans-serif-light" />
 
                     </LinearLayout>
 
@@ -323,16 +421,17 @@
                         android:background="@drawable/rounded_background_light"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="16dp">
+                        android:padding="20dp">
 
                         <TextView
                             android:id="@+id/textErrorCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0"
-                            android:textColor="@color/status_error_color"
-                            android:textSize="24sp"
+                            android:textColor="@color/error"
+                            android:textSize="28sp"
                             android:textStyle="bold"
+                            android:fontFamily="sans-serif-medium"
                             tools:text="2" />
 
                         <TextView
@@ -340,8 +439,10 @@
                             android:layout_height="wrap_content"
                             android:text="Fehler"
                             android:textAlignment="center"
-                            android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="12sp" />
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp"
+                            android:layout_marginTop="4dp"
+                            android:fontFamily="sans-serif-light" />
 
                     </LinearLayout>
 
@@ -350,7 +451,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="16dp"
                     android:orientation="horizontal">
 
                     <!-- Success Rate -->
@@ -362,16 +463,17 @@
                         android:background="@drawable/rounded_background_light"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="16dp">
+                        android:padding="20dp">
 
                         <TextView
                             android:id="@+id/textSuccessRate"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="100%"
-                            android:textColor="@color/status_live_color"
-                            android:textSize="24sp"
+                            android:textColor="@color/success"
+                            android:textSize="28sp"
                             android:textStyle="bold"
+                            android:fontFamily="sans-serif-medium"
                             tools:text="97.8%" />
 
                         <TextView
@@ -379,8 +481,10 @@
                             android:layout_height="wrap_content"
                             android:text="Erfolgsrate"
                             android:textAlignment="center"
-                            android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="12sp" />
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp"
+                            android:layout_marginTop="4dp"
+                            android:fontFamily="sans-serif-light" />
 
                     </LinearLayout>
 
@@ -393,16 +497,17 @@
                         android:background="@drawable/rounded_background_light"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="16dp">
+                        android:padding="20dp">
 
                         <TextView
                             android:id="@+id/textAverageResponseTime"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0ms"
-                            android:textColor="@color/status_pending_color"
-                            android:textSize="24sp"
+                            android:textColor="@color/warning"
+                            android:textSize="28sp"
                             android:textStyle="bold"
+                            android:fontFamily="sans-serif-medium"
                             tools:text="25ms" />
 
                         <TextView
@@ -410,8 +515,10 @@
                             android:layout_height="wrap_content"
                             android:text="Ø Antwortzeit"
                             android:textAlignment="center"
-                            android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="12sp" />
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp"
+                            android:layout_marginTop="4dp"
+                            android:fontFamily="sans-serif-light" />
 
                     </LinearLayout>
 

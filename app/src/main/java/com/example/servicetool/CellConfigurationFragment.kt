@@ -124,8 +124,8 @@ class CellConfigurationFragment : Fragment() {
     }
 
     private fun setupFilterSpinner() {
-        // Filter Werte 0-15 (gängige Filter-Bereiche)
-        val filterValues = arrayOf("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15")
+        // Filter Werte nur 0 und 5 (die beiden verwendeten Werte)
+        val filterValues = arrayOf("0", "5")
 
         val adapter = ArrayAdapter(
             requireContext(),
@@ -135,7 +135,7 @@ class CellConfigurationFragment : Fragment() {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
         spinnerFilterValue.adapter = adapter
-        spinnerFilterValue.setSelection(5) // Standard: Filter 5
+        spinnerFilterValue.setSelection(1) // Standard: Filter 5 (Index 1)
     }
 
     private fun setupInputValidation() {

@@ -3,44 +3,54 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
-    <!-- Hauptnavigation -->
+    <!-- 📊 Monitoring & Übersicht -->
     <group
-        android:id="@+id/group_main"
+        android:id="@+id/group_monitoring"
         android:checkableBehavior="single">
 
         <item
             android:id="@+id/nav_dashboard"
             android:icon="@drawable/ic_info_24"
-            android:title="Dashboard" />
+            android:title="📊 Dashboard"
+            android:titleCondensed="Dashboard" />
 
         <item
             android:id="@+id/nav_multicell_overview"
             android:icon="@drawable/ic_weight_24"
-            android:title="Multi-Cell Übersicht" />
-
-        <item
-            android:id="@+id/cellConfigurationFragment"
-            android:icon="@android:drawable/ic_menu_manage"
-            android:title="Zellen Konfiguration" />
+            android:title="🏭 Multi-Cell Übersicht"
+            android:titleCondensed="Multi-Cell" />
 
     </group>
 
-    <!-- Einstellungen-Gruppe -->
+    <!-- ⚙️ Konfiguration -->
+    <group
+        android:id="@+id/group_configuration"
+        android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/cellConfigurationFragment"
+            android:icon="@drawable/ic_settings_24"
+            android:title="🔧 Zellen Konfiguration"
+            android:titleCondensed="Zellen Config" />
+
+    </group>
+
+    <!-- 🔗 Hardware & Einstellungen -->
     <group
         android:id="@+id/group_settings"
         android:checkableBehavior="single">
 
         <item
             android:id="@+id/nav_moxa_settings"
-            android:icon="@drawable/ic_digital_24"
-            android:title="Moxa Einstellungen" />
+            android:icon="@drawable/ic_ethernet_24"
+            android:title="🌐 Moxa Einstellungen"
+            android:titleCondensed="Moxa" />
 
         <item
             android:id="@+id/nav_settings"
             android:icon="@drawable/ic_settings_24"
-            android:title="App Einstellungen" />
-
-
+            android:title="⚙️ App Einstellungen"
+            android:titleCondensed="Einstellungen" />
 
     </group>
 
