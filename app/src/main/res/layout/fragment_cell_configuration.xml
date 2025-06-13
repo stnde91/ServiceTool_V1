@@ -235,11 +235,35 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="🔍 Die App sucht automatisch alle aktiven Zellen (1-8) und setzt den Filter"
+                    android:text="⚡ Stellen Sie die Anzahl der aktiven Zellen ein, dann wird nur für diese der Filter gesetzt"
                     android:textSize="12sp"
                     android:layout_marginBottom="16dp"
                     android:textStyle="italic"
                     android:textColor="@android:color/holo_green_dark" />
+
+                <!-- Anzahl aktive Zellen -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="16dp"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Anzahl aktive Zellen:"
+                        android:textSize="16sp"
+                        android:textColor="@android:color/black" />
+
+                    <Spinner
+                        android:id="@+id/spinner_cell_count"
+                        android:layout_width="80dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp" />
+
+                </LinearLayout>
 
                 <!-- Filter Auswahl -->
                 <LinearLayout

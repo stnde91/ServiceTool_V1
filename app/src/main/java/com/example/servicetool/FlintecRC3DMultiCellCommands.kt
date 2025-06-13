@@ -109,11 +109,18 @@ object FlintecRC3DMultiCellCommands {
         val filterStr = String.format("%02d", validatedFilter)
         android.util.Log.d("FilterQuery", "filterStr: '$filterStr'")
         
-        // The digit before cell number depends on filter value:
-        // Filter 0 = "4", Filter 5 = "1" 
-        val filterDependentDigit = if (validatedFilter == 0) "4" else "1"
+        // The digit before cell number depends on BOTH filter value AND cell number:
+        // For filter 0: Cell A="4", Cell B="7" 
+        // For filter 5: Cell A="1", Cell B="2"
+        val filterDependentDigit = when {
+            validatedFilter == 0 && cellNumber == 1 -> "4"  // Cell A, Filter 0
+            validatedFilter == 0 && cellNumber == 2 -> "7"  // Cell B, Filter 0
+            validatedFilter == 5 && cellNumber == 1 -> "1"  // Cell A, Filter 5
+            validatedFilter == 5 && cellNumber == 2 -> "2"  // Cell B, Filter 5
+            else -> "1" // Default fallback for other combinations
+        }
         
-        val baseCommand = "${cellChar}Q${filterStr}1403${filterDependentDigit}${cellNumber}"
+        val baseCommand = "${cellChar}Q${filterStr}1403${filterDependentDigit}1"
         android.util.Log.d("FilterQuery", "baseCommand: '$baseCommand'")
         
         // No checksum needed - the command ends as shown in Wireshark
@@ -173,6 +180,30 @@ object FlintecRC3DMultiCellCommands {
         return byteArrayOf(STX, cellPrefix.toByte(), 0x77.toByte(), cellSpecificByte.toByte(), fixedByte.toByte(), ETX) // 'w' = 0x77
     }
     
+    // Filter-Status abfragen (basierend auf Wireshark-Log: 024177373303 = Aw73)
+    fun createFilterStatusCommand(cellNumber: Int): String {
+        if (cellNumber !in 1..8) {
+            android.util.Log.w("FilterStatusCommand", "Ungültige Zellnummer: $cellNumber. Muss 1-8 sein.")
+            return ""
+        }
+        
+        val cellChar = when (cellNumber) {
+            1 -> 'A'; 2 -> 'B'; 3 -> 'C'; 4 -> 'D'
+            5 -> 'E'; 6 -> 'F'; 7 -> 'G'; 8 -> 'H'
+            else -> return ""
+        }
+        
+        // Basierend auf Wireshark-Analyse: Filter-Status-Abfrage verwendet "w73" Format
+        // Dies entspricht der Windows-App Sequenz nach Filter-Änderung
+        val statusByte = '7'  // Immer '7' für Status-Abfrage
+        val fixedByte = '3'   // Immer '3' aus Wireshark-Analyse
+        
+        val fullCommand = "\u0002${cellChar}w${statusByte}${fixedByte}\u0003"
+        
+        android.util.Log.d("FilterStatusCommand", "Filter-Status-Abfrage für Zelle $cellNumber ($cellChar): '$fullCommand'")
+        return fullCommand
+    }
+
     // Neue Funktion: Erstelle Filter-Kommando als String (für direkte Verwendung) - KORRIGIERTE VERSION
     fun createFilterCommand(cellNumber: Int, filterValue: Int): String {
         if (cellNumber !in 1..8) {

@@ -29,6 +29,7 @@ class CellConfigurationFragment : Fragment() {
     private lateinit var progressBar: ProgressBar
     
     // Filter UI Components
+    private lateinit var spinnerCellCount: Spinner
     private lateinit var spinnerFilterValue: Spinner
     private lateinit var buttonSetFilter: Button
     private lateinit var progressBarFilter: ProgressBar
@@ -45,6 +46,7 @@ class CellConfigurationFragment : Fragment() {
 
         initializeViews(view)
         setupSpinner()
+        setupCellCountSpinner()
         setupFilterSpinner()
         setupInputValidation()
         setupClickListeners()
@@ -61,6 +63,7 @@ class CellConfigurationFragment : Fragment() {
         progressBar = view.findViewById(R.id.progress_bar)
         
         // Filter Components
+        spinnerCellCount = view.findViewById(R.id.spinner_cell_count)
         spinnerFilterValue = view.findViewById(R.id.spinner_filter_value)
         buttonSetFilter = view.findViewById(R.id.button_set_filter)
         progressBarFilter = view.findViewById(R.id.progress_bar_filter)
@@ -86,6 +89,38 @@ class CellConfigurationFragment : Fragment() {
 
         spinnerNewCell.adapter = adapter
         spinnerNewCell.setSelection(1) // Standard: Zelle 2 (Index 1)
+    }
+
+    private fun setupCellCountSpinner() {
+        // Anzahl aktive Zellen 1-8
+        val cellCounts = arrayOf("1", "2", "3", "4", "5", "6", "7", "8")
+
+        val adapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_spinner_item,
+            cellCounts
+        )
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        spinnerCellCount.adapter = adapter
+        
+        // Lade gespeicherte Einstellung oder verwende Standard (2 Zellen)
+        val settingsManager = SettingsManager.getInstance(requireContext())
+        val savedCellCount = settingsManager.getActiveCellCount()
+        val index = maxOf(0, savedCellCount - 1) // Index 0-7 für Werte 1-8
+        spinnerCellCount.setSelection(index)
+        
+        Log.d("CellConfig", "Geladene Zellanzahl-Einstellung: $savedCellCount (Index: $index)")
+        
+        // Speichere Änderungen automatisch
+        spinnerCellCount.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: android.view.View?, position: Int, id: Long) {
+                val newCellCount = cellCounts[position].toInt()
+                settingsManager.setActiveCellCount(newCellCount)
+                Log.d("CellConfig", "Zellanzahl-Einstellung gespeichert: $newCellCount")
+            }
+            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
+        }
     }
 
     private fun setupFilterSpinner() {
@@ -355,8 +390,13 @@ class CellConfigurationFragment : Fragment() {
     // Neue Hauptfunktion: Filter für alle Zellen setzen (adress-basiert)
     private fun setFilterForAllDetectedCells(filterValue: Int) {
         Log.d("CellConfig", "setFilterForAllDetectedCells aufgerufen mit filterValue: $filterValue")
-        showFilterStatus("Setze Filter $filterValue für alle Zellen (1-8)...", false)
-        showStatus("Verwende direkte Zell-Adressierung (A-H)...", false)
+        
+        // Hole die konfigurierte Anzahl der aktiven Zellen
+        val activeCellCount = spinnerCellCount.selectedItem.toString().toInt()
+        Log.d("CellConfig", "Verwende konfigurierte Zellanzahl: $activeCellCount")
+        
+        showFilterStatus("Setze Filter $filterValue für $activeCellCount Zellen...", false)
+        showStatus("Verwende direkte Zell-Adressierung (A-${('A' + activeCellCount - 1)})...", false)
         setFilterUIEnabled(false)
 
         lifecycleScope.launch(Dispatchers.IO) {
@@ -369,13 +409,13 @@ class CellConfigurationFragment : Fragment() {
                     return@launch
                 }
 
-                Log.i("CellConfig", "Direkte Filter-Setzung startet - Filter: $filterValue für Zellen 1-8")
+                Log.i("CellConfig", "Direkte Filter-Setzung startet - Filter: $filterValue für Zellen 1-$activeCellCount")
 
                 var successCount = 0
-                var totalCells = 8
+                val totalCells = activeCellCount
                 
-                // Teste alle Zellen 1-8 mit direkter Adressierung
-                for (cellNumber in 1..8) {
+                // Teste nur die konfigurierten aktiven Zellen
+                for (cellNumber in 1..activeCellCount) {
                     try {
                         Log.d("CellConfig", "Setze Filter für Zelle $cellNumber")
                         
@@ -414,10 +454,27 @@ class CellConfigurationFragment : Fragment() {
                         
                         Log.d("CellConfig", "Zelle $cellNumber Aw Response: '$writeResponse'")
                         
+                        // 3. Filter-Status abfragen (wie Windows-App das macht)
+                        Thread.sleep(200) // Kurze Pause vor Status-Abfrage
+                        
+                        val filterStatusCommand = FlintecRC3DMultiCellCommands.createFilterStatusCommand(cellNumber)
+                        Log.d("CellConfig", "Sende Filter-Status-Abfrage für Zelle $cellNumber: '$filterStatusCommand'")
+                        
+                        val statusResponse = try {
+                            withTimeout(3000) {
+                                communicationManager?.sendCommand(filterStatusCommand) ?: ""
+                            }
+                        } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
+                            Log.w("CellConfig", "Timeout bei Filter-Status-Abfrage für Zelle $cellNumber")
+                            ""
+                        }
+                        
+                        Log.d("CellConfig", "Zelle $cellNumber Filter-Status Response: '$statusResponse'")
+                        
                         // Erfolg wenn eine der Antworten nicht leer ist (Zelle ist aktiv)
-                        if (queryResponse.isNotEmpty() || writeResponse.isNotEmpty()) {
+                        if (queryResponse.isNotEmpty() || writeResponse.isNotEmpty() || statusResponse.isNotEmpty()) {
                             successCount++
-                            Log.i("CellConfig", "Filter erfolgreich für Zelle $cellNumber (AQ: '$queryResponse', Aw: '$writeResponse')")
+                            Log.i("CellConfig", "Filter erfolgreich für Zelle $cellNumber (AQ: '$queryResponse', Aw: '$writeResponse', Status: '$statusResponse')")
                         } else {
                             Log.d("CellConfig", "Zelle $cellNumber nicht aktiv oder Timeout")
                         }
@@ -691,6 +748,7 @@ class CellConfigurationFragment : Fragment() {
     }
 
     private fun setFilterUIEnabled(enabled: Boolean) {
+        spinnerCellCount.isEnabled = enabled
         spinnerFilterValue.isEnabled = enabled
         buttonSetFilter.isEnabled = enabled
         progressBarFilter.visibility = if (enabled) View.GONE else View.VISIBLE
