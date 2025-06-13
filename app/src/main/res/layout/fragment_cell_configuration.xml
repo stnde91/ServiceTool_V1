@@ -431,7 +431,7 @@
                         android:text="Filter für alle Zellen setzen"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        app:backgroundTint="@color/accent"
+                        app:backgroundTint="@color/primary"
                         app:cornerRadius="12dp"
                         app:icon="@drawable/ic_filter_24"
                         app:iconGravity="textStart"
@@ -444,7 +444,7 @@
                         android:layout_height="32dp"
                         android:layout_marginStart="16dp"
                         android:visibility="gone"
-                        android:indeterminateTint="@color/accent" />
+                        android:indeterminateTint="@color/primary" />
 
                 </LinearLayout>
 
