@@ -16,6 +16,15 @@ object FlintecRC3DCommands {
     fun getBaudrate(): ByteArray = byteArrayOf(STX, 0x41, 0x73, 0x32, 0x32, 0x30, ETX)
     fun getTemperature(): ByteArray = byteArrayOf(STX, 0x41, 0x74, 0x37, 0x33, ETX)
     fun getFilter(): ByteArray = byteArrayOf(STX, 0x41, 0x70, 0x33, 0x33, ETX)
+    fun setFilter(filterValue: Int): ByteArray {
+        // Validation: Filter value should be between 0 and 15
+        val validatedFilter = filterValue.coerceIn(0, 15)
+        // Based on Wireshark analysis: Aw43 (6 bytes) sets filter to 0
+        // Format: STX + 'A' + 'w' + filter_hex_byte + checksum + ETX
+        val filterHex = validatedFilter.toString(16).padStart(1, '0')[0].code.toByte()
+        val checksum = (0x33 + validatedFilter).toByte() // Simple checksum calculation
+        return byteArrayOf(STX, 0x41, 0x77, filterHex, checksum, ETX)
+    }
     fun getVersion(): ByteArray = byteArrayOf(STX, 0x41, 0x76, 0x35, 0x33, ETX)
 
     // Antwort-Parser mit korrekter Dekodierung aller Befehle
@@ -47,6 +56,11 @@ object FlintecRC3DCommands {
                 val rawFilter = response.drop(2)
                 val decodedFilter = decodeFilter(rawFilter)
                 FlintecData.Filter(decodedFilter)
+            }
+            "AP", "Aw" -> {
+                // Both AP and Aw responses indicate filter set result
+                val filterSetResult = response.drop(2)
+                FlintecData.FilterSetResult(filterSetResult.isNotEmpty())
             }
             "Av" -> {
                 FlintecData.Version(response.drop(2))

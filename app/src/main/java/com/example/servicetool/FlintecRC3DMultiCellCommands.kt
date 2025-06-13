@@ -10,7 +10,7 @@ object FlintecRC3DMultiCellCommands {
 
     // Befehlstypen Enum
     enum class CommandType {
-        SERIAL_NUMBER, COUNTS, BAUDRATE, TEMPERATURE, FILTER, VERSION
+        SERIAL_NUMBER, COUNTS, BAUDRATE, TEMPERATURE, FILTER, SET_FILTER, VERSION
     }
 
     // --- Befehlsgenerierung ---
@@ -73,6 +73,7 @@ object FlintecRC3DMultiCellCommands {
                 8 -> byteArrayOf(STX, 0x48, 0x70, 0x3A, 0x33, ETX)       // Hp:3
                 else -> byteArrayOf()
             }
+            CommandType.SET_FILTER -> byteArrayOf() // Handled by setFilterForCell function
             CommandType.VERSION -> when (cellNumber) {
                 1 -> byteArrayOf(STX, 0x41, 0x76, 0x35, 0x33, ETX)       // Av53
                 2 -> byteArrayOf(STX, 0x42, 0x76, 0x36, 0x33, ETX)       // Bv63
@@ -85,6 +86,128 @@ object FlintecRC3DMultiCellCommands {
                 else -> byteArrayOf()
             }
         }
+    }
+
+    // Filter-Query-Kommando generieren (12 Bytes) - der eigentliche Filter-Setz-Befehl
+    fun createFilterQueryCommand(cellNumber: Int, filterValue: Int): String {
+        android.util.Log.d("FilterQuery", "createFilterQueryCommand aufgerufen: cellNumber=$cellNumber, filterValue=$filterValue")
+        
+        val validatedFilter = filterValue.coerceIn(0, 15)
+        android.util.Log.d("FilterQuery", "validatedFilter: $validatedFilter")
+        
+        val cellChar = when (cellNumber) {
+            1 -> 'A'; 2 -> 'B'; 3 -> 'C'; 4 -> 'D'
+            5 -> 'E'; 6 -> 'F'; 7 -> 'G'; 8 -> 'H'
+            else -> return ""
+        }
+        android.util.Log.d("FilterQuery", "cellChar: $cellChar")
+        
+        // Based on CORRECTED Wireshark analysis:
+        // Filter 0: AQ00140341 for cell A, BQ00140371 for cell B
+        // Filter 5: AQ05140311 for cell A, BQ05140321 for cell B
+        // Format: CELL + Q + filter_2digits + "1403" + filter_dependent_digit + cell_digit
+        val filterStr = String.format("%02d", validatedFilter)
+        android.util.Log.d("FilterQuery", "filterStr: '$filterStr'")
+        
+        // The digit before cell number depends on filter value:
+        // Filter 0 = "4", Filter 5 = "1" 
+        val filterDependentDigit = if (validatedFilter == 0) "4" else "1"
+        
+        val baseCommand = "${cellChar}Q${filterStr}1403${filterDependentDigit}${cellNumber}"
+        android.util.Log.d("FilterQuery", "baseCommand: '$baseCommand'")
+        
+        // No checksum needed - the command ends as shown in Wireshark
+        val checksumStr = ""
+        android.util.Log.d("FilterQuery", "checksumStr: '$checksumStr'")
+        
+        val fullCommand = "\u0002${baseCommand}${checksumStr}\u0003"
+        
+        android.util.Log.d("FilterQuery", "Filter-Query für Zelle $cellNumber: Wert $validatedFilter -> '$fullCommand'")
+        return fullCommand
+    }
+
+    // Filter setzen für spezifische Zelle - KORRIGIERTE VERSION basierend auf Wireshark-Analyse
+    fun setFilterForCell(cellNumber: Int, filterValue: Int): ByteArray {
+        // Validation: Cell number should be between 1 and 8
+        if (cellNumber !in 1..8) {
+            android.util.Log.w("FlintecRC3D", "Invalid cell number: $cellNumber. Must be 1-8.")
+            return byteArrayOf()
+        }
+        
+        // Validation: Filter value should be between 0 and 15
+        val validatedFilter = filterValue.coerceIn(0, 15)
+        if (validatedFilter != filterValue) {
+            android.util.Log.w("FlintecRC3D", "Filter value $filterValue clamped to $validatedFilter (valid range: 0-15)")
+        }
+        
+        val cellPrefix = when (cellNumber) {
+            1 -> 0x41  // A
+            2 -> 0x42  // B
+            3 -> 0x43  // C
+            4 -> 0x44  // D
+            5 -> 0x45  // E
+            6 -> 0x46  // F
+            7 -> 0x47  // G
+            8 -> 0x48  // H
+            else -> return byteArrayOf()
+        }
+        
+        // Based on Wireshark analysis: Aw43, Bw73 (6 bytes) sets filter
+        // Format: STX + CELL + 'w' + cell_specific_byte + '3' + ETX
+        // From Windows software: Both filter 0 AND filter 5 use the same commands!
+        val cellSpecificByte = when (cellPrefix) {
+            0x41 -> 0x34 // A: Always '4'
+            0x42 -> 0x37 // B: Always '7'
+            0x43 -> 0x34 // C: Pattern '4'
+            0x44 -> 0x37 // D: Pattern '7'
+            0x45 -> 0x34 // E: Pattern '4'
+            0x46 -> 0x37 // F: Pattern '7'
+            0x47 -> 0x34 // G: Pattern '4'
+            0x48 -> 0x37 // H: Pattern '7'
+            else -> 0x34 // Default
+        }
+        val fixedByte = 0x33 // Always '3' from Wireshark analysis
+        
+        android.util.Log.d("FilterCell", "Filter-Kommando für Zelle $cellNumber (${cellPrefix.toInt().toChar()}): Wert $validatedFilter -> 6-Byte Format")
+        
+        return byteArrayOf(STX, cellPrefix.toByte(), 0x77.toByte(), cellSpecificByte.toByte(), fixedByte.toByte(), ETX) // 'w' = 0x77
+    }
+    
+    // Neue Funktion: Erstelle Filter-Kommando als String (für direkte Verwendung) - KORRIGIERTE VERSION
+    fun createFilterCommand(cellNumber: Int, filterValue: Int): String {
+        if (cellNumber !in 1..8) {
+            android.util.Log.w("FilterCommand", "Ungültige Zellnummer: $cellNumber. Muss 1-8 sein.")
+            return ""
+        }
+        
+        val validatedFilter = filterValue.coerceIn(0, 15)
+        val cellChar = when (cellNumber) {
+            1 -> 'A'; 2 -> 'B'; 3 -> 'C'; 4 -> 'D'
+            5 -> 'E'; 6 -> 'F'; 7 -> 'G'; 8 -> 'H'
+            else -> return ""
+        }
+        
+        // Based on Wireshark analysis: 6-byte format Aw43, Bw73
+        // Format: STX + CELL + 'w' + cell_specific_byte + '3' + ETX
+        // From Windows software: Both filter 0 AND filter 5 use the same commands!
+        // Aw43 for cell A (any filter), Bw73 for cell B (any filter)
+        val cellSpecificByte = when (cellChar) {
+            'A' -> '4'  // Always '4' for cell A
+            'B' -> '7'  // Always '7' for cell B
+            'C' -> '4'  // Assume pattern continues
+            'D' -> '7'
+            'E' -> '4'
+            'F' -> '7'
+            'G' -> '4'
+            'H' -> '7'
+            else -> '4' // Default
+        }
+        val fixedByte = '3' // Always '3' from Wireshark analysis
+        
+        val fullCommand = "\u0002${cellChar}w${cellSpecificByte}${fixedByte}\u0003"
+        
+        android.util.Log.d("FilterCommand", "Filter-String für Zelle $cellNumber ($cellChar): $validatedFilter -> '$fullCommand' (6-Byte Format)")
+        return fullCommand
     }
 
     // --- Antwort-Parsing ---
@@ -106,6 +229,7 @@ object FlintecRC3DMultiCellCommands {
             "s" -> FlintecData.Baudrate(decodeBaudrateMultiCell(dataPayload, responseCellPrefix))
             "t" -> FlintecData.Temperature(decodeTemperatureMultiCell(dataPayload))
             "p" -> FlintecData.Filter(decodeFilterMultiCell(dataPayload))
+            "P", "w" -> FlintecData.FilterSetResult(dataPayload.isNotEmpty())
             "v" -> FlintecData.Version(decodeVersion(dataPayload))
             else -> {
                 android.util.Log.w("Parser", "Unbekannter Befehlstyp '$responseCommandType' in Antwort: '$response'")
@@ -250,6 +374,52 @@ object FlintecRC3DMultiCellCommands {
     }
 
 
+    // === NEUE SERIENNUMMER-BASIERTE FILTER-BEFEHLE ===
+    
+    // Filter mit Seriennummer abfragen
+    fun getFilterBySerialNumber(serialNumber: String): String {
+        val STX = "\u0002"
+        val ETX = "\u0003"
+        
+        val command = STX + "<" + serialNumber + "p33"
+        val commandWithChecksum = command + calculateChecksum(command) + ETX
+        
+        android.util.Log.d("FilterSerial", "Filter-Abfrage für S/N $serialNumber: '$commandWithChecksum'")
+        return commandWithChecksum
+    }
+    
+    // Filter mit Seriennummer setzen
+    fun setFilterBySerialNumber(serialNumber: String, filterValue: Int): String {
+        val STX = "\u0002"
+        val ETX = "\u0003"
+        
+        // Validierung: Filter-Wert muss zwischen 0 und 15 liegen
+        val validatedFilter = filterValue.coerceIn(0, 15)
+        if (validatedFilter != filterValue) {
+            android.util.Log.w("FilterSerial", "Filter-Wert $filterValue auf $validatedFilter begrenzt (gültiger Bereich: 0-15)")
+        }
+        
+        val filterString = String.format("%02d", validatedFilter)
+        val command = STX + "<" + serialNumber + "P33" + filterString + "0000"
+        val commandWithChecksum = command + calculateChecksum(command) + ETX
+        
+        android.util.Log.d("FilterSerial", "Filter-Setzung für S/N $serialNumber auf Wert $validatedFilter: '$commandWithChecksum'")
+        return commandWithChecksum
+    }
+    
+    // Checksumme berechnen (gleiche Logik wie in CellConfigurationFragment)
+    private fun calculateChecksum(command: String): String {
+        var checksum = 0
+        for (char in command) {
+            checksum = checksum xor char.code
+        }
+        
+        val lowNibble = (checksum % 16) + 0x30
+        val highNibble = (checksum / 16) + 0x30
+        
+        return "${lowNibble.toChar()}${highNibble.toChar()}"
+    }
+
     fun getCommandDescription(cellNumber: Int, commandType: CommandType): String {
         val cellName = when (cellNumber) {
             1 -> "A (Zelle 1)"
@@ -269,6 +439,7 @@ object FlintecRC3DMultiCellCommands {
             CommandType.BAUDRATE -> "Baudrate"
             CommandType.TEMPERATURE -> "Temperatur"
             CommandType.FILTER -> "Filter"
+            CommandType.SET_FILTER -> "Filter setzen"
             CommandType.VERSION -> "Version"
         }
         return "$command für $cellName"

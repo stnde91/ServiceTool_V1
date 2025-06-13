@@ -200,6 +200,115 @@
 
         </androidx.cardview.widget.CardView>
 
+        <!-- NEU: Filter Konfiguration -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Filter Konfiguration"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="16dp"
+                    android:textColor="@android:color/black" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Filter für alle aktiven Zellen automatisch setzen:"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="16dp"
+                    android:textColor="@android:color/darker_gray" />
+                    
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="🔍 Die App sucht automatisch alle aktiven Zellen (1-8) und setzt den Filter"
+                    android:textSize="12sp"
+                    android:layout_marginBottom="16dp"
+                    android:textStyle="italic"
+                    android:textColor="@android:color/holo_green_dark" />
+
+                <!-- Filter Auswahl -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="20dp"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Filter Wert:"
+                        android:textSize="16sp"
+                        android:textColor="@android:color/black" />
+
+                    <Spinner
+                        android:id="@+id/spinner_filter_value"
+                        android:layout_width="120dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp" />
+
+                </LinearLayout>
+
+                <!-- Filter Status -->
+                <TextView
+                    android:id="@+id/text_filter_status"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Filter-Funktion bereit"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="16dp"
+                    android:minHeight="32dp"
+                    android:gravity="center_vertical"
+                    android:background="@android:color/transparent"
+                    android:padding="8dp"
+                    android:textColor="@android:color/holo_green_dark" />
+
+                <!-- Filter Button und Progress -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <Button
+                        android:id="@+id/button_set_filter"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Filter für alle Zellen setzen"
+                        android:backgroundTint="@android:color/holo_orange_dark"
+                        android:textColor="@android:color/white"
+                        android:textStyle="bold" />
+
+                    <ProgressBar
+                        android:id="@+id/progress_bar_filter"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginStart="12dp"
+                        android:visibility="gone" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </androidx.cardview.widget.CardView>
+
         <!-- NEU: Tipps für Seriennummer-Ermittlung -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"

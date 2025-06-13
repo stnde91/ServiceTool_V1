@@ -27,6 +27,12 @@ class CellConfigurationFragment : Fragment() {
     private lateinit var buttonChangeAddress: Button
     private lateinit var textViewStatus: TextView
     private lateinit var progressBar: ProgressBar
+    
+    // Filter UI Components
+    private lateinit var spinnerFilterValue: Spinner
+    private lateinit var buttonSetFilter: Button
+    private lateinit var progressBarFilter: ProgressBar
+    private lateinit var textViewFilterStatus: TextView
 
     private var communicationManager: CommunicationManager? = null
 
@@ -39,6 +45,7 @@ class CellConfigurationFragment : Fragment() {
 
         initializeViews(view)
         setupSpinner()
+        setupFilterSpinner()
         setupInputValidation()
         setupClickListeners()
 
@@ -52,10 +59,18 @@ class CellConfigurationFragment : Fragment() {
         buttonChangeAddress = view.findViewById(R.id.button_change_address)
         textViewStatus = view.findViewById(R.id.text_status)
         progressBar = view.findViewById(R.id.progress_bar)
+        
+        // Filter Components
+        spinnerFilterValue = view.findViewById(R.id.spinner_filter_value)
+        buttonSetFilter = view.findViewById(R.id.button_set_filter)
+        progressBarFilter = view.findViewById(R.id.progress_bar_filter)
+        textViewFilterStatus = view.findViewById(R.id.text_filter_status)
 
         // Initial ausblenden
         progressBar.visibility = View.GONE
+        progressBarFilter.visibility = View.GONE
         showStatus("Bereit für Konfiguration", false)
+        showFilterStatus("Filter-Funktion bereit", false)
     }
 
     private fun setupSpinner() {
@@ -71,6 +86,21 @@ class CellConfigurationFragment : Fragment() {
 
         spinnerNewCell.adapter = adapter
         spinnerNewCell.setSelection(1) // Standard: Zelle 2 (Index 1)
+    }
+
+    private fun setupFilterSpinner() {
+        // Filter Werte 0-15 (gängige Filter-Bereiche)
+        val filterValues = arrayOf("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15")
+
+        val adapter = ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_spinner_item,
+            filterValues
+        )
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        spinnerFilterValue.adapter = adapter
+        spinnerFilterValue.setSelection(5) // Standard: Filter 5
     }
 
     private fun setupInputValidation() {
@@ -201,6 +231,19 @@ class CellConfigurationFragment : Fragment() {
 
             changeAddressBySerialNumber(serialNumber, newCell)
         }
+        
+        buttonSetFilter.setOnClickListener {
+            val selectedItem = spinnerFilterValue.selectedItem
+            val selectedPosition = spinnerFilterValue.selectedItemPosition
+            val filterValue = selectedItem.toString().toInt()
+            
+            Log.d("CellConfig", "Filter-Button geklickt:")
+            Log.d("CellConfig", "  - selectedItem: '$selectedItem'")
+            Log.d("CellConfig", "  - selectedPosition: $selectedPosition")
+            Log.d("CellConfig", "  - filterValue: $filterValue")
+            
+            setFilterForAllDetectedCells(filterValue)
+        }
     }
 
     private fun changeAddressBySerialNumber(serialNumber: String, toCell: Int) {
@@ -307,6 +350,292 @@ class CellConfigurationFragment : Fragment() {
         }
     }
 
+    // === AUTOMATISCHE FILTER-FUNKTIONEN ===
+    
+    // Neue Hauptfunktion: Filter für alle Zellen setzen (adress-basiert)
+    private fun setFilterForAllDetectedCells(filterValue: Int) {
+        Log.d("CellConfig", "setFilterForAllDetectedCells aufgerufen mit filterValue: $filterValue")
+        showFilterStatus("Setze Filter $filterValue für alle Zellen (1-8)...", false)
+        showStatus("Verwende direkte Zell-Adressierung (A-H)...", false)
+        setFilterUIEnabled(false)
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                if (!ensureConnection()) {
+                    withContext(Dispatchers.Main) {
+                        showStatus("Fehler: Keine Verbindung zur Hardware!", true)
+                        setFilterUIEnabled(true)
+                    }
+                    return@launch
+                }
+
+                Log.i("CellConfig", "Direkte Filter-Setzung startet - Filter: $filterValue für Zellen 1-8")
+
+                var successCount = 0
+                var totalCells = 8
+                
+                // Teste alle Zellen 1-8 mit direkter Adressierung
+                for (cellNumber in 1..8) {
+                    try {
+                        Log.d("CellConfig", "Setze Filter für Zelle $cellNumber")
+                        
+                        // Verwende korrigierte zwei-Kommando-Sequenz: AQ Query + Aw Write
+                        // Basierend auf funktionierender Wireshark-Analyse
+                        
+                        // 1. AQ Query-Kommando (setzt tatsächlich den Filter)
+                        val queryCommand = FlintecRC3DMultiCellCommands.createFilterQueryCommand(cellNumber, filterValue)
+                        Log.d("CellConfig", "Sende AQ Query für Zelle $cellNumber: '$queryCommand'")
+                        
+                        val queryResponse = try {
+                            withTimeout(3000) {
+                                communicationManager?.sendCommand(queryCommand) ?: ""
+                            }
+                        } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
+                            Log.w("CellConfig", "Timeout bei AQ Query für Zelle $cellNumber")
+                            ""
+                        }
+                        
+                        Log.d("CellConfig", "Zelle $cellNumber AQ Response: '$queryResponse'")
+                        
+                        Thread.sleep(100) // Kurze Pause zwischen den Kommandos
+                        
+                        // 2. Aw Write-Kommando (bestätigt den Filter)
+                        val writeCommand = FlintecRC3DMultiCellCommands.createFilterCommand(cellNumber, filterValue)
+                        Log.d("CellConfig", "Sende Aw Write für Zelle $cellNumber: '$writeCommand'")
+                        
+                        val writeResponse = try {
+                            withTimeout(3000) {
+                                communicationManager?.sendCommand(writeCommand) ?: ""
+                            }
+                        } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
+                            Log.w("CellConfig", "Timeout bei Aw Write für Zelle $cellNumber")
+                            ""
+                        }
+                        
+                        Log.d("CellConfig", "Zelle $cellNumber Aw Response: '$writeResponse'")
+                        
+                        // Erfolg wenn eine der Antworten nicht leer ist (Zelle ist aktiv)
+                        if (queryResponse.isNotEmpty() || writeResponse.isNotEmpty()) {
+                            successCount++
+                            Log.i("CellConfig", "Filter erfolgreich für Zelle $cellNumber (AQ: '$queryResponse', Aw: '$writeResponse')")
+                        } else {
+                            Log.d("CellConfig", "Zelle $cellNumber nicht aktiv oder Timeout")
+                        }
+                        
+                        Thread.sleep(300) // Kurze Pause zwischen Befehlen
+                        
+                    } catch (e: Exception) {
+                        Log.e("CellConfig", "Fehler bei Zelle $cellNumber", e)
+                    }
+                }
+
+                withContext(Dispatchers.Main) {
+                    if (successCount > 0) {
+                        showFilterStatus("✓ Filter $filterValue erfolgreich für $successCount/$totalCells Zellen gesetzt!", false)
+                        showStatus("Filter-Operation erfolgreich abgeschlossen", false)
+                    } else {
+                        showFilterStatus("❌ Filter konnte für keine Zelle gesetzt werden!", true)
+                        showStatus("Filter-Operation fehlgeschlagen", true)
+                    }
+                    setFilterUIEnabled(true)
+                }
+
+            } catch (e: Exception) {
+                Log.e("CellConfig", "Fehler beim automatischen Filter setzen", e)
+                withContext(Dispatchers.Main) {
+                    showFilterStatus("❌ Fehler: ${e.message}", true)
+                    setFilterUIEnabled(true)
+                }
+            }
+        }
+    }
+    
+    // Sammelt alle Seriennummern der aktiven Zellen (1-8)
+    private suspend fun collectAllCellSerialNumbers(): Map<Int, String> {
+        return withContext(Dispatchers.IO) {
+            val results = mutableMapOf<Int, String>()
+            
+            try {
+                val manager = communicationManager ?: return@withContext results
+                
+                // Teste Zellen 1-8 und sammle Seriennummern
+                for (cellNumber in 1..8) {
+                    try {
+                        val command = FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, 
+                            FlintecRC3DMultiCellCommands.CommandType.SERIAL_NUMBER)
+                        val commandString = String(command, Charsets.ISO_8859_1)
+                        
+                        val response = try {
+                            withTimeout(5000) {
+                                manager.sendCommand(commandString) ?: ""
+                            }
+                        } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
+                            Log.d("CellConfig", "Timeout bei Zelle $cellNumber - vermutlich nicht aktiv")
+                            ""
+                        }
+                        
+                        if (response.isNotEmpty()) {
+                            val parsedResponse = FlintecRC3DMultiCellCommands.parseMultiCellResponse(response)
+                            if (parsedResponse is FlintecData.SerialNumber && parsedResponse.value.isNotEmpty()) {
+                                results[cellNumber] = parsedResponse.value
+                                Log.i("CellConfig", "Zelle $cellNumber aktiv: S/N ${parsedResponse.value}")
+                            }
+                        }
+                        
+                        Thread.sleep(300) // Kurze Pause zwischen Abfragen
+                        
+                    } catch (e: Exception) {
+                        Log.d("CellConfig", "Zelle $cellNumber nicht erreichbar: ${e.message}")
+                    }
+                }
+                
+                Log.i("CellConfig", "Insgesamt ${results.size} aktive Zellen gefunden: ${results.keys}")
+                return@withContext results
+                
+            } catch (e: Exception) {
+                Log.e("CellConfig", "Fehler beim Sammeln der Seriennummern", e)
+                return@withContext results
+            }
+        }
+    }
+    
+    // Einzelzellen-Filter (für manuelle Eingabe - optional behalten)
+    private fun setFilterBySerialNumber(serialNumber: String, filterValue: Int) {
+        showStatus("Filter $filterValue wird für Zelle S/N $serialNumber gesetzt...", false)
+        setFilterUIEnabled(false)
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                if (!ensureConnection()) {
+                    withContext(Dispatchers.Main) {
+                        showStatus("Fehler: Keine Verbindung zur Hardware!", true)
+                        setFilterUIEnabled(true)
+                    }
+                    return@launch
+                }
+
+                Log.i("CellConfig", "Setze Filter $filterValue für Zelle S/N: $serialNumber")
+
+                // Verwende die neue seriennummer-basierte Filter-Funktion
+                val command = FlintecRC3DMultiCellCommands.setFilterBySerialNumber(serialNumber, filterValue)
+                
+                Log.d("CellConfig", "Sende Filter-Kommando: '$command'")
+                
+                val response = try {
+                    withTimeout(8000) {
+                        communicationManager?.sendCommand(command) ?: ""
+                    }
+                } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
+                    Log.w("CellConfig", "Timeout bei Filter-Setzung nach 8 Sekunden")
+                    ""
+                } catch (e: Exception) {
+                    Log.e("CellConfig", "Fehler bei Filter-Kommando", e)
+                    ""
+                }
+                
+                Log.d("CellConfig", "Filter-Antwort: '$response'")
+
+                withContext(Dispatchers.Main) {
+                    if (response.isNotEmpty() && (response.contains("P") || response.contains("X"))) {
+                        showStatus("✓ Filter $filterValue erfolgreich für S/N $serialNumber gesetzt!", false)
+                        // Optional: Seriennummer-Feld leeren nach erfolgreichem Filter-Set
+                        // editTextSerialNumber.setText("")
+                    } else {
+                        showStatus("❌ Filter konnte nicht gesetzt werden! Antwort: '$response'", true)
+                    }
+                    setFilterUIEnabled(true)
+                }
+
+            } catch (e: Exception) {
+                Log.e("CellConfig", "Fehler beim Filter setzen", e)
+                withContext(Dispatchers.Main) {
+                    showStatus("❌ Fehler: ${e.message}", true)
+                    setFilterUIEnabled(true)
+                }
+            }
+        }
+    }
+    
+    // Alte Methode: Filter für alle Zellen (verwendet feste Adressen - funktioniert nicht mehr)
+    private fun setFilterForAllCells(filterValue: Int) {
+        showStatus("Filter $filterValue wird für alle Zellen gesetzt...", false)
+        setFilterUIEnabled(false)
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                if (!ensureConnection()) {
+                    withContext(Dispatchers.Main) {
+                        showStatus("Fehler: Keine Verbindung zur Hardware!", true)
+                        setFilterUIEnabled(true)
+                    }
+                    return@launch
+                }
+
+                Log.i("CellConfig", "Setze Filter $filterValue für alle Zellen (1-8)")
+
+                var successCount = 0
+                var totalCells = 8
+
+                for (cellNumber in 1..8) {
+                    try {
+                        // DEPRECATED: Diese Methode verwendet feste Zelladressen A-H (funktioniert nicht mehr!)
+                        // Die neue Methode setFilterForAllDetectedCells() verwendet Seriennummern
+                        val command = FlintecRC3DMultiCellCommands.setFilterForCell(cellNumber, filterValue)
+                        val commandString = String(command, Charsets.ISO_8859_1)
+                        
+                        Log.d("CellConfig", "Sende Filter-Kommando für Zelle $cellNumber: ${command.joinToString(" ") { "%02X".format(it) }}")
+                        Log.d("CellConfig", "Command String für Zelle $cellNumber: '${commandString.map { it.code.toString(16) }.joinToString(" ")}'")
+                        
+                        val response = try {
+                            Log.d("CellConfig", "Starte sendCommand für Zelle $cellNumber...")
+                            withTimeout(8000) {  // Erhöht auf 8 Sekunden für bessere Kompatibilität
+                                val result = communicationManager?.sendCommand(commandString) ?: ""
+                                Log.d("CellConfig", "sendCommand abgeschlossen für Zelle $cellNumber: '$result'")
+                                result
+                            }
+                        } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
+                            Log.w("CellConfig", "Timeout bei Zelle $cellNumber nach 8 Sekunden")
+                            ""
+                        } catch (e: Exception) {
+                            Log.e("CellConfig", "Fehler bei sendCommand für Zelle $cellNumber", e)
+                            ""
+                        }
+
+                        val parsedResponse = FlintecRC3DMultiCellCommands.parseMultiCellResponse(response)
+                        if (parsedResponse is FlintecData.FilterSetResult && parsedResponse.success) {
+                            successCount++
+                            Log.i("CellConfig", "Filter erfolgreich gesetzt für Zelle $cellNumber")
+                        } else {
+                            Log.w("CellConfig", "Filter-Antwort für Zelle $cellNumber: '$response'")
+                        }
+
+                        // Kurze Pause zwischen Kommandos (wie in Wireshark beobachtet)
+                        Thread.sleep(500)
+
+                    } catch (e: Exception) {
+                        Log.e("CellConfig", "Fehler bei Zelle $cellNumber", e)
+                    }
+                }
+
+                withContext(Dispatchers.Main) {
+                    if (successCount > 0) {
+                        showStatus("✅ Filter $filterValue erfolgreich für $successCount/$totalCells Zellen gesetzt!", false)
+                    } else {
+                        showStatus("❌ Filter konnte für keine Zelle gesetzt werden!", true)
+                    }
+                    setFilterUIEnabled(true)
+                }
+
+            } catch (e: Exception) {
+                Log.e("CellConfig", "Fehler beim Filter setzen", e)
+                withContext(Dispatchers.Main) {
+                    showStatus("❌ Fehler: ${e.message}", true)
+                    setFilterUIEnabled(true)
+                }
+            }
+        }
+    }
+
     private fun calculateChecksum(command: String): String {
         var checksum = 0
         for (char in command) {
@@ -359,6 +688,22 @@ class CellConfigurationFragment : Fragment() {
         spinnerNewCell.isEnabled = enabled
         buttonChangeAddress.isEnabled = enabled && editTextSerialNumber.text.toString().trim().length >= 4
         progressBar.visibility = if (enabled) View.GONE else View.VISIBLE
+    }
+
+    private fun setFilterUIEnabled(enabled: Boolean) {
+        spinnerFilterValue.isEnabled = enabled
+        buttonSetFilter.isEnabled = enabled
+        progressBarFilter.visibility = if (enabled) View.GONE else View.VISIBLE
+    }
+    
+    private fun showFilterStatus(message: String, isError: Boolean) {
+        textViewFilterStatus.text = message
+        textViewFilterStatus.setTextColor(
+            if (isError)
+                requireContext().getColor(android.R.color.holo_red_dark)
+            else
+                requireContext().getColor(android.R.color.holo_green_dark)
+        )
     }
 
     override fun onDestroyView() {
