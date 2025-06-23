@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/md_theme_light_background"
+    android:background="?attr/android:colorBackground"
     android:padding="16dp">
 
     <LinearLayout
@@ -18,7 +18,7 @@
             android:text="Zellen Konfiguration"
             android:textSize="32sp"
             android:textStyle="bold"
-            android:textColor="@color/md_theme_light_onSurface"
+            android:textColor="?attr/colorOnSurface"
             android:layout_marginBottom="8dp" />
 
         <TextView
@@ -26,7 +26,7 @@
             android:layout_height="wrap_content"
             android:text="Adresse ändern und Filter konfigurieren"
             android:textSize="16sp"
-            android:textColor="@color/md_theme_light_onSurfaceVariant"
+            android:textColor="?attr/colorOnSurfaceVariant"
             android:layout_marginBottom="24dp" />
 
         <!-- Address Change Card -->
@@ -49,7 +49,7 @@
                     android:text="Zellenadresse ändern"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@color/md_theme_light_onSurface"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginBottom="16dp" />
 
                 <!-- Serial Number Input -->
@@ -62,8 +62,8 @@
                     app:helperText="8-12 Zeichen (Hex oder Dezimal)"
                     app:counterEnabled="true"
                     app:counterMaxLength="12"
-                    app:boxStrokeColor="@color/md_theme_light_primary"
-                    app:hintTextColor="@color/md_theme_light_primary"
+                    app:boxStrokeColor="?attr/colorPrimary"
+                    app:hintTextColor="?attr/colorPrimary"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -97,14 +97,14 @@
                             android:text="Neue Adresse"
                             android:textSize="16sp"
                             android:textStyle="bold"
-                            android:textColor="@color/md_theme_light_onSurface" />
+                            android:textColor="?attr/colorOnSurface" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Ziel-Zellenadresse auswählen"
                             android:textSize="14sp"
-                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:textColor="?attr/colorOnSurfaceVariant"
                             android:layout_marginTop="2dp" />
 
                     </LinearLayout>
@@ -114,7 +114,8 @@
                         android:layout_width="120dp"
                         android:layout_height="48dp"
                         android:layout_marginStart="16dp"
-                        android:background="@drawable/spinner_background" />
+                        android:background="@drawable/spinner_background"
+                        android:textColor="?attr/colorOnSurface" />
 
                 </LinearLayout>
 
@@ -133,7 +134,7 @@
                         android:text="Adresse ändern"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        app:backgroundTint="@color/md_theme_light_primary"
+                        app:backgroundTint="?attr/colorPrimary"
                         app:cornerRadius="12dp"
                         app:icon="@drawable/ic_settings_24"
                         app:iconGravity="textStart"
@@ -147,7 +148,7 @@
                         android:layout_height="32dp"
                         android:layout_marginStart="16dp"
                         android:visibility="gone"
-                        android:indeterminateTint="@color/md_theme_light_primary" />
+                        android:indeterminateTint="?attr/colorPrimary" />
 
                 </LinearLayout>
 
@@ -175,7 +176,7 @@
                     android:text="Filter Konfiguration"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@color/md_theme_light_onSurface"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginBottom="16dp" />
 
                 <!-- Info Box -->
@@ -183,7 +184,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:background="@color/md_theme_light_surfaceVariant"
+                    android:background="?attr/colorSurfaceVariant"
                     android:padding="16dp"
                     android:layout_marginBottom="20dp"
                     android:gravity="center_vertical">
@@ -194,7 +195,7 @@
                         android:layout_weight="1"
                         android:text="Stellen Sie die Anzahl der aktiven Zellen ein. Filter wird nur für diese gesetzt."
                         android:textSize="14sp"
-                        android:textColor="@color/md_theme_light_onSurfaceVariant" />
+                        android:textColor="?attr/colorOnSurfaceVariant" />
 
                 </LinearLayout>
 
@@ -203,7 +204,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:background="@color/md_theme_light_surfaceVariant"
+                    android:background="?attr/colorSurfaceVariant"
                     android:padding="20dp"
                     android:layout_marginBottom="20dp">
 
@@ -236,7 +237,7 @@
                                 android:text="Nur diese Zellen werden bearbeitet"
                                 android:textSize="12sp"
                                 android:layout_marginTop="2dp"
-                                android:textColor="@color/md_theme_light_onSurfaceVariant" />
+                                android:textColor="?attr/colorOnSurfaceVariant" />
 
                         </LinearLayout>
 
@@ -249,7 +250,7 @@
                             android:paddingStart="16dp"
                             android:paddingEnd="40dp"
                             android:gravity="center_vertical"
-                            android:textColor="@color/md_theme_light_onSurface"
+                            android:textColor="?attr/colorOnSurface"
                             android:textSize="16sp"
                             android:textStyle="bold" />
 
@@ -274,7 +275,7 @@
                                 android:text="Filter Wert"
                                 android:textSize="16sp"
                                 android:textStyle="bold"
-                                android:textColor="@color/md_theme_light_onSurface" />
+                                android:textColor="?attr/colorOnSurface" />
 
                             <TextView
                                 android:layout_width="match_parent"
@@ -282,7 +283,7 @@
                                 android:text="Verfügbar: 0, 5 (Standard: 5)"
                                 android:textSize="12sp"
                                 android:layout_marginTop="2dp"
-                                android:textColor="@color/md_theme_light_onSurfaceVariant" />
+                                android:textColor="?attr/colorOnSurfaceVariant" />
 
                         </LinearLayout>
 
@@ -295,7 +296,7 @@
                             android:paddingStart="16dp"
                             android:paddingEnd="40dp"
                             android:gravity="center_vertical"
-                            android:textColor="@color/md_theme_light_onSurface"
+                            android:textColor="?attr/colorOnSurface"
                             android:textSize="16sp"
                             android:textStyle="bold" />
 
@@ -313,7 +314,7 @@
                     android:layout_marginBottom="20dp"
                     android:minHeight="40dp"
                     android:gravity="center_vertical"
-                    android:background="@color/md_theme_light_surfaceVariant"
+                    android:background="?attr/colorSurfaceVariant"
                     android:padding="16dp"
                     android:textColor="@color/status_success"
                     android:drawableStart="@drawable/ic_status_success"
@@ -334,7 +335,7 @@
                         android:text="Filter für alle Zellen setzen"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        app:backgroundTint="@color/md_theme_light_primary"
+                        app:backgroundTint="?attr/colorPrimary"
                         app:cornerRadius="12dp"
                         app:icon="@drawable/ic_filter_24"
                         app:iconGravity="textStart"
@@ -347,7 +348,7 @@
                         android:layout_height="32dp"
                         android:layout_marginStart="16dp"
                         android:visibility="gone"
-                        android:indeterminateTint="@color/md_theme_light_primary" />
+                        android:indeterminateTint="?attr/colorPrimary" />
 
                 </LinearLayout>
 
@@ -375,7 +376,7 @@
                     android:text="Status"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@color/md_theme_light_onSurface"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginBottom="16dp" />
 
                 <TextView
@@ -386,9 +387,9 @@
                     android:textSize="16sp"
                     android:minHeight="48dp"
                     android:gravity="center_vertical"
-                    android:background="@color/md_theme_light_surfaceVariant"
+                    android:background="?attr/colorSurfaceVariant"
                     android:padding="16dp"
-                    android:textColor="@color/md_theme_light_onSurfaceVariant"
+                    android:textColor="?attr/colorOnSurfaceVariant"
                     android:drawableStart="@drawable/ic_status_pending"
                     android:drawablePadding="12dp" />
 
@@ -417,7 +418,7 @@
                     android:text="Tipps &amp; Hinweise"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@color/md_theme_light_onSurface"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginBottom="16dp" />
 
                 <TextView
@@ -426,7 +427,7 @@
                     android:text="• Neue Zellen sind standardmäßig auf Adresse 1 (A) konfiguriert\n• Multi-Cell Übersicht zeigt alle Seriennummern an\n• Filter-Änderungen werden sofort an die Hardware übertragen\n• Die App verwendet die gleichen Kommandos wie die Windows-Software"
                     android:textSize="14sp"
                     android:lineSpacingExtra="4dp"
-                    android:textColor="@color/md_theme_light_onSurfaceVariant" />
+                    android:textColor="?attr/colorOnSurfaceVariant" />
 
             </LinearLayout>
 

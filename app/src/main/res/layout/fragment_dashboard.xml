@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/md_theme_light_background">
+    android:background="?attr/android:colorBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,7 +19,7 @@
             android:text="Dashboard"
             android:textSize="32sp"
             android:textStyle="bold"
-            android:textColor="@color/md_theme_light_onSurface"
+            android:textColor="?attr/colorOnSurface"
             android:layout_marginBottom="24dp" />
 
         <!-- System Status Card -->
@@ -42,7 +42,7 @@
                     android:text="System Status"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@color/md_theme_light_onSurface"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginBottom="16dp" />
 
                 <!-- Flintec Status -->
@@ -50,7 +50,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="12dp"
-                    android:background="@color/md_theme_light_surfaceVariant"
+                    android:background="?attr/colorSurfaceVariant"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
                     android:padding="12dp">
@@ -75,7 +75,7 @@
                             android:text="Flintec RC3D System"
                             android:textSize="16sp"
                             android:textStyle="bold"
-                            android:textColor="@color/md_theme_light_onSurface" />
+                            android:textColor="?attr/colorOnSurface" />
 
                         <TextView
                             android:id="@+id/textFlintecStatus"
@@ -83,7 +83,7 @@
                             android:layout_height="wrap_content"
                             android:text="System wird geprüft..."
                             android:textSize="14sp"
-                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:textColor="?attr/colorOnSurfaceVariant"
                             android:layout_marginTop="2dp"
                             tools:text="3/4 Zellen online" />
 
@@ -102,7 +102,7 @@
                             android:text="?/?"
                             android:textSize="20sp"
                             android:textStyle="bold"
-                            android:textColor="@color/md_theme_light_primary"
+                            android:textColor="?attr/colorPrimary"
                             tools:text="3/4" />
 
                         <TextView
@@ -110,7 +110,7 @@
                             android:layout_height="wrap_content"
                             android:text="Zellen"
                             android:textSize="12sp"
-                            android:textColor="@color/md_theme_light_onSurfaceVariant" />
+                            android:textColor="?attr/colorOnSurfaceVariant" />
 
                     </LinearLayout>
 
@@ -120,7 +120,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/md_theme_light_surfaceVariant"
+                    android:background="?attr/colorSurfaceVariant"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
                     android:padding="12dp">
@@ -145,7 +145,7 @@
                             android:text="Moxa Gateway"
                             android:textSize="16sp"
                             android:textStyle="bold"
-                            android:textColor="@color/md_theme_light_onSurface" />
+                            android:textColor="?attr/colorOnSurface" />
 
                         <TextView
                             android:id="@+id/textMoxaStatus"
@@ -153,7 +153,7 @@
                             android:layout_height="wrap_content"
                             android:text="Verbindung wird geprüft..."
                             android:textSize="14sp"
-                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:textColor="?attr/colorOnSurfaceVariant"
                             android:layout_marginTop="2dp"
                             tools:text="192.168.50.3:4001" />
 
@@ -172,7 +172,7 @@
                             android:text="---"
                             android:textSize="16sp"
                             android:textStyle="bold"
-                            android:textColor="@color/md_theme_light_primary"
+                            android:textColor="?attr/colorPrimary"
                             tools:text="12ms" />
 
                         <TextView
@@ -180,7 +180,7 @@
                             android:layout_height="wrap_content"
                             android:text="Ping"
                             android:textSize="12sp"
-                            android:textColor="@color/md_theme_light_onSurfaceVariant" />
+                            android:textColor="?attr/colorOnSurfaceVariant" />
 
                     </LinearLayout>
 
@@ -210,7 +210,7 @@
                     android:text="Schnellaktionen"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@color/md_theme_light_onSurface"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginBottom="16dp" />
 
                 <androidx.recyclerview.widget.RecyclerView
@@ -244,7 +244,7 @@
                     android:text="System-Statistiken"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@color/md_theme_light_onSurface"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginBottom="16dp" />
 
                 <!-- Statistics Grid -->
@@ -259,7 +259,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
                         android:layout_weight="1"
-                        android:background="@color/md_theme_light_primaryContainer"
+                        android:background="?attr/colorPrimaryContainer"
                         android:gravity="center"
                         android:orientation="vertical"
                         android:padding="16dp">
@@ -271,7 +271,7 @@
                             android:text="0"
                             android:textSize="24sp"
                             android:textStyle="bold"
-                            android:textColor="@color/md_theme_light_onPrimaryContainer"
+                            android:textColor="?attr/colorOnPrimaryContainer"
                             tools:text="47" />
 
                         <TextView
@@ -280,7 +280,7 @@
                             android:text="Erfolgreiche Verbindungen"
                             android:textAlignment="center"
                             android:textSize="12sp"
-                            android:textColor="@color/md_theme_light_onPrimaryContainer"
+                            android:textColor="?attr/colorOnPrimaryContainer"
                             android:layout_marginTop="4dp" />
 
                     </LinearLayout>
@@ -291,7 +291,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
                         android:layout_weight="1"
-                        android:background="@color/md_theme_light_surfaceVariant"
+                        android:background="?attr/colorSurfaceVariant"
                         android:gravity="center"
                         android:orientation="vertical"
                         android:padding="16dp">
@@ -303,7 +303,7 @@
                             android:text="0"
                             android:textSize="24sp"
                             android:textStyle="bold"
-                            android:textColor="@color/md_theme_light_error"
+                            android:textColor="?attr/colorError"
                             tools:text="2" />
 
                         <TextView
@@ -312,7 +312,7 @@
                             android:text="Fehler"
                             android:textAlignment="center"
                             android:textSize="12sp"
-                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:textColor="?attr/colorOnSurfaceVariant"
                             android:layout_marginTop="4dp" />
 
                     </LinearLayout>
@@ -331,7 +331,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
                         android:layout_weight="1"
-                        android:background="@color/md_theme_light_surfaceVariant"
+                        android:background="?attr/colorSurfaceVariant"
                         android:gravity="center"
                         android:orientation="vertical"
                         android:padding="16dp">
@@ -352,7 +352,7 @@
                             android:text="Erfolgsrate"
                             android:textAlignment="center"
                             android:textSize="12sp"
-                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:textColor="?attr/colorOnSurfaceVariant"
                             android:layout_marginTop="4dp" />
 
                     </LinearLayout>
@@ -363,7 +363,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
                         android:layout_weight="1"
-                        android:background="@color/md_theme_light_surfaceVariant"
+                        android:background="?attr/colorSurfaceVariant"
                         android:gravity="center"
                         android:orientation="vertical"
                         android:padding="16dp">
@@ -384,7 +384,7 @@
                             android:text="Ø Antwortzeit"
                             android:textAlignment="center"
                             android:textSize="12sp"
-                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:textColor="?attr/colorOnSurfaceVariant"
                             android:layout_marginTop="4dp" />
 
                     </LinearLayout>

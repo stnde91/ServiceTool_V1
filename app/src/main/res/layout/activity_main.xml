@@ -45,9 +45,9 @@
         android:layout_gravity="start"
         app:headerLayout="@layout/nav_header_main"
         app:menu="@menu/activity_main_drawer"
-        app:itemIconTint="@color/md_theme_light_onSurfaceVariant"
-        app:itemTextColor="@color/md_theme_light_onSurfaceVariant"
-        app:itemShapeFillColor="@color/md_theme_light_secondaryContainer"
+        app:itemIconTint="?attr/colorOnSurfaceVariant"
+        app:itemTextColor="?attr/colorOnSurfaceVariant"
+        app:itemShapeFillColor="?attr/colorSecondaryContainer"
         app:itemShapeInsetStart="16dp"
         app:itemShapeInsetEnd="16dp" />
 
