@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/md_theme_light_background"
     android:padding="16dp">
 
     <LinearLayout
@@ -10,23 +11,30 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Titel -->
+        <!-- Minimalist Header -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Zellen Konfiguration"
-            android:textSize="24sp"
+            android:textSize="32sp"
             android:textStyle="bold"
-            android:gravity="center"
-            android:layout_marginBottom="24dp"
-            android:textColor="@android:color/holo_blue_dark" />
+            android:textColor="@color/md_theme_light_onSurface"
+            android:layout_marginBottom="8dp" />
 
-        <!-- Adressänderung Sektion -->
-        <androidx.cardview.widget.CardView
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="8dp"
+            android:text="Adresse ändern und Filter konfigurieren"
+            android:textSize="16sp"
+            android:textColor="@color/md_theme_light_onSurfaceVariant"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Address Change Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="12dp"
             app:cardElevation="4dp">
 
             <LinearLayout
@@ -36,43 +44,40 @@
                 android:padding="16dp">
 
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Zellenadresse ändern"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:layout_marginBottom="16dp"
-                    android:textColor="@android:color/black" />
+                    android:textColor="@color/md_theme_light_onSurface"
+                    android:layout_marginBottom="16dp" />
 
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Geben Sie die Seriennummer der Zelle ein und wählen Sie die neue Adresse:"
-                    android:textSize="14sp"
-                    android:layout_marginBottom="16dp"
-                    android:textColor="@android:color/darker_gray" />
-
-                <!-- GEÄNDERT: Seriennummer-Eingabe statt Dropdown -->
+                <!-- Serial Number Input -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/textInputLayoutSerialNumber"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginBottom="20dp"
                     android:hint="Seriennummer"
-                    app:helperText="8 Zeichen (z.B. 14149487)"
+                    app:helperText="8-12 Zeichen (Hex oder Dezimal)"
                     app:counterEnabled="true"
-                    app:counterMaxLength="12">
+                    app:counterMaxLength="12"
+                    app:boxStrokeColor="@color/md_theme_light_primary"
+                    app:hintTextColor="@color/md_theme_light_primary"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editTextSerialNumber"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="text"
-                        android:textAllCaps="true" />
+                        android:textAllCaps="true"
+                        android:textSize="16sp"
+                        android:fontFamily="monospace" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Neue Zelle (bleibt Dropdown) -->
+                <!-- New Address Selection -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -80,59 +85,82 @@
                     android:layout_marginBottom="20dp"
                     android:gravity="center_vertical">
 
-                    <TextView
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Neue Adresse:"
-                        android:textSize="16sp"
-                        android:textColor="@android:color/black" />
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Neue Adresse"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/md_theme_light_onSurface" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Ziel-Zellenadresse auswählen"
+                            android:textSize="14sp"
+                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:layout_marginTop="2dp" />
+
+                    </LinearLayout>
 
                     <Spinner
                         android:id="@+id/spinner_new_cell"
-                        android:layout_width="177dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp" />
+                        android:layout_width="120dp"
+                        android:layout_height="48dp"
+                        android:layout_marginStart="16dp"
+                        android:background="@drawable/spinner_background" />
 
                 </LinearLayout>
 
-                <!-- Button und Progress -->
+                <!-- Action Button -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/button_change_address"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
+                        android:layout_height="56dp"
                         android:layout_weight="1"
                         android:text="Adresse ändern"
-                        android:backgroundTint="@android:color/holo_blue_bright"
-                        android:textColor="@android:color/white"
+                        android:textSize="16sp"
                         android:textStyle="bold"
-                        android:enabled="false" />
+                        app:backgroundTint="@color/md_theme_light_primary"
+                        app:cornerRadius="12dp"
+                        app:icon="@drawable/ic_settings_24"
+                        app:iconGravity="textStart"
+                        app:iconPadding="8dp"
+                        android:enabled="false"
+                        style="@style/Widget.MaterialComponents.Button" />
 
                     <ProgressBar
                         android:id="@+id/progress_bar"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_marginStart="12dp"
-                        android:visibility="gone" />
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_marginStart="16dp"
+                        android:visibility="gone"
+                        android:indeterminateTint="@color/md_theme_light_primary" />
 
                 </LinearLayout>
 
             </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
-        <!-- Status Anzeige -->
-        <androidx.cardview.widget.CardView
+        <!-- Filter Configuration Card -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="8dp"
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="12dp"
             app:cardElevation="4dp">
 
             <LinearLayout
@@ -142,37 +170,240 @@
                 android:padding="16dp">
 
                 <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Filter Konfiguration"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/md_theme_light_onSurface"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Info Box -->
+                <LinearLayout
                     android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:background="@color/md_theme_light_surfaceVariant"
+                    android:padding="16dp"
+                    android:layout_marginBottom="20dp"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Stellen Sie die Anzahl der aktiven Zellen ein. Filter wird nur für diese gesetzt."
+                        android:textSize="14sp"
+                        android:textColor="@color/md_theme_light_onSurfaceVariant" />
+
+                </LinearLayout>
+
+                <!-- Configuration Controls -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@color/md_theme_light_surfaceVariant"
+                    android:padding="20dp"
+                    android:layout_marginBottom="20dp">
+
+                    <!-- Cell Count -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="16dp"
+                        android:gravity="center_vertical">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="Anzahl aktive Zellen"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/primary_dark"
+                                android:fontFamily="sans-serif-medium" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="Nur diese Zellen werden bearbeitet"
+                                android:textSize="12sp"
+                                android:layout_marginTop="2dp"
+                                android:textColor="@color/md_theme_light_onSurfaceVariant" />
+
+                        </LinearLayout>
+
+                        <Spinner
+                            android:id="@+id/spinner_cell_count"
+                            android:layout_width="100dp"
+                            android:layout_height="48dp"
+                            android:layout_marginStart="12dp"
+                            android:background="@drawable/spinner_background"
+                            android:paddingStart="16dp"
+                            android:paddingEnd="40dp"
+                            android:gravity="center_vertical"
+                            android:textColor="@color/md_theme_light_onSurface"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                    <!-- Filter Value -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="Filter Wert"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/md_theme_light_onSurface" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="Verfügbar: 0, 5 (Standard: 5)"
+                                android:textSize="12sp"
+                                android:layout_marginTop="2dp"
+                                android:textColor="@color/md_theme_light_onSurfaceVariant" />
+
+                        </LinearLayout>
+
+                        <Spinner
+                            android:id="@+id/spinner_filter_value"
+                            android:layout_width="100dp"
+                            android:layout_height="48dp"
+                            android:layout_marginStart="12dp"
+                            android:background="@drawable/spinner_background"
+                            android:paddingStart="16dp"
+                            android:paddingEnd="40dp"
+                            android:gravity="center_vertical"
+                            android:textColor="@color/md_theme_light_onSurface"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <!-- Status Display -->
+                <TextView
+                    android:id="@+id/text_filter_status"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Filter-Funktion bereit"
+                    android:textSize="14sp"
+                    android:layout_marginBottom="20dp"
+                    android:minHeight="40dp"
+                    android:gravity="center_vertical"
+                    android:background="@color/md_theme_light_surfaceVariant"
+                    android:padding="16dp"
+                    android:textColor="@color/status_success"
+                    android:drawableStart="@drawable/ic_status_success"
+                    android:drawablePadding="12dp" />
+
+                <!-- Action Button -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/button_set_filter"
+                        android:layout_width="0dp"
+                        android:layout_height="56dp"
+                        android:layout_weight="1"
+                        android:text="Filter für alle Zellen setzen"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        app:backgroundTint="@color/md_theme_light_primary"
+                        app:cornerRadius="12dp"
+                        app:icon="@drawable/ic_filter_24"
+                        app:iconGravity="textStart"
+                        app:iconPadding="8dp"
+                        style="@style/Widget.MaterialComponents.Button" />
+
+                    <ProgressBar
+                        android:id="@+id/progress_bar_filter"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_marginStart="16dp"
+                        android:visibility="gone"
+                        android:indeterminateTint="@color/md_theme_light_primary" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- Status Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Status"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:layout_marginBottom="8dp"
-                    android:textColor="@android:color/black" />
+                    android:textColor="@color/md_theme_light_onSurface"
+                    android:layout_marginBottom="16dp" />
 
                 <TextView
                     android:id="@+id/text_status"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Bereit für Konfiguration"
-                    android:textSize="14sp"
+                    android:textSize="16sp"
                     android:minHeight="48dp"
                     android:gravity="center_vertical"
-                    android:background="@android:color/transparent"
-                    android:padding="8dp"
-                    android:textColor="@android:color/darker_gray" />
+                    android:background="@color/md_theme_light_surfaceVariant"
+                    android:padding="16dp"
+                    android:textColor="@color/md_theme_light_onSurfaceVariant"
+                    android:drawableStart="@drawable/ic_status_pending"
+                    android:drawablePadding="12dp" />
 
             </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
-        <!-- Erweiterte Warnung für den neuen Use Case -->
-        <androidx.cardview.widget.CardView
+        <!-- Quick Tips Card -->
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="4dp"
-            app:cardBackgroundColor="@android:color/holo_orange_light">
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp"
+            app:strokeWidth="0dp"
+            app:cardBackgroundColor="@color/info_background">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -181,59 +412,25 @@
                 android:padding="16dp">
 
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="⚠️ Wichtige Hinweise für Serienkonfiguration"
-                    android:textSize="16sp"
+                    android:text="Tipps &amp; Hinweise"
+                    android:textSize="18sp"
                     android:textStyle="bold"
-                    android:layout_marginBottom="8dp"
-                    android:textColor="@android:color/black" />
+                    android:textColor="@color/md_theme_light_onSurface"
+                    android:layout_marginBottom="16dp" />
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="• Neue Zellen sind standardmäßig auf Adresse 1 (A) konfiguriert&#10;• Verwenden Sie die Seriennummer der Zelle (8 Zeichen)&#10;• Nach erfolgreicher Konfiguration wird das Eingabefeld automatisch geleert"
+                    android:text="• Neue Zellen sind standardmäßig auf Adresse 1 (A) konfiguriert\n• Multi-Cell Übersicht zeigt alle Seriennummern an\n• Filter-Änderungen werden sofort an die Hardware übertragen\n• Die App verwendet die gleichen Kommandos wie die Windows-Software"
                     android:textSize="14sp"
-                    android:textColor="@android:color/black" />
+                    android:lineSpacingExtra="4dp"
+                    android:textColor="@color/md_theme_light_onSurfaceVariant" />
 
             </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
-
-        <!-- NEU: Tipps für Seriennummer-Ermittlung -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            app:cardCornerRadius="8dp"
-            app:cardElevation="4dp"
-            app:cardBackgroundColor="@android:color/holo_blue_light">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="💡 Seriennummer ermitteln"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="8dp"
-                    android:textColor="@android:color/white" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="• Multi-Cell Übersicht → Seriennummern werden dort angezeigt&#10;• Neue Zellen: Probieren Sie bekannte Seriennummern aus&#10;• Die App zeigt nach erfolgreicher Verbindung die Seriennummer an"
-                    android:textSize="14sp"
-                    android:textColor="@android:color/white" />
-
-            </LinearLayout>
-
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
 

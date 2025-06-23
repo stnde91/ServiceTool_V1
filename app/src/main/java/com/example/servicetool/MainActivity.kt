@@ -3,6 +3,7 @@ package com.example.servicetool
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen // NEU: Import für den Splash Screen
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -20,6 +21,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // NEU: Installiert den Splash Screen.
+        // Dieser Aufruf muss VOR super.onCreate() stehen.
+        installSplashScreen()
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -44,7 +49,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_dashboard,
                 R.id.nav_multicell_overview,
                 R.id.nav_settings,
-                R.id.nav_moxa_settings,          // NEU: Moxa Settings als Top-Level
+                R.id.nav_moxa_settings,          // Moxa Settings als Top-Level
                 R.id.cellConfigurationFragment
             ), drawerLayout
         )
@@ -78,7 +83,6 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_settings -> {
                     navigateIfNeeded(R.id.nav_settings, "App Einstellungen")
                 }
-                // NEU: Moxa Settings Navigation
                 R.id.nav_moxa_settings -> {
                     navigateIfNeeded(R.id.nav_moxa_settings, "Moxa Einstellungen")
                 }

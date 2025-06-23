@@ -217,7 +217,7 @@ class MoxaTelnetController(private val ipAddress: String) {
                 if (!login(password, inputStream, outputStream)) return false
             }
 
-            if (!executeTelnetCommand(outputStream, "s\n", "Save change?", inputStream)) return false
+            if (!executeTelnetCommand(outputStream, "s\n", "Ready to restart", inputStream)) return false
             if (!executeTelnetCommand(outputStream, "y\n", null, inputStream, 2000)) return false
             Log.i(TAG, "Save and Restart command sequence successful.")
             return true
@@ -234,9 +234,12 @@ class MoxaTelnetController(private val ipAddress: String) {
         outputStream.write(command.toByteArray(Charsets.US_ASCII))
         outputStream.flush()
         if (expectedResponse != null) {
-            if (readUntil(expectedResponse, inputStream) == null) {
+            val actualResponse = readUntil(expectedResponse, inputStream, returnFullBuffer = true)
+            if (actualResponse == null) {
                 Log.w(TAG, "Expected response '$expectedResponse' not received after command '$command'.")
                 return false
+            } else {
+                Log.d(TAG, "Command '$command' successful. Response: '$actualResponse'")
             }
         }
         delay(waitAfter)

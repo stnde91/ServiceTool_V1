@@ -38,6 +38,7 @@ class CommunicationManager {
 
                 socket = Socket()
                 socket?.connect(InetSocketAddress(ipAddress, port), 7000)
+                socket?.soTimeout = 3000 // Set read timeout to 3 seconds
 
                 if (socket?.isConnected == true) {
                     outputStream = socket!!.getOutputStream()
@@ -102,8 +103,8 @@ class CommunicationManager {
                 outputStream?.flush()
                 Log.d("CommunicationManager", "sendCommand: Befehl gesendet und geflusht.")
 
-                // Lese die Antwort mit Timeout
-                val responseMessage = withTimeoutOrNull(15000L) {
+                // Lese die Antwort mit Timeout (verkürzt für bessere UX)
+                val responseMessage = withTimeoutOrNull(3000L) {
                     val responseBuffer = mutableListOf<Byte>()
                     var byteRead: Int
                     var etxFound = false
@@ -180,7 +181,7 @@ class CommunicationManager {
                 )
 
                 if (responseMessage == null) {
-                    Log.e("CommunicationManager", "sendCommand: Gesamt-Timeout (15s) oder keine verwertbare Antwort.")
+                    Log.e("CommunicationManager", "sendCommand: Gesamt-Timeout (3s) oder keine verwertbare Antwort.")
                 }
 
                 responseMessage
@@ -211,12 +212,12 @@ class CommunicationManager {
                 null
             } catch (e: TimeoutCancellationException) {
                 val duration = System.currentTimeMillis() - startTime
-                Log.e("CommunicationManager", "sendCommand: Expliziter Timeout durch withTimeoutOrNull.")
+                Log.e("CommunicationManager", "sendCommand: Expliziter Timeout durch withTimeoutOrNull (3s).")
                 loggingManager?.logCommunication(
                     LoggingManager.CommunicationDirection.BIDIRECTIONAL,
                     cellNumber,
                     command.take(20),
-                    "EXPLICIT_TIMEOUT",
+                    "EXPLICIT_TIMEOUT_3S",
                     false,
                     duration
                 )

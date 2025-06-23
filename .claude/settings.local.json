@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(claude config list)",
+      "Bash(ls:*)",
+      "Bash(./gradlew:*)",
+      "Bash(gradle:*)",
+      "Bash(sed:*)",
+      "Bash(chmod:*)",
+      "Bash(find:*)",
+      "Bash(rg:*)",
+      "Bash(grep:*)",
+      "Bash(awk:*)",
+      "Bash(java:*)",
+      "Bash(sudo apt:*)",
+      "Bash(sudo apt install:*)"
+    ],
+    "deny": []
+  }
+}

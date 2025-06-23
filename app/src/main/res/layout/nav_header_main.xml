@@ -2,67 +2,29 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@drawable/gradient_primary"
-    android:padding="24dp"
+    android:layout_height="176dp"
+    android:background="@color/md_theme_light_surfaceVariant"
+    android:paddingTop="48dp"
+    android:paddingBottom="16dp"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
     android:orientation="vertical"
-    android:gravity="center_vertical"
-    android:theme="@style/ThemeOverlay.AppCompat.Dark">
+    android:gravity="bottom">
 
-    <!-- ✅ NEU: Firmenlogo prominenter platziert -->
-    <ImageView
-        android:id="@+id/imageCompanyLogo"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:src="@drawable/company_logo"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp"
-        android:layout_gravity="center_horizontal"
-        android:scaleType="centerInside"
-        android:contentDescription="Firmenlogo"
-        android:background="@drawable/logo_background_circle"
-        android:padding="8dp"
-        android:elevation="4dp" />
-
-    <!-- App-Informationen -->
-    <LinearLayout
-        android:layout_width="match_parent"
+    <TextView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginTop="8dp"
-        android:gravity="center_horizontal">
+        android:text="ServiceTool"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="@color/md_theme_light_onSurface" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/app_name"
-            android:textColor="@android:color/white"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:gravity="center" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="Flintec RC3D Service Tool"
-            android:textColor="@android:color/white"
-            android:textSize="14sp"
-            android:alpha="0.9"
-            android:gravity="center" />
-
-        <!-- ✅ NEU: Firmenname hinzufügen -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Waagen Döhrn GmbH Co KG"
-            android:textColor="@android:color/white"
-            android:textSize="12sp"
-            android:alpha="0.8"
-            android:gravity="center"
-            android:textStyle="italic" />
-
-    </LinearLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Flintec RC3D Configuration"
+        android:textSize="16sp"
+        android:textColor="@color/md_theme_light_onSurfaceVariant"
+        android:layout_marginTop="4dp" />
 
 </LinearLayout>

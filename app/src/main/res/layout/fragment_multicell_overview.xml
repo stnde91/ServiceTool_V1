@@ -4,42 +4,62 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8F9FA"
-    android:padding="16dp">
+    android:background="@color/md_theme_light_background">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <!-- Header Card mit Gesamtstatus -->
+        <!-- Minimalist Header -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Multi-Cell Übersicht"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:textColor="@color/md_theme_light_onSurface"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/textOverallStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="System bereit"
+            android:textSize="16sp"
+            android:textColor="@color/md_theme_light_onSurfaceVariant"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Configuration Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="4dp"
-            app:strokeWidth="0dp">
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/gradient_primary"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="16dp">
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Konfiguration"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/md_theme_light_onSurface"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Cell Count Selection -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <ImageView
-                        android:layout_width="32dp"
-                        android:layout_height="32dp"
-                        android:layout_marginEnd="12dp"
-                        android:src="@drawable/ic_weight_24"
-                        app:tint="@android:color/white" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -50,29 +70,29 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Flintec RC3D Multi-Cell"
-                            android:textColor="@android:color/white"
-                            android:textSize="24sp"
-                            android:textStyle="bold" />
+                            android:text="Anzahl aktive Zellen"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/md_theme_light_onSurface" />
 
                         <TextView
-                            android:id="@+id/textOverallStatus"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Zellen bereit"
-                            android:textColor="@android:color/white"
+                            android:text="Wählen Sie die Zellenanzahl"
                             android:textSize="14sp"
-                            android:alpha="0.9" />
+                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:layout_marginTop="2dp" />
 
                     </LinearLayout>
 
-                    <com.google.android.material.progressindicator.CircularProgressIndicator
-                        android:id="@+id/progressIndicatorOverall"
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:visibility="gone"
-                        app:indicatorColor="@android:color/white"
-                        app:trackThickness="3dp" />
+                    <Spinner
+                        android:id="@+id/spinnerActiveCells"
+                        android:layout_width="120dp"
+                        android:layout_height="48dp"
+                        android:layout_marginStart="16dp"
+                        android:background="@drawable/spinner_background"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp" />
 
                 </LinearLayout>
 
@@ -80,14 +100,13 @@
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Zellenanzahl-Auswahl Card -->
+        <!-- Cells Overview Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:strokeWidth="0dp">
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -98,118 +117,31 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Anzahl aktiver Zellen"
-                    android:textColor="?android:attr/textColorPrimary"
-                    android:textSize="16sp"
-                    android:layout_marginBottom="8dp"/>
-
-                <Spinner
-                    android:id="@+id/spinnerActiveCells"
-                    android:layout_width="match_parent"
-                    android:layout_height="48dp"
-                    android:background="@drawable/rounded_background_light"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"/>
-            </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- 8-Zellen Grid (4x2) - Kompaktes Design -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:strokeWidth="0dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    android:text="Zellen-Übersicht"
-                    android:textColor="?android:attr/textColorPrimary"
+                    android:text="Zellen-Status"
                     android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textColor="@color/md_theme_light_onSurface"
+                    android:layout_marginBottom="16dp" />
 
-                <!-- Erste Reihe: Zellen 1-4 -->
+                <!-- First Row: Cells 2, 3, 4, 5 -->
                 <LinearLayout
                     android:id="@+id/rowCell1to4"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginBottom="8dp"
                     android:orientation="horizontal">
 
-                    <!-- Zelle 1 - Kompakt -->
-                    <LinearLayout
-                        android:id="@+id/layoutCell1"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginEnd="6dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/rounded_background_light"
-                        android:gravity="center"
-                        android:orientation="vertical"
-                        android:padding="10dp"
-                        android:visibility="gone"
-                        tools:visibility="visible">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Zelle 1"
-                            android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="11sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/textSerialCell1"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="1dp"
-                            android:text="S/N: 123456"
-                            android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="9sp"
-                            android:textStyle="italic"
-                            android:gravity="center"
-                            tools:text="S/N: 123456" />
-
-                        <TextView
-                            android:id="@+id/textCountsCell1"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="0"
-                            android:textColor="@color/status_live_color"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            tools:text="95" />
-
-                        <ImageView
-                            android:id="@+id/statusIndicatorCell1"
-                            android:layout_width="8dp"
-                            android:layout_height="8dp"
-                            android:layout_marginTop="3dp"
-                            android:src="@drawable/ic_status_pending" />
-                    </LinearLayout>
-
-                    <!-- Zelle 2 - Kompakt -->
+                    <!-- Cell 2 -->
                     <LinearLayout
                         android:id="@+id/layoutCell2"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="3dp"
-                        android:layout_marginEnd="3dp"
+                        android:layout_marginEnd="4dp"
                         android:layout_weight="1"
-                        android:background="@drawable/rounded_background_light"
+                        android:background="@color/md_theme_light_surfaceVariant"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="10dp"
+                        android:padding="12dp"
                         android:visibility="gone"
                         tools:visibility="visible">
 
@@ -217,21 +149,9 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Zelle 2"
-                            android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="11sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/textSerialCell2"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="1dp"
-                            android:text="S/N: 654321"
-                            android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="9sp"
-                            android:textStyle="italic"
-                            android:gravity="center"
-                            tools:text="S/N: 654321" />
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/md_theme_light_onSurface" />
 
                         <TextView
                             android:id="@+id/textCountsCell2"
@@ -239,31 +159,43 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="0"
-                            android:textColor="@color/status_live_color"
-                            android:textSize="18sp"
+                            android:textSize="20sp"
                             android:textStyle="bold"
+                            android:textColor="@color/md_theme_light_primary"
                             tools:text="87" />
+
+                        <TextView
+                            android:id="@+id/textSerialCell2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="S/N: ------"
+                            android:textSize="10sp"
+                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:fontFamily="monospace"
+                            tools:text="S/N: 654321" />
 
                         <ImageView
                             android:id="@+id/statusIndicatorCell2"
-                            android:layout_width="8dp"
-                            android:layout_height="8dp"
-                            android:layout_marginTop="3dp"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_marginTop="8dp"
                             android:src="@drawable/ic_status_pending" />
+
                     </LinearLayout>
 
-                    <!-- Zelle 3 - Kompakt -->
+                    <!-- Repeat for cells 3, 4, 5 with similar structure -->
                     <LinearLayout
                         android:id="@+id/layoutCell3"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="3dp"
-                        android:layout_marginEnd="3dp"
+                        android:layout_marginStart="2dp"
+                        android:layout_marginEnd="2dp"
                         android:layout_weight="1"
-                        android:background="@drawable/rounded_background_light"
+                        android:background="@color/md_theme_light_surfaceVariant"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="10dp"
+                        android:padding="12dp"
                         android:visibility="gone"
                         tools:visibility="visible">
 
@@ -271,21 +203,9 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Zelle 3"
-                            android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="11sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/textSerialCell3"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="1dp"
-                            android:text="S/N: 789012"
-                            android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="9sp"
-                            android:textStyle="italic"
-                            android:gravity="center"
-                            tools:text="S/N: 789012" />
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/md_theme_light_onSurface" />
 
                         <TextView
                             android:id="@+id/textCountsCell3"
@@ -293,30 +213,42 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="0"
-                            android:textColor="@color/status_live_color"
-                            android:textSize="18sp"
+                            android:textSize="20sp"
                             android:textStyle="bold"
+                            android:textColor="@color/md_theme_light_primary"
                             tools:text="112" />
+
+                        <TextView
+                            android:id="@+id/textSerialCell3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="S/N: ------"
+                            android:textSize="10sp"
+                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:fontFamily="monospace"
+                            tools:text="S/N: 789012" />
 
                         <ImageView
                             android:id="@+id/statusIndicatorCell3"
-                            android:layout_width="8dp"
-                            android:layout_height="8dp"
-                            android:layout_marginTop="3dp"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_marginTop="8dp"
                             android:src="@drawable/ic_status_pending" />
+
                     </LinearLayout>
 
-                    <!-- Zelle 4 - Kompakt -->
                     <LinearLayout
                         android:id="@+id/layoutCell4"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
+                        android:layout_marginStart="2dp"
+                        android:layout_marginEnd="2dp"
                         android:layout_weight="1"
-                        android:background="@drawable/rounded_background_light"
+                        android:background="@color/md_theme_light_surfaceVariant"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="10dp"
+                        android:padding="12dp"
                         android:visibility="gone"
                         tools:visibility="visible">
 
@@ -324,21 +256,9 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Zelle 4"
-                            android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="11sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/textSerialCell4"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="1dp"
-                            android:text="S/N: 345678"
-                            android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="9sp"
-                            android:textStyle="italic"
-                            android:gravity="center"
-                            tools:text="S/N: 345678" />
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/md_theme_light_onSurface" />
 
                         <TextView
                             android:id="@+id/textCountsCell4"
@@ -346,38 +266,41 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="0"
-                            android:textColor="@color/status_live_color"
-                            android:textSize="18sp"
+                            android:textSize="20sp"
                             android:textStyle="bold"
+                            android:textColor="@color/md_theme_light_primary"
                             tools:text="78" />
+
+                        <TextView
+                            android:id="@+id/textSerialCell4"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="S/N: ------"
+                            android:textSize="10sp"
+                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:fontFamily="monospace"
+                            tools:text="S/N: 345678" />
 
                         <ImageView
                             android:id="@+id/statusIndicatorCell4"
-                            android:layout_width="8dp"
-                            android:layout_height="8dp"
-                            android:layout_marginTop="3dp"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_marginTop="8dp"
                             android:src="@drawable/ic_status_pending" />
+
                     </LinearLayout>
-                </LinearLayout>
 
-                <!-- Zweite Reihe: Zellen 5-8 -->
-                <LinearLayout
-                    android:id="@+id/rowCell5to8"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-
-                    <!-- Zelle 5 - Kompakt -->
                     <LinearLayout
                         android:id="@+id/layoutCell5"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="6dp"
+                        android:layout_marginStart="4dp"
                         android:layout_weight="1"
-                        android:background="@drawable/rounded_background_light"
+                        android:background="@color/md_theme_light_surfaceVariant"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="10dp"
+                        android:padding="12dp"
                         android:visibility="gone"
                         tools:visibility="visible">
 
@@ -385,21 +308,9 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Zelle 5"
-                            android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="11sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/textSerialCell5"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="1dp"
-                            android:text="S/N: 901234"
-                            android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="9sp"
-                            android:textStyle="italic"
-                            android:gravity="center"
-                            tools:text="S/N: 901234" />
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/md_theme_light_onSurface" />
 
                         <TextView
                             android:id="@+id/textCountsCell5"
@@ -407,138 +318,105 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="0"
-                            android:textColor="@color/status_live_color"
-                            android:textSize="18sp"
+                            android:textSize="20sp"
                             android:textStyle="bold"
+                            android:textColor="@color/md_theme_light_primary"
                             tools:text="103" />
+
+                        <TextView
+                            android:id="@+id/textSerialCell5"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="S/N: ------"
+                            android:textSize="10sp"
+                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:fontFamily="monospace"
+                            tools:text="S/N: 901234" />
 
                         <ImageView
                             android:id="@+id/statusIndicatorCell5"
-                            android:layout_width="8dp"
-                            android:layout_height="8dp"
-                            android:layout_marginTop="3dp"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_marginTop="8dp"
                             android:src="@drawable/ic_status_pending" />
+
                     </LinearLayout>
 
-                    <!-- Zelle 6 - Kompakt -->
+                </LinearLayout>
+
+                <!-- Second Row: Cells 1, 8, 7, 6 -->
+                <LinearLayout
+                    android:id="@+id/rowCell5to8"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <!-- Similar structure for cells 1, 8, 7, 6 -->
                     <LinearLayout
-                        android:id="@+id/layoutCell6"
+                        android:id="@+id/layoutCell1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="3dp"
-                        android:layout_marginEnd="3dp"
+                        android:layout_marginEnd="4dp"
                         android:layout_weight="1"
-                        android:background="@drawable/rounded_background_light"
+                        android:background="@color/md_theme_light_surfaceVariant"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="10dp"
+                        android:padding="12dp"
                         android:visibility="gone"
                         tools:visibility="visible">
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Zelle 6"
-                            android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="11sp"
-                            android:textStyle="bold" />
+                            android:text="Zelle 1"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/md_theme_light_onSurface" />
 
                         <TextView
-                            android:id="@+id/textSerialCell6"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="1dp"
-                            android:text="S/N: 567890"
-                            android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="9sp"
-                            android:textStyle="italic"
-                            android:gravity="center"
-                            tools:text="S/N: 567890" />
-
-                        <TextView
-                            android:id="@+id/textCountsCell6"
+                            android:id="@+id/textCountsCell1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="0"
-                            android:textColor="@color/status_live_color"
-                            android:textSize="18sp"
+                            android:textSize="20sp"
                             android:textStyle="bold"
-                            tools:text="89" />
-
-                        <ImageView
-                            android:id="@+id/statusIndicatorCell6"
-                            android:layout_width="8dp"
-                            android:layout_height="8dp"
-                            android:layout_marginTop="3dp"
-                            android:src="@drawable/ic_status_pending" />
-                    </LinearLayout>
-
-                    <!-- Zelle 7 - Kompakt -->
-                    <LinearLayout
-                        android:id="@+id/layoutCell7"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="3dp"
-                        android:layout_marginEnd="3dp"
-                        android:layout_weight="1"
-                        android:background="@drawable/rounded_background_light"
-                        android:gravity="center"
-                        android:orientation="vertical"
-                        android:padding="10dp"
-                        android:visibility="gone"
-                        tools:visibility="visible">
+                            android:textColor="@color/md_theme_light_primary"
+                            tools:text="95" />
 
                         <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Zelle 7"
-                            android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="11sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/textSerialCell7"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="1dp"
-                            android:text="S/N: 234567"
-                            android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="9sp"
-                            android:textStyle="italic"
-                            android:gravity="center"
-                            tools:text="S/N: 234567" />
-
-                        <TextView
-                            android:id="@+id/textCountsCell7"
+                            android:id="@+id/textSerialCell1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="0"
-                            android:textColor="@color/status_live_color"
-                            android:textSize="18sp"
-                            android:textStyle="bold"
-                            tools:text="94" />
+                            android:text="S/N: ------"
+                            android:textSize="10sp"
+                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:fontFamily="monospace"
+                            tools:text="S/N: 123456" />
 
                         <ImageView
-                            android:id="@+id/statusIndicatorCell7"
-                            android:layout_width="8dp"
-                            android:layout_height="8dp"
-                            android:layout_marginTop="3dp"
+                            android:id="@+id/statusIndicatorCell1"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_marginTop="8dp"
                             android:src="@drawable/ic_status_pending" />
+
                     </LinearLayout>
 
-                    <!-- Zelle 8 - Kompakt -->
+                    <!-- Repeat structure for cells 8, 7, 6 -->
                     <LinearLayout
                         android:id="@+id/layoutCell8"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
+                        android:layout_marginStart="2dp"
+                        android:layout_marginEnd="2dp"
                         android:layout_weight="1"
-                        android:background="@drawable/rounded_background_light"
+                        android:background="@color/md_theme_light_surfaceVariant"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="10dp"
+                        android:padding="12dp"
                         android:visibility="gone"
                         tools:visibility="visible">
 
@@ -546,21 +424,9 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Zelle 8"
-                            android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="11sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/textSerialCell8"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="1dp"
-                            android:text="S/N: 890123"
-                            android:textColor="?android:attr/textColorSecondary"
-                            android:textSize="9sp"
-                            android:textStyle="italic"
-                            android:gravity="center"
-                            tools:text="S/N: 890123" />
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/md_theme_light_onSurface" />
 
                         <TextView
                             android:id="@+id/textCountsCell8"
@@ -568,166 +434,312 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="0"
-                            android:textColor="@color/status_live_color"
-                            android:textSize="18sp"
+                            android:textSize="20sp"
                             android:textStyle="bold"
+                            android:textColor="@color/md_theme_light_primary"
                             tools:text="101" />
+
+                        <TextView
+                            android:id="@+id/textSerialCell8"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="S/N: ------"
+                            android:textSize="10sp"
+                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:fontFamily="monospace"
+                            tools:text="S/N: 890123" />
 
                         <ImageView
                             android:id="@+id/statusIndicatorCell8"
-                            android:layout_width="8dp"
-                            android:layout_height="8dp"
-                            android:layout_marginTop="3dp"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_marginTop="8dp"
                             android:src="@drawable/ic_status_pending" />
+
                     </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/layoutCell7"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="2dp"
+                        android:layout_marginEnd="2dp"
+                        android:layout_weight="1"
+                        android:background="@color/md_theme_light_surfaceVariant"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="12dp"
+                        android:visibility="gone"
+                        tools:visibility="visible">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Zelle 7"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/md_theme_light_onSurface" />
+
+                        <TextView
+                            android:id="@+id/textCountsCell7"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="0"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/md_theme_light_primary"
+                            tools:text="94" />
+
+                        <TextView
+                            android:id="@+id/textSerialCell7"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="S/N: ------"
+                            android:textSize="10sp"
+                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:fontFamily="monospace"
+                            tools:text="S/N: 234567" />
+
+                        <ImageView
+                            android:id="@+id/statusIndicatorCell7"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_marginTop="8dp"
+                            android:src="@drawable/ic_status_pending" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/layoutCell6"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:layout_weight="1"
+                        android:background="@color/md_theme_light_surfaceVariant"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:padding="12dp"
+                        android:visibility="gone"
+                        tools:visibility="visible">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Zelle 6"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/md_theme_light_onSurface" />
+
+                        <TextView
+                            android:id="@+id/textCountsCell6"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="0"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/md_theme_light_primary"
+                            tools:text="89" />
+
+                        <TextView
+                            android:id="@+id/textSerialCell6"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="S/N: ------"
+                            android:textSize="10sp"
+                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:fontFamily="monospace"
+                            tools:text="S/N: 567890" />
+
+                        <ImageView
+                            android:id="@+id/statusIndicatorCell6"
+                            android:layout_width="16dp"
+                            android:layout_height="16dp"
+                            android:layout_marginTop="8dp"
+                            android:src="@drawable/ic_status_pending" />
+
+                    </LinearLayout>
+
                 </LinearLayout>
+
             </LinearLayout>
+
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Steuerung Card -->
+        <!-- Control Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:strokeWidth="0dp">
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="16dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
                     android:text="Steuerung"
-                    android:textColor="?android:attr/textColorPrimary"
                     android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textColor="@color/md_theme_light_onSurface"
+                    android:layout_marginBottom="16dp" />
 
                 <!-- Button Row -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="12dp">
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/buttonRefreshAll"
-                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="0dp"
-                        android:layout_height="56dp"
+                        android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
                         android:layout_weight="1"
-                        android:text="Alle aktualisieren"
-                        android:textSize="14sp"
-                        app:icon="@drawable/ic_refresh_24"
-                        app:iconGravity="textStart" />
+                        android:text="Aktualisieren"
+                        app:icon="@drawable/ic_refresh_24" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/buttonStartLiveAll"
-                        style="@style/Widget.Material3.Button"
                         android:layout_width="0dp"
-                        android:layout_height="56dp"
+                        android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
                         android:layout_marginEnd="4dp"
                         android:layout_weight="1"
-                        android:backgroundTint="@color/status_live_color"
                         android:text="Live Start"
-                        android:textSize="14sp"
-                        app:icon="@drawable/ic_play_24"
-                        app:iconGravity="textStart" />
+                        app:icon="@drawable/ic_play_24" />
 
-                    <Button
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/buttonStopLiveAll"
-                        style="@style/Widget.Material3.Button"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:layout_width="0dp"
-                        android:layout_height="56dp"
+                        android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
                         android:layout_weight="1"
-                        android:backgroundTint="@color/status_error_color"
-                        android:enabled="false"
                         android:text="Live Stop"
-                        android:textSize="14sp"
                         app:icon="@drawable/ic_stop_24"
-                        app:iconGravity="textStart" />
+                        android:enabled="false" />
+
                 </LinearLayout>
 
-                <!-- Letzte Aktualisierung -->
-                <TextView
-                    android:id="@+id/textLastUpdateAll"
-                    android:layout_width="wrap_content"
+                <!-- Last Update Info -->
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="12dp"
-                    android:text="Noch nicht geladen"
-                    android:textColor="?android:attr/textColorSecondary"
-                    android:textSize="12sp"
-                    tools:text="Letzte Aktualisierung: 14:32:15" />
+                    android:orientation="horizontal"
+                    android:background="@color/md_theme_light_surfaceVariant"
+                    android:padding="12dp"
+                    android:gravity="center_vertical">
+
+                    <com.google.android.material.progressindicator.CircularProgressIndicator
+                        android:id="@+id/progressIndicatorOverall"
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginEnd="12dp"
+                        android:visibility="gone" />
+
+                    <TextView
+                        android:id="@+id/textLastUpdateAll"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Noch nicht geladen"
+                        android:textSize="14sp"
+                        android:textColor="@color/md_theme_light_onSurfaceVariant"
+                        tools:text="Letzte Aktualisierung: 14:32:15" />
+
+                </LinearLayout>
+
             </LinearLayout>
+
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Technische Details Liste -->
+        <!-- Technical Details Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
-            app:strokeWidth="0dp">
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="20dp">
+                android:padding="16dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
                     android:text="Technische Details"
-                    android:textColor="?android:attr/textColorPrimary"
                     android:textSize="18sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:textColor="@color/md_theme_light_onSurface"
+                    android:layout_marginBottom="16dp" />
 
-                <!-- Gemeinsame Baudrate -->
+                <!-- Common Baudrate -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="12dp"
                     android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:background="@color/md_theme_light_surfaceVariant"
+                    android:padding="12dp">
 
                     <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
                         android:layout_marginEnd="12dp"
                         android:src="@drawable/ic_speed_24"
-                        app:tint="?android:attr/textColorSecondary" />
+                        app:tint="@color/md_theme_light_primary" />
 
-                    <TextView
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Baudrate"
-                        android:textColor="?android:attr/textColorSecondary"
-                        android:textSize="14sp" />
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Baudrate"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/md_theme_light_onSurface" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Kommunikationsgeschwindigkeit"
+                            android:textSize="14sp"
+                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:layout_marginTop="2dp" />
+
+                    </LinearLayout>
 
                     <TextView
                         android:id="@+id/textBaudrateAll"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Unbekannt"
-                        android:textColor="?android:attr/textColorPrimary"
-                        android:textSize="14sp"
+                        android:textSize="16sp"
                         android:textStyle="bold"
+                        android:textColor="@color/md_theme_light_primary"
                         tools:text="9600 bps" />
+
                 </LinearLayout>
 
-                <!-- NEU: Container für individuelle Zell-Details -->
+                <!-- Individual Cell Details Container -->
                 <LinearLayout
                     android:id="@+id/layoutIndividualDetailsContainer"
                     android:layout_width="match_parent"
@@ -736,6 +748,9 @@
                     android:animateLayoutChanges="true" />
 
             </LinearLayout>
+
         </com.google.android.material.card.MaterialCardView>
+
     </LinearLayout>
+
 </androidx.core.widget.NestedScrollView>

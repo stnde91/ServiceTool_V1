@@ -1,13 +1,141 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
+    <!-- Base colors -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-
-    <color name="colorPrimaryVariant">#00695C</color> <color name="background_color">#ECEFF1</color>   <color name="status_pending_color">#FFB300</color> <color name="status_success_color">#388E3C</color> <color name="status_error_color">#D32F2F</color>   <color name="status_live_color">#1976D2</color>    <color name="card_background">#FFFFFF</color>
-    <color name="text_primary_dark">#212121</color> <color name="text_secondary_dark">#757575</color> <color name="results_area_background">#FAFAFA</color> <color name="results_area_stroke">#E0E0E0</color>
+    
+    <!-- Material 3 Light Theme Colors - Minimalist Blue Scheme -->
+    <color name="md_theme_light_primary">#0061A4</color>
+    <color name="md_theme_light_onPrimary">#FFFFFF</color>
+    <color name="md_theme_light_primaryContainer">#D1E4FF</color>
+    <color name="md_theme_light_onPrimaryContainer">#001D36</color>
+    
+    <color name="md_theme_light_secondary">#535F70</color>
+    <color name="md_theme_light_onSecondary">#FFFFFF</color>
+    <color name="md_theme_light_secondaryContainer">#D7E3F7</color>
+    <color name="md_theme_light_onSecondaryContainer">#101C2B</color>
+    
+    <color name="md_theme_light_tertiary">#6B5778</color>
+    <color name="md_theme_light_onTertiary">#FFFFFF</color>
+    <color name="md_theme_light_tertiaryContainer">#F2DAFF</color>
+    <color name="md_theme_light_onTertiaryContainer">#251431</color>
+    
+    <color name="md_theme_light_error">#BA1A1A</color>
+    <color name="md_theme_light_onError">#FFFFFF</color>
+    <color name="md_theme_light_errorContainer">#FFDAD6</color>
+    <color name="md_theme_light_onErrorContainer">#410002</color>
+    
+    <color name="md_theme_light_background">#FDFCFF</color>
+    <color name="md_theme_light_onBackground">#1A1C1E</color>
+    <color name="md_theme_light_surface">#FDFCFF</color>
+    <color name="md_theme_light_onSurface">#1A1C1E</color>
+    <color name="md_theme_light_surfaceVariant">#DFE2EB</color>
+    <color name="md_theme_light_onSurfaceVariant">#43474E</color>
+    
+    <color name="md_theme_light_outline">#73777F</color>
+    <color name="md_theme_light_outlineVariant">#C3C7CF</color>
+    <color name="md_theme_light_inverseSurface">#2F3033</color>
+    <color name="md_theme_light_inverseOnSurface">#F1F0F4</color>
+    <color name="md_theme_light_inversePrimary">#9ECAFF</color>
+    
+    <color name="md_theme_light_surfaceContainer">#F3F2F6</color>
+    <color name="md_theme_light_surfaceContainerHigh">#E8E7EB</color>
+    <color name="md_theme_light_surfaceContainerHighest">#E2E2E5</color>
+    <color name="md_theme_light_surfaceContainerLow">#F9F8FC</color>
+    <color name="md_theme_light_surfaceContainerLowest">#FFFFFF</color>
+    
+    <!-- Material 3 Dark Theme Colors -->
+    <color name="md_theme_dark_primary">#9ECAFF</color>
+    <color name="md_theme_dark_onPrimary">#003258</color>
+    <color name="md_theme_dark_primaryContainer">#00497D</color>
+    <color name="md_theme_dark_onPrimaryContainer">#D1E4FF</color>
+    
+    <color name="md_theme_dark_secondary">#BBC7DB</color>
+    <color name="md_theme_dark_onSecondary">#253140</color>
+    <color name="md_theme_dark_secondaryContainer">#3C4857</color>
+    <color name="md_theme_dark_onSecondaryContainer">#D7E3F7</color>
+    
+    <color name="md_theme_dark_tertiary">#D6BEE4</color>
+    <color name="md_theme_dark_onTertiary">#3B2948</color>
+    <color name="md_theme_dark_tertiaryContainer">#523F5F</color>
+    <color name="md_theme_dark_onTertiaryContainer">#F2DAFF</color>
+    
+    <color name="md_theme_dark_error">#FFB4AB</color>
+    <color name="md_theme_dark_onError">#690005</color>
+    <color name="md_theme_dark_errorContainer">#93000A</color>
+    <color name="md_theme_dark_onErrorContainer">#FFDAD6</color>
+    
+    <color name="md_theme_dark_background">#1A1C1E</color>
+    <color name="md_theme_dark_onBackground">#E2E2E5</color>
+    <color name="md_theme_dark_surface">#1A1C1E</color>
+    <color name="md_theme_dark_onSurface">#E2E2E5</color>
+    <color name="md_theme_dark_surfaceVariant">#43474E</color>
+    <color name="md_theme_dark_onSurfaceVariant">#C3C7CF</color>
+    
+    <color name="md_theme_dark_outline">#8D9199</color>
+    <color name="md_theme_dark_outlineVariant">#43474E</color>
+    <color name="md_theme_dark_inverseSurface">#E2E2E5</color>
+    <color name="md_theme_dark_inverseOnSurface">#2F3033</color>
+    <color name="md_theme_dark_inversePrimary">#0061A4</color>
+    
+    <color name="md_theme_dark_surfaceContainer">#1E2022</color>
+    <color name="md_theme_dark_surfaceContainerHigh">#282A2C</color>
+    <color name="md_theme_dark_surfaceContainerHighest">#333537</color>
+    <color name="md_theme_dark_surfaceContainerLow">#1A1C1E</color>
+    <color name="md_theme_dark_surfaceContainerLowest">#0C0E10</color>
+    
+    <!-- Material 3 compatibility colors for dark theme -->
+    <color name="colorSurfaceContainerHighest_dark">@color/md_theme_dark_surfaceVariant</color>
+    <color name="colorSurfaceContainer_dark">@color/md_theme_dark_surfaceVariant</color>
+    <color name="colorPrimaryContainer_dark">@color/md_theme_dark_primaryContainer</color>
+    <color name="colorOnPrimaryContainer_dark">@color/md_theme_dark_onPrimaryContainer</color>
+    
+    <!-- Status Colors - Material 3 Semantic Colors -->
+    <color name="status_success">#4CAF50</color>
+    <color name="status_warning">#FF9800</color>
+    <color name="status_error">#F44336</color>
+    <color name="status_info">#2196F3</color>
+    <color name="status_pending">#FFC107</color>
+    <color name="status_live">#03A9F4</color>
+    
+    <!-- Legacy colors for backward compatibility -->
+    <color name="primary">@color/md_theme_light_primary</color>
+    <color name="primary_dark">@color/md_theme_light_primaryContainer</color>
+    <color name="primary_light">@color/md_theme_light_primaryContainer</color>
+    <color name="accent">@color/md_theme_light_secondary</color>
+    <color name="text_primary">@color/md_theme_light_onSurface</color>
+    <color name="text_secondary">@color/md_theme_light_onSurfaceVariant</color>
+    <color name="background_color">@color/md_theme_light_background</color>
+    <color name="background_light">@color/md_theme_light_background</color>
+    <color name="card_background">@color/md_theme_light_surface</color>
+    
+    <!-- Status colors with legacy names -->
+    <color name="status_live_color">@color/status_live</color>
+    <color name="status_error_color">@color/status_error</color>
+    <color name="status_pending_color">@color/status_pending</color>
+    <color name="status_success_color">@color/status_success</color>
+    
+    <!-- Legacy UI element colors -->
+    <color name="success">@color/status_success</color>
+    <color name="warning">@color/status_warning</color>
+    <color name="error">@color/status_error</color>
+    <color name="info">@color/status_info</color>
+    
+    <!-- Results area colors -->
+    <color name="results_area_background">@color/md_theme_light_surfaceVariant</color>
+    <color name="results_area_stroke">@color/md_theme_light_outline</color>
+    
+    <!-- Info card colors -->
+    <color name="info_background">@color/md_theme_light_surfaceVariant</color>
+    <color name="info_text">@color/md_theme_light_onSurfaceVariant</color>
+    
+    <!-- Material 3 compatibility colors for older library versions -->
+    <color name="colorSurfaceContainerHighest">@color/md_theme_light_surfaceVariant</color>
+    <color name="colorSurfaceContainer">@color/md_theme_light_surfaceVariant</color>
+    <color name="colorPrimaryContainer">@color/md_theme_light_primaryContainer</color>
+    <color name="colorOnPrimaryContainer">@color/md_theme_light_onPrimaryContainer</color>
+    
+    <!-- Additional legacy mappings for code references -->
+    <color name="text_secondary_dark">@color/md_theme_light_onSurfaceVariant</color>
+    <color name="text_primary_dark">@color/md_theme_light_onSurface</color>
 </resources>

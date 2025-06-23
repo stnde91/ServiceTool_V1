@@ -7,16 +7,13 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ProgressBar
-import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -29,40 +26,14 @@ class MoxaSettingsFragment : Fragment() {
     private lateinit var editTextMoxaIp: TextInputEditText
     private lateinit var editTextMoxaPort: TextInputEditText
     private lateinit var textViewMoxaModel: TextView
-    private lateinit var buttonTestMoxaConnection: Button
-    private lateinit var textViewConnectionStatus: TextView
+    private lateinit var buttonSaveMoxaSettings: Button
+    private lateinit var buttonTestConnection: Button
+    private lateinit var buttonPingMoxa: Button
+    private lateinit var textViewConnectionResult: TextView
+    private lateinit var buttonMoxaStatus: Button
+    private lateinit var buttonMoxaRestart: Button
+    private lateinit var textViewMoxaStatus: TextView
     private lateinit var progressBarConnection: ProgressBar
-
-    // Port 1 UI
-    private lateinit var spinnerPort1Baudrate: Spinner
-    private lateinit var spinnerPort1DataBits: Spinner
-    private lateinit var spinnerPort1StopBits: Spinner
-    private lateinit var spinnerPort1Parity: Spinner
-    private lateinit var spinnerPort1FlowControl: Spinner
-    private lateinit var switchPort1Fifo: SwitchMaterial
-    private lateinit var textViewPort1Interface: TextView
-    private lateinit var buttonApplyPort1: Button
-    private lateinit var textViewPort1Status: TextView
-
-    // Port 2 UI
-    private lateinit var spinnerPort2Baudrate: Spinner
-    private lateinit var spinnerPort2DataBits: Spinner
-    private lateinit var spinnerPort2StopBits: Spinner
-    private lateinit var spinnerPort2Parity: Spinner
-    private lateinit var spinnerPort2FlowControl: Spinner
-    private lateinit var switchPort2Fifo: SwitchMaterial
-    private lateinit var textViewPort2Interface: TextView
-    private lateinit var buttonApplyPort2: Button
-    private lateinit var textViewPort2Status: TextView
-
-    private lateinit var buttonRestartMoxa: Button
-    private lateinit var buttonFactoryReset: Button
-    private lateinit var buttonDiagnostic: Button
-    private lateinit var textViewSystemStatus: TextView
-    private lateinit var editTextUsername: TextInputEditText
-    private lateinit var editTextPassword: TextInputEditText
-    private lateinit var buttonBackupConfig: Button
-    private lateinit var buttonRestoreConfig: Button
 
     // Services
     private lateinit var settingsManager: SettingsManager
@@ -84,10 +55,6 @@ class MoxaSettingsFragment : Fragment() {
         setupListeners()
         loadCurrentSettings()
 
-        lifecycleScope.launch {
-            delay(500)
-            loadPortConfigurations()
-        }
     }
 
     private fun initializeServices() {
@@ -106,46 +73,16 @@ class MoxaSettingsFragment : Fragment() {
         editTextMoxaIp = view.findViewById(R.id.editTextMoxaIp)
         editTextMoxaPort = view.findViewById(R.id.editTextMoxaPort)
         textViewMoxaModel = view.findViewById(R.id.textViewMoxaModel)
-        buttonTestMoxaConnection = view.findViewById(R.id.buttonTestMoxaConnection)
-        textViewConnectionStatus = view.findViewById(R.id.textViewConnectionStatus)
+        buttonSaveMoxaSettings = view.findViewById(R.id.buttonSaveMoxaSettings)
+        buttonTestConnection = view.findViewById(R.id.buttonTestConnection)
+        buttonPingMoxa = view.findViewById(R.id.buttonPingMoxa)
+        textViewConnectionResult = view.findViewById(R.id.textViewConnectionResult)
+        buttonMoxaStatus = view.findViewById(R.id.buttonMoxaStatus)
+        buttonMoxaRestart = view.findViewById(R.id.buttonMoxaRestart)
+        textViewMoxaStatus = view.findViewById(R.id.textViewMoxaStatus)
         progressBarConnection = view.findViewById(R.id.progressBarConnection)
 
-        // Port 1
-        spinnerPort1Baudrate = view.findViewById(R.id.spinnerPort1Baudrate)
-        spinnerPort1DataBits = view.findViewById(R.id.spinnerPort1DataBits)
-        spinnerPort1StopBits = view.findViewById(R.id.spinnerPort1StopBits)
-        spinnerPort1Parity = view.findViewById(R.id.spinnerPort1Parity)
-        spinnerPort1FlowControl = view.findViewById(R.id.spinnerPort1FlowControl)
-        switchPort1Fifo = view.findViewById(R.id.switchPort1Fifo)
-        textViewPort1Interface = view.findViewById(R.id.textViewPort1Interface)
-        buttonApplyPort1 = view.findViewById(R.id.buttonApplyPort1)
-        textViewPort1Status = view.findViewById(R.id.textViewPort1Status)
-
-        // Port 2
-        spinnerPort2Baudrate = view.findViewById(R.id.spinnerPort2Baudrate)
-        spinnerPort2DataBits = view.findViewById(R.id.spinnerPort2DataBits)
-        spinnerPort2StopBits = view.findViewById(R.id.spinnerPort2StopBits)
-        spinnerPort2Parity = view.findViewById(R.id.spinnerPort2Parity)
-        spinnerPort2FlowControl = view.findViewById(R.id.spinnerPort2FlowControl)
-        switchPort2Fifo = view.findViewById(R.id.switchPort2Fifo)
-        textViewPort2Interface = view.findViewById(R.id.textViewPort2Interface)
-        buttonApplyPort2 = view.findViewById(R.id.buttonApplyPort2)
-        textViewPort2Status = view.findViewById(R.id.textViewPort2Status)
-
-        buttonRestartMoxa = view.findViewById(R.id.buttonRestartMoxa)
-        buttonFactoryReset = view.findViewById(R.id.buttonFactoryReset)
-        buttonDiagnostic = view.findViewById(R.id.buttonDiagnostic)
-        textViewSystemStatus = view.findViewById(R.id.textViewSystemStatus)
-        editTextUsername = view.findViewById(R.id.editTextUsername)
-        editTextPassword = view.findViewById(R.id.editTextPassword)
-        buttonBackupConfig = view.findViewById(R.id.buttonBackupConfig)
-        buttonRestoreConfig = view.findViewById(R.id.buttonRestoreConfig)
-
-        updateConnectionStatus("Nicht getestet", false)
-        updateSystemStatus("Bereit")
-
-        setPortUIEnabled(1, false)
-        setPortUIEnabled(2, false)
+        updateConnectionStatus("Bereit für Verbindungstest", false)
     }
 
     private fun setupListeners() {
@@ -153,179 +90,204 @@ class MoxaSettingsFragment : Fragment() {
             override fun afterTextChanged(s: Editable?) {
                 settingsManager.setMoxaIpAddress(s.toString())
                 updateTelnetController()
-                updateConnectionStatus("Nicht getestet", false)
+                updateConnectionStatus("Bereit für Verbindungstest", false)
             }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
-        buttonTestMoxaConnection.setOnClickListener { loadPortConfigurations() }
-        buttonRestartMoxa.setOnClickListener { showTelnetRestartConfirmation() }
-
-        buttonApplyPort1.setOnClickListener { applyAllSettingsForPort(1) }
-        buttonApplyPort2.setOnClickListener { applyAllSettingsForPort(2) }
-    }
-
-    private fun loadPortConfigurations() {
-        setUIEnabled(false, keepRestartEnabled = false)
-        updatePortStatus(1, "Lade Konfiguration...")
-        updatePortStatus(2, "Lade Konfiguration...")
-        showProgress(true)
-
-        lifecycleScope.launch {
-            val portSettings = telnetController.getPortSettings(getPassword())
-
-            withContext(Dispatchers.Main) {
-                setUIEnabled(true, keepRestartEnabled = portSettings != null)
-                showProgress(false)
-                if (portSettings != null) {
-                    updateConnectionStatus("✅ Konfiguration geladen", true)
-
-                    portSettings[1]?.let {
-                        updatePortStatus(1, "Aktuell: ${it.baudRate} bps, ${it.dataBits}N${it.stopBits}")
-                        setupPortSpinners(1, it)
-                    }
-
-                    portSettings[2]?.let {
-                        updatePortStatus(2, "Aktuell: ${it.baudRate} bps, ${it.dataBits}N${it.stopBits}")
-                        setupPortSpinners(2, it)
-                    }
-                } else {
-                    updateConnectionStatus("❌ Konfiguration konnte nicht geladen werden", false)
-                    updatePortStatus(1, "Fehler beim Laden")
-                    updatePortStatus(2, "Fehler beim Laden")
+        editTextMoxaPort.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                val port = s.toString().toIntOrNull()
+                if (port != null && port in 1..65535) {
+                    settingsManager.setMoxaPort(port)
+                    updateConnectionStatus("Bereit für Verbindungstest", false)
                 }
             }
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+
+        buttonSaveMoxaSettings.setOnClickListener { 
+            saveSettings()
+        }
+
+        buttonTestConnection.setOnClickListener { 
+            testMoxaConnection() 
+        }
+
+        buttonPingMoxa.setOnClickListener { 
+            pingMoxa() 
+        }
+
+        buttonMoxaStatus.setOnClickListener { 
+            getMoxaStatus() 
+        }
+
+        buttonMoxaRestart.setOnClickListener { 
+            showTelnetRestartConfirmation() 
         }
     }
 
-    /**
-     * NEU: Sammelt alle Einstellungen aus der UI und wendet sie an.
-     */
-    private fun applyAllSettingsForPort(port: Int) {
-        val baudSpinner = if (port == 1) spinnerPort1Baudrate else spinnerPort2Baudrate
-        val dataBitsSpinner = if (port == 1) spinnerPort1DataBits else spinnerPort2DataBits
-        val stopBitsSpinner = if (port == 1) spinnerPort1StopBits else spinnerPort2StopBits
-        val paritySpinner = if (port == 1) spinnerPort1Parity else spinnerPort2Parity
-        val flowControlSpinner = if (port == 1) spinnerPort1FlowControl else spinnerPort2FlowControl
-        val fifoSwitch = if (port == 1) switchPort1Fifo else switchPort2Fifo
+    private fun saveSettings() {
+        updateConnectionStatus("Einstellungen werden gespeichert...", false)
+        showToast("Moxa-Einstellungen gespeichert")
+        loggingManager.logInfo("MoxaSettings", "Einstellungen gespeichert: ${settingsManager.getMoxaIpAddress()}:${settingsManager.getMoxaPort()}")
+        updateConnectionStatus("Einstellungen gespeichert", true)
+    }
 
-        val settingsUpdate = MoxaTelnetController.PortSettingsUpdate(
-            baudRate = baudSpinner.selectedItem.toString().toIntOrNull() ?: 9600,
-            dataBits = dataBitsSpinner.selectedItem.toString().toIntOrNull() ?: 8,
-            stopBits = stopBitsSpinner.selectedItem.toString().toIntOrNull() ?: 1,
-            parity = paritySpinner.selectedItem.toString(),
-            flowControl = flowControlSpinner.selectedItem.toString(),
-            fifoEnabled = fifoSwitch.isChecked
-        )
-
-        setUIEnabled(false, keepRestartEnabled = false)
-        updatePortStatus(port, "Wende Einstellungen an & starte neu...")
+    private fun testMoxaConnection() {
+        buttonTestConnection.isEnabled = false
+        updateConnectionStatus("Teste Verbindung...", false)
         showProgress(true)
 
         lifecycleScope.launch {
-            val success = telnetController.applyPortSettings(port, settingsUpdate, getPassword())
-
-            withContext(Dispatchers.Main) {
-                if (success) {
-                    updatePortStatus(port, "Einstellungen angewendet. Neustart wird eingeleitet...")
-                    monitorRestartProgress()
-                } else {
-                    updatePortStatus(port, "❌ Fehler beim Anwenden der Einstellungen")
-                    setUIEnabled(true)
+            try {
+                val communicationManager = CommunicationManager()
+                val success = communicationManager.connect(
+                    settingsManager.getMoxaIpAddress(),
+                    settingsManager.getMoxaPort()
+                )
+                
+                withContext(Dispatchers.Main) {
+                    if (success) {
+                        communicationManager.disconnect()
+                        updateConnectionStatus("✅ Verbindung erfolgreich", true)
+                        loggingManager.logInfo("MoxaSettings", "Verbindungstest erfolgreich")
+                    } else {
+                        updateConnectionStatus("❌ Verbindung fehlgeschlagen", false)
+                        loggingManager.logError("MoxaSettings", "Verbindungstest fehlgeschlagen", null)
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    updateConnectionStatus("❌ Fehler: ${e.message}", false)
+                    loggingManager.logError("MoxaSettings", "Verbindungstest-Fehler", e)
+                }
+            } finally {
+                withContext(Dispatchers.Main) {
+                    buttonTestConnection.isEnabled = true
                     showProgress(false)
                 }
             }
         }
     }
 
-    private fun setupPortSpinners(port: Int, settings: MoxaTelnetController.PortSettings) {
-        // Baudrate
-        val baudSpinner = if (port == 1) spinnerPort1Baudrate else spinnerPort2Baudrate
-        val baudRates = telnetController.supportedBaudRates.map { it.toString() }
-        val baudAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, baudRates)
-        baudAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        baudSpinner.adapter = baudAdapter
-        val baudIndex = baudRates.indexOf(settings.baudRate.toString())
-        if (baudIndex != -1) baudSpinner.setSelection(baudIndex)
+    private fun pingMoxa() {
+        buttonPingMoxa.isEnabled = false
+        updateConnectionStatus("Ping wird ausgeführt...", false)
 
-        // Data Bits
-        val dataBitsSpinner = if (port == 1) spinnerPort1DataBits else spinnerPort2DataBits
-        val dataBits = listOf("5", "6", "7", "8")
-        val dataBitsAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, dataBits)
-        dataBitsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        dataBitsSpinner.adapter = dataBitsAdapter
-        val dataBitsIndex = dataBits.indexOf(settings.dataBits.toString())
-        if (dataBitsIndex != -1) dataBitsSpinner.setSelection(dataBitsIndex)
+        lifecycleScope.launch {
+            try {
+                val startTime = System.currentTimeMillis()
+                val success = telnetController.testConnection()
+                val responseTime = System.currentTimeMillis() - startTime
 
-        // Stop Bits
-        val stopBitsSpinner = if (port == 1) spinnerPort1StopBits else spinnerPort2StopBits
-        val stopBits = listOf("1", "2")
-        val stopBitsAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, stopBits)
-        stopBitsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        stopBitsSpinner.adapter = stopBitsAdapter
-        val stopBitsIndex = stopBits.indexOf(settings.stopBits.toString())
-        if (stopBitsIndex != -1) stopBitsSpinner.setSelection(stopBitsIndex)
-
-        // Parity
-        val paritySpinner = if (port == 1) spinnerPort1Parity else spinnerPort2Parity
-        val parity = listOf("None", "Even", "Odd", "Space", "Mark")
-        val parityAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, parity)
-        parityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        paritySpinner.adapter = parityAdapter
-        val parityIndex = parity.indexOfFirst { it.equals(settings.parity, ignoreCase = true) }
-        if (parityIndex != -1) paritySpinner.setSelection(parityIndex)
-
-        // Flow Control
-        val flowControlSpinner = if (port == 1) spinnerPort1FlowControl else spinnerPort2FlowControl
-        val flowControl = listOf("None", "RTS/CTS", "XON/XOFF", "DTR/DSR")
-        val flowControlAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, flowControl)
-        flowControlAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        flowControlSpinner.adapter = flowControlAdapter
-        val flowControlIndex = flowControl.indexOfFirst { it.replace("/", "").equals(settings.flowControl.replace("/", ""), ignoreCase = true) }
-        if (flowControlIndex != -1) flowControlSpinner.setSelection(flowControlIndex)
-
-        // FIFO
-        val fifoSwitch = if (port == 1) switchPort1Fifo else switchPort2Fifo
-        fifoSwitch.isChecked = settings.fifo.equals("Enabled", ignoreCase = true)
-
-        // Interface
-        val interfaceTextView = if (port == 1) textViewPort1Interface else textViewPort2Interface
-        interfaceTextView.text = settings.interfaceType
-
-        setPortUIEnabled(port, true)
+                withContext(Dispatchers.Main) {
+                    if (success) {
+                        updateConnectionStatus("✅ Ping erfolgreich (${responseTime}ms)", true)
+                    } else {
+                        updateConnectionStatus("❌ Ping fehlgeschlagen", false)
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    updateConnectionStatus("❌ Ping-Fehler: ${e.message}", false)
+                }
+            } finally {
+                withContext(Dispatchers.Main) {
+                    buttonPingMoxa.isEnabled = true
+                }
+            }
+        }
     }
 
-    private fun getPassword(): String {
-        return editTextPassword.text.toString().ifEmpty { "moxa" }
+    private fun getMoxaStatus() {
+        buttonMoxaStatus.isEnabled = false
+        updateMoxaStatus("Lade Device-Info...")
+
+        lifecycleScope.launch {
+            try {
+                val portSettings = telnetController.getPortSettings("moxa")
+                
+                withContext(Dispatchers.Main) {
+                    if (portSettings != null) {
+                        val status = buildString {
+                            appendLine("✅ NPort 5232 Device Server")
+                            appendLine("📍 IP: ${settingsManager.getMoxaIpAddress()}")
+                            appendLine("🔌 Port: ${settingsManager.getMoxaPort()}")
+                            
+                            portSettings[1]?.let { port1 ->
+                                appendLine("🔧 Port 1: ${port1.baudRate} bps, ${port1.dataBits}${port1.parity.take(1)}${port1.stopBits}")
+                            }
+                            
+                            portSettings[2]?.let { port2 ->
+                                appendLine("🔧 Port 2: ${port2.baudRate} bps, ${port2.dataBits}${port2.parity.take(1)}${port2.stopBits}")
+                            }
+                        }
+                        updateMoxaStatus(status)
+                    } else {
+                        updateMoxaStatus("❌ Device-Info konnte nicht geladen werden")
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    updateMoxaStatus("❌ Fehler beim Laden der Device-Info: ${e.message}")
+                }
+            } finally {
+                withContext(Dispatchers.Main) {
+                    buttonMoxaStatus.isEnabled = true
+                }
+            }
+        }
     }
+
 
     private fun showTelnetRestartConfirmation() {
         AlertDialog.Builder(requireContext())
             .setTitle("Moxa Neustart")
-            .setMessage("Möchten Sie die Moxa wirklich neu starten? Ungespeicherte Änderungen gehen dabei verloren.")
+            .setMessage("Möchten Sie die Moxa wirklich neu starten?\n\nIP: ${settingsManager.getMoxaIpAddress()}\nUngespeicherte Änderungen gehen dabei verloren.")
             .setPositiveButton("Ja, neu starten") { _, _ ->
                 showToast("Neustart-Prozess wird gestartet...")
+                loggingManager.logInfo("MoxaSettings", "Benutzer bestätigt Neustart für IP: ${settingsManager.getMoxaIpAddress()}")
                 restartMoxaViaTelnet()
             }
-            .setNegativeButton("Abbrechen", null)
+            .setNegativeButton("Abbrechen") { _, _ ->
+                loggingManager.logInfo("MoxaSettings", "Neustart abgebrochen")
+            }
             .show()
     }
 
     private fun restartMoxaViaTelnet() {
-        setUIEnabled(false, keepRestartEnabled = false)
-        updateSystemStatus("Starte Moxa über Telnet neu...")
+        setUIEnabled(false)
+        updateMoxaStatus("Starte Moxa über Telnet neu...")
         loggingManager.logInfo("MoxaSettings", "Telnet-Neustart wird eingeleitet...")
 
         lifecycleScope.launch(Dispatchers.IO) {
-            val success = telnetController.restart(getPassword())
+            try {
+                // Stelle sicher, dass wir die aktuelle IP-Adresse verwenden
+                withContext(Dispatchers.Main) {
+                    updateTelnetController()
+                }
+                
+                loggingManager.logInfo("MoxaSettings", "Versuche Telnet-Neustart für IP: ${settingsManager.getMoxaIpAddress()}")
+                val success = telnetController.restart("moxa")
 
-            withContext(Dispatchers.Main) {
-                if (success) {
-                    updateSystemStatus("✅ Telnet-Befehle gesendet. Warte auf Neustart...")
-                    monitorRestartProgress()
-                } else {
-                    updateSystemStatus("❌ Telnet-Neustart fehlgeschlagen.")
+                withContext(Dispatchers.Main) {
+                    if (success) {
+                        updateMoxaStatus("✅ Telnet-Befehle gesendet. Warte auf Neustart...")
+                        loggingManager.logInfo("MoxaSettings", "Telnet-Neustart-Befehle erfolgreich gesendet")
+                        monitorRestartProgress()
+                    } else {
+                        updateMoxaStatus("❌ Telnet-Neustart fehlgeschlagen.")
+                        loggingManager.logError("MoxaSettings", "Telnet-Neustart fehlgeschlagen", null)
+                        setUIEnabled(true)
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    updateMoxaStatus("❌ Fehler beim Neustart: ${e.message}")
+                    loggingManager.logError("MoxaSettings", "Telnet-Neustart Ausnahme", e)
                     setUIEnabled(true)
                 }
             }
@@ -334,19 +296,20 @@ class MoxaSettingsFragment : Fragment() {
 
     private suspend fun monitorRestartProgress() {
         withContext(Dispatchers.Main) {
-            updateSystemStatus("Moxa startet neu... (Warte 5s)")
+            updateMoxaStatus("Moxa startet neu... (Warte 5s)")
         }
         delay(5000)
 
         for (attempt in 1..15) {
             withContext(Dispatchers.Main) {
-                updateSystemStatus("🔍 Überwache Neustart... Versuch $attempt/15")
+                updateMoxaStatus("🔍 Überwache Neustart... Versuch $attempt/15")
             }
             try {
                 if (telnetController.testConnection()) {
                     withContext(Dispatchers.Main) {
-                        updateSystemStatus("✅ Moxa ist wieder online!")
-                        loadPortConfigurations()
+                        updateMoxaStatus("✅ Moxa ist wieder online!")
+                        updateConnectionStatus("Neustart erfolgreich", true)
+                        setUIEnabled(true)
                     }
                     return
                 }
@@ -356,7 +319,7 @@ class MoxaSettingsFragment : Fragment() {
         }
 
         withContext(Dispatchers.Main) {
-            updateSystemStatus("⚠️ Moxa antwortet nicht.")
+            updateMoxaStatus("⚠️ Moxa antwortet nicht.")
             updateConnectionStatus("Verbindung fehlgeschlagen", false)
             setUIEnabled(true)
         }
@@ -365,7 +328,6 @@ class MoxaSettingsFragment : Fragment() {
     private fun loadCurrentSettings() {
         editTextMoxaIp.setText(settingsManager.getMoxaIpAddress())
         editTextMoxaPort.setText(settingsManager.getMoxaPort().toString())
-        editTextPassword.setText("moxa")
     }
 
     private fun showToast(message: String) {
@@ -378,48 +340,23 @@ class MoxaSettingsFragment : Fragment() {
 
     private fun updateConnectionStatus(status: String, isSuccess: Boolean) {
         if(context != null) {
-            textViewConnectionStatus.text = "Verbindung: $status"
-            textViewConnectionStatus.setTextColor(requireContext().getColor(if (isSuccess) R.color.status_success_color else R.color.status_error_color))
+            textViewConnectionResult.text = status
+            textViewConnectionResult.setTextColor(requireContext().getColor(if (isSuccess) R.color.status_success_color else R.color.status_error_color))
         }
     }
 
-    private fun updateSystemStatus(status: String) {
-        textViewSystemStatus.text = "System: $status"
+    private fun updateMoxaStatus(status: String) {
+        textViewMoxaStatus.text = status
     }
 
-    private fun updatePortStatus(port: Int, status: String) {
-        val textView = if (port == 1) textViewPort1Status else textViewPort2Status
-        textView.text = "Port $port: $status"
-    }
-
-    private fun setUIEnabled(enabled: Boolean, keepRestartEnabled: Boolean? = null) {
-        val finalRestartEnabled = keepRestartEnabled ?: enabled
-        buttonRestartMoxa.isEnabled = finalRestartEnabled
-        buttonTestMoxaConnection.isEnabled = enabled
-        if(!enabled) {
-            setPortUIEnabled(1, false)
-            setPortUIEnabled(2, false)
-        }
-    }
-
-    private fun setPortUIEnabled(port: Int, enabled: Boolean) {
-        if (port == 1) {
-            spinnerPort1Baudrate.isEnabled = enabled
-            spinnerPort1DataBits.isEnabled = enabled
-            spinnerPort1StopBits.isEnabled = enabled
-            spinnerPort1Parity.isEnabled = enabled
-            spinnerPort1FlowControl.isEnabled = enabled
-            switchPort1Fifo.isEnabled = enabled
-            buttonApplyPort1.isEnabled = enabled
-        } else {
-            spinnerPort2Baudrate.isEnabled = enabled
-            spinnerPort2DataBits.isEnabled = enabled
-            spinnerPort2StopBits.isEnabled = enabled
-            spinnerPort2Parity.isEnabled = enabled
-            spinnerPort2FlowControl.isEnabled = enabled
-            switchPort2Fifo.isEnabled = enabled
-            buttonApplyPort2.isEnabled = enabled
-        }
+    private fun setUIEnabled(enabled: Boolean) {
+        buttonSaveMoxaSettings.isEnabled = enabled
+        buttonTestConnection.isEnabled = enabled
+        buttonPingMoxa.isEnabled = enabled
+        buttonMoxaStatus.isEnabled = enabled
+        buttonMoxaRestart.isEnabled = enabled
+        editTextMoxaIp.isEnabled = enabled
+        editTextMoxaPort.isEnabled = enabled
     }
 
     private fun showProgress(show: Boolean) {
