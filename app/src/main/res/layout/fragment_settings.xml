@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/md_theme_light_background"
+    android:background="?attr/android:colorBackground"
     android:padding="16dp">
 
     <LinearLayout
@@ -19,7 +19,7 @@
             android:text="App Einstellungen"
             android:textSize="32sp"
             android:textStyle="bold"
-            android:textColor="@color/md_theme_light_onSurface"
+            android:textColor="?attr/colorOnSurface"
             android:layout_marginBottom="8dp" />
 
         <TextView
@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:text="Anwendungseinstellungen und Konfiguration"
             android:textSize="16sp"
-            android:textColor="@color/md_theme_light_onSurfaceVariant"
+            android:textColor="?attr/colorOnSurfaceVariant"
             android:layout_marginBottom="16dp" />
 
         <LinearLayout
@@ -35,20 +35,132 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginBottom="24dp"
-            android:background="@color/md_theme_light_surfaceVariant"
+            android:background="?attr/colorSurfaceVariant"
             android:padding="12dp"
             android:gravity="center_vertical">
 
             <TextView
                 android:id="@+id/textViewAppVersion"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="Version 1.103"
-                android:textColor="@color/md_theme_light_onSurfaceVariant"
+                android:textColor="?attr/colorOnSurfaceVariant"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonCheckUpdate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Update prüfen"
+                android:textSize="12sp"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                app:icon="@drawable/ic_refresh_24"
+                app:iconSize="16dp" />
+
         </LinearLayout>
+
+        <!-- App Update Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardAppUpdate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="App Update verfügbar"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="?attr/colorOnSurface"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:id="@+id/textUpdateVersion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Version 1.104 ist verfügbar"
+                    android:textSize="16sp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:layout_marginBottom="8dp" />
+
+                <TextView
+                    android:id="@+id/textUpdateDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Neue Features und Bugfixes..."
+                    android:textSize="14sp"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:layout_marginBottom="16dp"
+                    android:maxLines="3"
+                    android:ellipsize="end" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonDownloadUpdate"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
+                        android:text="Jetzt aktualisieren"
+                        android:textSize="14sp"
+                        app:backgroundTint="?attr/colorPrimary"
+                        app:icon="@drawable/ic_refresh_24" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/buttonIgnoreUpdate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Später"
+                        android:textSize="14sp"
+                        style="@style/Widget.Material3.Button.OutlinedButton" />
+
+                </LinearLayout>
+
+                <!-- Update Progress -->
+                <LinearLayout
+                    android:id="@+id/layoutUpdateProgress"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="16dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:id="@+id/textUpdateStatus"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Download wird vorbereitet..."
+                        android:textSize="14sp"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:layout_marginBottom="8dp" />
+
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/progressUpdate"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:indeterminate="true" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
 
         <!-- Connection Settings Card -->
         <com.google.android.material.card.MaterialCardView
@@ -70,7 +182,7 @@
                     android:text="Verbindungseinstellungen"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@color/md_theme_light_onSurface"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginBottom="16dp" />
 
                 <!-- IP Address Input -->
@@ -81,8 +193,8 @@
                     android:layout_marginBottom="20dp"
                     android:hint="IP-Adresse"
                     app:helperText="z.B. 192.168.50.3"
-                    app:boxStrokeColor="@color/md_theme_light_primary"
-                    app:hintTextColor="@color/md_theme_light_primary"
+                    app:boxStrokeColor="?attr/colorPrimary"
+                    app:hintTextColor="?attr/colorPrimary"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -103,8 +215,8 @@
                     android:layout_marginBottom="20dp"
                     android:hint="Port"
                     app:helperText="Standard: 4001"
-                    app:boxStrokeColor="@color/md_theme_light_primary"
-                    app:hintTextColor="@color/md_theme_light_primary"
+                    app:boxStrokeColor="?attr/colorPrimary"
+                    app:hintTextColor="?attr/colorPrimary"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -125,7 +237,7 @@
                     android:text="Verbindung testen"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    app:backgroundTint="@color/md_theme_light_primary"
+                    app:backgroundTint="?attr/colorPrimary"
                     app:cornerRadius="12dp"
                     app:icon="@drawable/ic_network_24"
                     app:iconGravity="textStart"
@@ -156,7 +268,7 @@
                     android:text="Verbindungsstatus"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@color/md_theme_light_onSurface"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginBottom="16dp" />
 
                 <!-- Connection Status Display -->
@@ -168,9 +280,9 @@
                     android:textSize="16sp"
                     android:minHeight="56dp"
                     android:gravity="center_vertical"
-                    android:background="@color/md_theme_light_surfaceVariant"
+                    android:background="?attr/colorSurfaceVariant"
                     android:padding="16dp"
-                    android:textColor="@color/md_theme_light_onSurfaceVariant"
+                    android:textColor="?attr/colorOnSurfaceVariant"
                     android:drawableStart="@drawable/ic_status_pending"
                     android:drawablePadding="12dp" />
 
@@ -198,7 +310,7 @@
                     android:text="Anwendungseinstellungen"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@color/md_theme_light_onSurface"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginBottom="16dp" />
 
                 <!-- Auto-connect Setting -->
@@ -208,7 +320,7 @@
                     android:layout_marginBottom="16dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:background="@color/md_theme_light_surfaceVariant"
+                    android:background="?attr/colorSurfaceVariant"
                     android:padding="16dp">
 
                     <ImageView
@@ -216,7 +328,7 @@
                         android:layout_height="24dp"
                         android:layout_marginEnd="16dp"
                         android:src="@drawable/ic_live_24"
-                        app:tint="@color/md_theme_light_primary" />
+                        app:tint="?attr/colorPrimary" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -228,7 +340,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Automatische Verbindung"
-                            android:textColor="@color/md_theme_light_onSurface"
+                            android:textColor="?attr/colorOnSurface"
                             android:textSize="16sp"
                             android:textStyle="bold" />
 
@@ -236,7 +348,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Verbinde automatisch beim App-Start"
-                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:textColor="?attr/colorOnSurfaceVariant"
                             android:textSize="12sp"
                             android:layout_marginTop="2dp" />
 
@@ -247,8 +359,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:checked="false"
-                        app:thumbTint="@color/md_theme_light_primary"
-                        app:trackTint="@color/md_theme_light_primaryContainer" />
+                        app:thumbTint="?attr/colorPrimary"
+                        app:trackTint="?attr/colorPrimaryContainer" />
 
                 </LinearLayout>
 
@@ -258,7 +370,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:background="@color/md_theme_light_surfaceVariant"
+                    android:background="?attr/colorSurfaceVariant"
                     android:padding="16dp">
 
                     <ImageView
@@ -266,7 +378,7 @@
                         android:layout_height="24dp"
                         android:layout_marginEnd="16dp"
                         android:src="@drawable/ic_diagnostic_24"
-                        app:tint="@color/md_theme_light_primary" />
+                        app:tint="?attr/colorPrimary" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -278,7 +390,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Debug-Logging"
-                            android:textColor="@color/md_theme_light_onSurface"
+                            android:textColor="?attr/colorOnSurface"
                             android:textSize="16sp"
                             android:textStyle="bold" />
 
@@ -286,7 +398,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Detaillierte Logs für Diagnose"
-                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:textColor="?attr/colorOnSurfaceVariant"
                             android:textSize="12sp"
                             android:layout_marginTop="2dp" />
 
@@ -297,8 +409,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:checked="true"
-                        app:thumbTint="@color/md_theme_light_primary"
-                        app:trackTint="@color/md_theme_light_primaryContainer" />
+                        app:thumbTint="?attr/colorPrimary"
+                        app:trackTint="?attr/colorPrimaryContainer" />
 
                 </LinearLayout>
 
@@ -325,7 +437,7 @@
                     android:text="Über diese App"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@color/md_theme_light_onSurface"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginBottom="16dp" />
 
                 <TextView
@@ -334,7 +446,7 @@
                     android:text="Service Tool für Flintec RC3D Wägezellen\n\n• Adressänderung von Wägezellen\n• Filter-Konfiguration für Multi-Cell-Systeme\n• Moxa Device Server Management\n• Live-Monitoring von Zellendaten\n\nEntwickelt für industrielle Wägesysteme mit Flintec RC3D Technologie."
                     android:textSize="14sp"
                     android:lineSpacingExtra="4dp"
-                    android:textColor="@color/md_theme_light_onSurfaceVariant" />
+                    android:textColor="?attr/colorOnSurfaceVariant" />
 
             </LinearLayout>
 

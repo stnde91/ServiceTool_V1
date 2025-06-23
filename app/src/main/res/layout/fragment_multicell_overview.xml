@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/md_theme_light_background">
+    android:background="?attr/android:colorBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,7 +19,7 @@
             android:text="Multi-Cell Übersicht"
             android:textSize="32sp"
             android:textStyle="bold"
-            android:textColor="@color/md_theme_light_onSurface"
+            android:textColor="?attr/colorOnSurface"
             android:layout_marginBottom="8dp" />
 
         <TextView
@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:text="System bereit"
             android:textSize="16sp"
-            android:textColor="@color/md_theme_light_onSurfaceVariant"
+            android:textColor="?attr/colorOnSurfaceVariant"
             android:layout_marginBottom="24dp" />
 
         <!-- Configuration Card -->
@@ -51,7 +51,7 @@
                     android:text="Konfiguration"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@color/md_theme_light_onSurface"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginBottom="16dp" />
 
                 <!-- Cell Count Selection -->
@@ -73,14 +73,14 @@
                             android:text="Anzahl aktive Zellen"
                             android:textSize="16sp"
                             android:textStyle="bold"
-                            android:textColor="@color/md_theme_light_onSurface" />
+                            android:textColor="?attr/colorOnSurface" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Wählen Sie die Zellenanzahl"
                             android:textSize="14sp"
-                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:textColor="?attr/colorOnSurfaceVariant"
                             android:layout_marginTop="2dp" />
 
                     </LinearLayout>
@@ -92,7 +92,8 @@
                         android:layout_marginStart="16dp"
                         android:background="@drawable/spinner_background"
                         android:paddingStart="16dp"
-                        android:paddingEnd="16dp" />
+                        android:paddingEnd="16dp"
+                        android:textColor="?attr/colorOnSurface" />
 
                 </LinearLayout>
 
@@ -120,7 +121,7 @@
                     android:text="Zellen-Status"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@color/md_theme_light_onSurface"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginBottom="16dp" />
 
                 <!-- First Row: Cells 2, 3, 4, 5 -->
@@ -138,7 +139,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="4dp"
                         android:layout_weight="1"
-                        android:background="@color/md_theme_light_surfaceVariant"
+                        android:background="?attr/colorSurfaceVariant"
                         android:gravity="center"
                         android:orientation="vertical"
                         android:padding="12dp"
@@ -151,7 +152,7 @@
                             android:text="Zelle 2"
                             android:textSize="14sp"
                             android:textStyle="bold"
-                            android:textColor="@color/md_theme_light_onSurface" />
+                            android:textColor="?attr/colorOnSurface" />
 
                         <TextView
                             android:id="@+id/textCountsCell2"
@@ -159,9 +160,9 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="0"
-                            android:textSize="20sp"
+                            android:textSize="16sp"
                             android:textStyle="bold"
-                            android:textColor="@color/md_theme_light_primary"
+                            android:textColor="?attr/colorPrimary"
                             tools:text="87" />
 
                         <TextView
@@ -171,7 +172,7 @@
                             android:layout_marginTop="4dp"
                             android:text="S/N: ------"
                             android:textSize="10sp"
-                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:textColor="?attr/colorOnSurfaceVariant"
                             android:fontFamily="monospace"
                             tools:text="S/N: 654321" />
 
@@ -192,7 +193,7 @@
                         android:layout_marginStart="2dp"
                         android:layout_marginEnd="2dp"
                         android:layout_weight="1"
-                        android:background="@color/md_theme_light_surfaceVariant"
+                        android:background="?attr/colorSurfaceVariant"
                         android:gravity="center"
                         android:orientation="vertical"
                         android:padding="12dp"
@@ -205,7 +206,7 @@
                             android:text="Zelle 3"
                             android:textSize="14sp"
                             android:textStyle="bold"
-                            android:textColor="@color/md_theme_light_onSurface" />
+                            android:textColor="?attr/colorOnSurface" />
 
                         <TextView
                             android:id="@+id/textCountsCell3"
@@ -213,9 +214,9 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="0"
-                            android:textSize="20sp"
+                            android:textSize="16sp"
                             android:textStyle="bold"
-                            android:textColor="@color/md_theme_light_primary"
+                            android:textColor="?attr/colorPrimary"
                             tools:text="112" />
 
                         <TextView
@@ -225,7 +226,7 @@
                             android:layout_marginTop="4dp"
                             android:text="S/N: ------"
                             android:textSize="10sp"
-                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:textColor="?attr/colorOnSurfaceVariant"
                             android:fontFamily="monospace"
                             tools:text="S/N: 789012" />
 
@@ -245,7 +246,7 @@
                         android:layout_marginStart="2dp"
                         android:layout_marginEnd="2dp"
                         android:layout_weight="1"
-                        android:background="@color/md_theme_light_surfaceVariant"
+                        android:background="?attr/colorSurfaceVariant"
                         android:gravity="center"
                         android:orientation="vertical"
                         android:padding="12dp"
@@ -258,7 +259,7 @@
                             android:text="Zelle 4"
                             android:textSize="14sp"
                             android:textStyle="bold"
-                            android:textColor="@color/md_theme_light_onSurface" />
+                            android:textColor="?attr/colorOnSurface" />
 
                         <TextView
                             android:id="@+id/textCountsCell4"
@@ -266,9 +267,9 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="0"
-                            android:textSize="20sp"
+                            android:textSize="16sp"
                             android:textStyle="bold"
-                            android:textColor="@color/md_theme_light_primary"
+                            android:textColor="?attr/colorPrimary"
                             tools:text="78" />
 
                         <TextView
@@ -278,7 +279,7 @@
                             android:layout_marginTop="4dp"
                             android:text="S/N: ------"
                             android:textSize="10sp"
-                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:textColor="?attr/colorOnSurfaceVariant"
                             android:fontFamily="monospace"
                             tools:text="S/N: 345678" />
 
@@ -297,7 +298,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
                         android:layout_weight="1"
-                        android:background="@color/md_theme_light_surfaceVariant"
+                        android:background="?attr/colorSurfaceVariant"
                         android:gravity="center"
                         android:orientation="vertical"
                         android:padding="12dp"
@@ -310,7 +311,7 @@
                             android:text="Zelle 5"
                             android:textSize="14sp"
                             android:textStyle="bold"
-                            android:textColor="@color/md_theme_light_onSurface" />
+                            android:textColor="?attr/colorOnSurface" />
 
                         <TextView
                             android:id="@+id/textCountsCell5"
@@ -318,9 +319,9 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="0"
-                            android:textSize="20sp"
+                            android:textSize="16sp"
                             android:textStyle="bold"
-                            android:textColor="@color/md_theme_light_primary"
+                            android:textColor="?attr/colorPrimary"
                             tools:text="103" />
 
                         <TextView
@@ -330,7 +331,7 @@
                             android:layout_marginTop="4dp"
                             android:text="S/N: ------"
                             android:textSize="10sp"
-                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:textColor="?attr/colorOnSurfaceVariant"
                             android:fontFamily="monospace"
                             tools:text="S/N: 901234" />
 
@@ -359,7 +360,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="4dp"
                         android:layout_weight="1"
-                        android:background="@color/md_theme_light_surfaceVariant"
+                        android:background="?attr/colorSurfaceVariant"
                         android:gravity="center"
                         android:orientation="vertical"
                         android:padding="12dp"
@@ -372,7 +373,7 @@
                             android:text="Zelle 1"
                             android:textSize="14sp"
                             android:textStyle="bold"
-                            android:textColor="@color/md_theme_light_onSurface" />
+                            android:textColor="?attr/colorOnSurface" />
 
                         <TextView
                             android:id="@+id/textCountsCell1"
@@ -380,9 +381,9 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="0"
-                            android:textSize="20sp"
+                            android:textSize="16sp"
                             android:textStyle="bold"
-                            android:textColor="@color/md_theme_light_primary"
+                            android:textColor="?attr/colorPrimary"
                             tools:text="95" />
 
                         <TextView
@@ -392,7 +393,7 @@
                             android:layout_marginTop="4dp"
                             android:text="S/N: ------"
                             android:textSize="10sp"
-                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:textColor="?attr/colorOnSurfaceVariant"
                             android:fontFamily="monospace"
                             tools:text="S/N: 123456" />
 
@@ -413,7 +414,7 @@
                         android:layout_marginStart="2dp"
                         android:layout_marginEnd="2dp"
                         android:layout_weight="1"
-                        android:background="@color/md_theme_light_surfaceVariant"
+                        android:background="?attr/colorSurfaceVariant"
                         android:gravity="center"
                         android:orientation="vertical"
                         android:padding="12dp"
@@ -426,7 +427,7 @@
                             android:text="Zelle 8"
                             android:textSize="14sp"
                             android:textStyle="bold"
-                            android:textColor="@color/md_theme_light_onSurface" />
+                            android:textColor="?attr/colorOnSurface" />
 
                         <TextView
                             android:id="@+id/textCountsCell8"
@@ -434,9 +435,9 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="0"
-                            android:textSize="20sp"
+                            android:textSize="16sp"
                             android:textStyle="bold"
-                            android:textColor="@color/md_theme_light_primary"
+                            android:textColor="?attr/colorPrimary"
                             tools:text="101" />
 
                         <TextView
@@ -446,7 +447,7 @@
                             android:layout_marginTop="4dp"
                             android:text="S/N: ------"
                             android:textSize="10sp"
-                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:textColor="?attr/colorOnSurfaceVariant"
                             android:fontFamily="monospace"
                             tools:text="S/N: 890123" />
 
@@ -466,7 +467,7 @@
                         android:layout_marginStart="2dp"
                         android:layout_marginEnd="2dp"
                         android:layout_weight="1"
-                        android:background="@color/md_theme_light_surfaceVariant"
+                        android:background="?attr/colorSurfaceVariant"
                         android:gravity="center"
                         android:orientation="vertical"
                         android:padding="12dp"
@@ -479,7 +480,7 @@
                             android:text="Zelle 7"
                             android:textSize="14sp"
                             android:textStyle="bold"
-                            android:textColor="@color/md_theme_light_onSurface" />
+                            android:textColor="?attr/colorOnSurface" />
 
                         <TextView
                             android:id="@+id/textCountsCell7"
@@ -487,9 +488,9 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="0"
-                            android:textSize="20sp"
+                            android:textSize="16sp"
                             android:textStyle="bold"
-                            android:textColor="@color/md_theme_light_primary"
+                            android:textColor="?attr/colorPrimary"
                             tools:text="94" />
 
                         <TextView
@@ -499,7 +500,7 @@
                             android:layout_marginTop="4dp"
                             android:text="S/N: ------"
                             android:textSize="10sp"
-                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:textColor="?attr/colorOnSurfaceVariant"
                             android:fontFamily="monospace"
                             tools:text="S/N: 234567" />
 
@@ -518,7 +519,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
                         android:layout_weight="1"
-                        android:background="@color/md_theme_light_surfaceVariant"
+                        android:background="?attr/colorSurfaceVariant"
                         android:gravity="center"
                         android:orientation="vertical"
                         android:padding="12dp"
@@ -531,7 +532,7 @@
                             android:text="Zelle 6"
                             android:textSize="14sp"
                             android:textStyle="bold"
-                            android:textColor="@color/md_theme_light_onSurface" />
+                            android:textColor="?attr/colorOnSurface" />
 
                         <TextView
                             android:id="@+id/textCountsCell6"
@@ -539,9 +540,9 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:text="0"
-                            android:textSize="20sp"
+                            android:textSize="16sp"
                             android:textStyle="bold"
-                            android:textColor="@color/md_theme_light_primary"
+                            android:textColor="?attr/colorPrimary"
                             tools:text="89" />
 
                         <TextView
@@ -551,7 +552,7 @@
                             android:layout_marginTop="4dp"
                             android:text="S/N: ------"
                             android:textSize="10sp"
-                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:textColor="?attr/colorOnSurfaceVariant"
                             android:fontFamily="monospace"
                             tools:text="S/N: 567890" />
 
@@ -590,7 +591,7 @@
                     android:text="Steuerung"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@color/md_theme_light_onSurface"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginBottom="16dp" />
 
                 <!-- Button Row -->
@@ -637,7 +638,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:background="@color/md_theme_light_surfaceVariant"
+                    android:background="?attr/colorSurfaceVariant"
                     android:padding="12dp"
                     android:gravity="center_vertical">
 
@@ -655,7 +656,7 @@
                         android:layout_weight="1"
                         android:text="Noch nicht geladen"
                         android:textSize="14sp"
-                        android:textColor="@color/md_theme_light_onSurfaceVariant"
+                        android:textColor="?attr/colorOnSurfaceVariant"
                         tools:text="Letzte Aktualisierung: 14:32:15" />
 
                 </LinearLayout>
@@ -683,7 +684,7 @@
                     android:text="Technische Details"
                     android:textSize="18sp"
                     android:textStyle="bold"
-                    android:textColor="@color/md_theme_light_onSurface"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginBottom="16dp" />
 
                 <!-- Common Baudrate -->
@@ -693,7 +694,7 @@
                     android:layout_marginBottom="12dp"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:background="@color/md_theme_light_surfaceVariant"
+                    android:background="?attr/colorSurfaceVariant"
                     android:padding="12dp">
 
                     <ImageView
@@ -701,7 +702,7 @@
                         android:layout_height="24dp"
                         android:layout_marginEnd="12dp"
                         android:src="@drawable/ic_speed_24"
-                        app:tint="@color/md_theme_light_primary" />
+                        app:tint="?attr/colorPrimary" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -715,14 +716,14 @@
                             android:text="Baudrate"
                             android:textSize="16sp"
                             android:textStyle="bold"
-                            android:textColor="@color/md_theme_light_onSurface" />
+                            android:textColor="?attr/colorOnSurface" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Kommunikationsgeschwindigkeit"
                             android:textSize="14sp"
-                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:textColor="?attr/colorOnSurfaceVariant"
                             android:layout_marginTop="2dp" />
 
                     </LinearLayout>
@@ -734,7 +735,7 @@
                         android:text="Unbekannt"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        android:textColor="@color/md_theme_light_primary"
+                        android:textColor="?attr/colorPrimary"
                         tools:text="9600 bps" />
 
                 </LinearLayout>

@@ -140,7 +140,7 @@ class CellConfigurationFragment : Fragment() {
 
     private fun setupInputValidation() {
         // CODE-BASIERTE HEX-FILTERUNG (statt android:digits)
-        val hexFilter = InputFilter { source, start, end, dest, dstart, dend ->
+        val hexFilter = InputFilter { source, start, end, _, _, _ ->
             val filtered = StringBuilder()
             for (i in start until end) {
                 val char = source[i]
@@ -356,6 +356,7 @@ class CellConfigurationFragment : Fragment() {
                     ""
                 }
 
+                Log.d("CellConfig", "Konfigurations-Antwort: '$configResponse'")
                 Thread.sleep(1000)
 
                 // Schritt 2: Schreibbefehl (w-Befehl)
@@ -373,6 +374,7 @@ class CellConfigurationFragment : Fragment() {
                     ""
                 }
 
+                Log.d("CellConfig", "Schreib-Antwort: '$writeResponse'")
                 Thread.sleep(1000)
 
                 Log.i("CellConfig", "Adressänderung abgeschlossen: $serialNumber → Zelle $toCell")

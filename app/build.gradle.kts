@@ -11,8 +11,8 @@ android {
         applicationId = "com.example.servicetool"
         minSdk = 26 // ANGEPASST: Erhöht auf 26 wegen adaptiver Icons
         targetSdk = 35 // Sollte mit compileSdk übereinstimmen
-        versionCode = 1
-        versionName = "1.1" // Version erhöht wegen Telnet-Funktion
+        versionCode = 105
+        versionName = "0.105" // ServiceTool V0.105
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

@@ -123,7 +123,8 @@
                     android:layout_marginBottom="16dp"
                     android:background="@drawable/rounded_background_light"
                     android:paddingStart="12dp"
-                    android:paddingEnd="12dp" />
+                    android:paddingEnd="12dp"
+                    android:textColor="?attr/colorOnSurface" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -231,7 +232,8 @@
                     android:layout_height="48dp"
                     android:background="@drawable/rounded_background_light"
                     android:paddingStart="12dp"
-                    android:paddingEnd="12dp" />
+                    android:paddingEnd="12dp"
+                    android:textColor="?attr/colorOnSurface" />
 
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
