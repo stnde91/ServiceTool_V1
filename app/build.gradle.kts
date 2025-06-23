@@ -11,8 +11,8 @@ android {
         applicationId = "com.example.servicetool"
         minSdk = 26 // ANGEPASST: Erhöht auf 26 wegen adaptiver Icons
         targetSdk = 35 // Sollte mit compileSdk übereinstimmen
-        versionCode = 1
-        versionName = "1.1" // Version erhöht wegen Telnet-Funktion
+        versionCode = 104
+        versionName = "0.104" // Update-Funktion implementiert
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -48,6 +48,10 @@ dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.12.0")
+    
+    // Für App-Updates
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.google.code.gson:gson:2.10.1")
 
     // UI & Layout
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")

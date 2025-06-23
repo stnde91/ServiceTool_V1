@@ -13,7 +13,11 @@
       "Bash(awk:*)",
       "Bash(java:*)",
       "Bash(sudo apt:*)",
-      "Bash(sudo apt install:*)"
+      "Bash(sudo apt install:*)",
+      "Bash(git branch:*)",
+      "Bash(git tag:*)",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }
