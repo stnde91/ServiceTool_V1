@@ -21,8 +21,7 @@ import java.util.*
 
 class DashboardFragment : Fragment() {
 
-    // UI Components
-    private lateinit var textCurrentTime: TextView
+    // UI Components  
     private lateinit var iconFlintecStatus: ImageView
     private lateinit var textFlintecStatus: TextView
     private lateinit var textFlintecCount: TextView
@@ -78,9 +77,6 @@ class DashboardFragment : Fragment() {
     }
 
     private fun initializeViews(view: View) {
-        // Time
-        textCurrentTime = view.findViewById(R.id.textCurrentTime)
-
         // System Status
         iconFlintecStatus = view.findViewById(R.id.iconFlintecStatus)
         textFlintecStatus = view.findViewById(R.id.textFlintecStatus)
@@ -177,7 +173,7 @@ class DashboardFragment : Fragment() {
     }
 
     private fun updateCurrentTime() {
-        textCurrentTime.text = timeFormat.format(Date())
+        // Time display removed from minimalist design
     }
 
     private fun updateSystemStatus() {

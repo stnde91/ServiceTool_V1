@@ -3,109 +3,54 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_light"
-    android:padding="20dp">
+    android:background="@color/md_theme_light_background"
+    android:padding="16dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Header Section -->
-        <LinearLayout
+        <!-- Minimalist Header -->
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginBottom="32dp"
-            android:gravity="center">
+            android:text="Zellen Konfiguration"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:textColor="@color/md_theme_light_onSurface"
+            android:layout_marginBottom="8dp" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="🔧"
-                android:textSize="48sp"
-                android:layout_marginBottom="8dp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Zellen Konfiguration"
-                android:textSize="28sp"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:textColor="@color/primary_dark"
-                android:fontFamily="sans-serif-medium" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Adresse ändern und Filter konfigurieren"
-                android:textSize="16sp"
-                android:gravity="center"
-                android:layout_marginTop="4dp"
-                android:textColor="@color/text_secondary"
-                android:fontFamily="sans-serif-light" />
-
-        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Adresse ändern und Filter konfigurieren"
+            android:textSize="16sp"
+            android:textColor="@color/md_theme_light_onSurfaceVariant"
+            android:layout_marginBottom="24dp" />
 
         <!-- Address Change Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="8dp"
-            app:strokeWidth="0dp"
-            app:cardBackgroundColor="@android:color/white">
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:padding="16dp">
 
-                <!-- Card Header -->
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="20dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="📍"
-                        android:textSize="24sp"
-                        android:layout_marginEnd="12dp" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Zellenadresse ändern"
-                            android:textSize="20sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/primary_dark"
-                            android:fontFamily="sans-serif-medium" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Seriennummer eingeben und neue Adresse wählen"
-                            android:textSize="14sp"
-                            android:layout_marginTop="2dp"
-                            android:textColor="@color/text_secondary"
-                            android:fontFamily="sans-serif-light" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
+                    android:text="Zellenadresse ändern"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/md_theme_light_onSurface"
+                    android:layout_marginBottom="16dp" />
 
                 <!-- Serial Number Input -->
                 <com.google.android.material.textfield.TextInputLayout
@@ -117,8 +62,8 @@
                     app:helperText="8-12 Zeichen (Hex oder Dezimal)"
                     app:counterEnabled="true"
                     app:counterMaxLength="12"
-                    app:boxStrokeColor="@color/primary"
-                    app:hintTextColor="@color/primary"
+                    app:boxStrokeColor="@color/md_theme_light_primary"
+                    app:hintTextColor="@color/md_theme_light_primary"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -137,33 +82,39 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginBottom="24dp"
-                    android:gravity="center_vertical"
-                    android:background="@drawable/rounded_background_light"
-                    android:padding="16dp">
+                    android:layout_marginBottom="20dp"
+                    android:gravity="center_vertical">
 
-                    <TextView
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Neue Adresse:"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/primary_dark"
-                        android:fontFamily="sans-serif-medium" />
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Neue Adresse"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/md_theme_light_onSurface" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Ziel-Zellenadresse auswählen"
+                            android:textSize="14sp"
+                            android:textColor="@color/md_theme_light_onSurfaceVariant"
+                            android:layout_marginTop="2dp" />
+
+                    </LinearLayout>
 
                     <Spinner
                         android:id="@+id/spinner_new_cell"
                         android:layout_width="120dp"
                         android:layout_height="48dp"
-                        android:layout_marginStart="12dp"
-                        android:background="@drawable/spinner_background_selector"
-                        android:paddingStart="16dp"
-                        android:paddingEnd="40dp"
-                        android:gravity="center_vertical"
-                        android:textColor="@color/text_primary"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:layout_marginStart="16dp"
+                        android:background="@drawable/spinner_background" />
 
                 </LinearLayout>
 
@@ -182,7 +133,7 @@
                         android:text="Adresse ändern"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        app:backgroundTint="@color/primary"
+                        app:backgroundTint="@color/md_theme_light_primary"
                         app:cornerRadius="12dp"
                         app:icon="@drawable/ic_settings_24"
                         app:iconGravity="textStart"
@@ -196,7 +147,7 @@
                         android:layout_height="32dp"
                         android:layout_marginStart="16dp"
                         android:visibility="gone"
-                        android:indeterminateTint="@color/primary" />
+                        android:indeterminateTint="@color/md_theme_light_primary" />
 
                 </LinearLayout>
 
@@ -209,76 +160,33 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="8dp"
-            app:strokeWidth="0dp"
-            app:cardBackgroundColor="@android:color/white">
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:padding="16dp">
 
-                <!-- Card Header -->
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="20dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="⚡"
-                        android:textSize="24sp"
-                        android:layout_marginEnd="12dp" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Filter Konfiguration"
-                            android:textSize="20sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/primary_dark"
-                            android:fontFamily="sans-serif-medium" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Automatisch für alle aktiven Zellen setzen"
-                            android:textSize="14sp"
-                            android:layout_marginTop="2dp"
-                            android:textColor="@color/text_secondary"
-                            android:fontFamily="sans-serif-light" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
+                    android:text="Filter Konfiguration"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/md_theme_light_onSurface"
+                    android:layout_marginBottom="16dp" />
 
                 <!-- Info Box -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:background="@drawable/gradient_primary_enhanced"
+                    android:background="@color/md_theme_light_surfaceVariant"
                     android:padding="16dp"
                     android:layout_marginBottom="20dp"
                     android:gravity="center_vertical">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="💡"
-                        android:textSize="20sp"
-                        android:layout_marginEnd="12dp" />
 
                     <TextView
                         android:layout_width="0dp"
@@ -286,8 +194,7 @@
                         android:layout_weight="1"
                         android:text="Stellen Sie die Anzahl der aktiven Zellen ein. Filter wird nur für diese gesetzt."
                         android:textSize="14sp"
-                        android:textColor="@android:color/white"
-                        android:fontFamily="sans-serif-light" />
+                        android:textColor="@color/md_theme_light_onSurfaceVariant" />
 
                 </LinearLayout>
 
@@ -296,7 +203,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:background="@drawable/rounded_background_light"
+                    android:background="@color/md_theme_light_surfaceVariant"
                     android:padding="20dp"
                     android:layout_marginBottom="20dp">
 
@@ -329,8 +236,7 @@
                                 android:text="Nur diese Zellen werden bearbeitet"
                                 android:textSize="12sp"
                                 android:layout_marginTop="2dp"
-                                android:textColor="@color/text_secondary"
-                                android:fontFamily="sans-serif-light" />
+                                android:textColor="@color/md_theme_light_onSurfaceVariant" />
 
                         </LinearLayout>
 
@@ -339,11 +245,11 @@
                             android:layout_width="100dp"
                             android:layout_height="48dp"
                             android:layout_marginStart="12dp"
-                            android:background="@drawable/spinner_background_selector"
+                            android:background="@drawable/spinner_background"
                             android:paddingStart="16dp"
                             android:paddingEnd="40dp"
                             android:gravity="center_vertical"
-                            android:textColor="@color/text_primary"
+                            android:textColor="@color/md_theme_light_onSurface"
                             android:textSize="16sp"
                             android:textStyle="bold" />
 
@@ -368,8 +274,7 @@
                                 android:text="Filter Wert"
                                 android:textSize="16sp"
                                 android:textStyle="bold"
-                                android:textColor="@color/primary_dark"
-                                android:fontFamily="sans-serif-medium" />
+                                android:textColor="@color/md_theme_light_onSurface" />
 
                             <TextView
                                 android:layout_width="match_parent"
@@ -377,8 +282,7 @@
                                 android:text="Verfügbar: 0, 5 (Standard: 5)"
                                 android:textSize="12sp"
                                 android:layout_marginTop="2dp"
-                                android:textColor="@color/text_secondary"
-                                android:fontFamily="sans-serif-light" />
+                                android:textColor="@color/md_theme_light_onSurfaceVariant" />
 
                         </LinearLayout>
 
@@ -387,11 +291,11 @@
                             android:layout_width="100dp"
                             android:layout_height="48dp"
                             android:layout_marginStart="12dp"
-                            android:background="@drawable/spinner_background_selector"
+                            android:background="@drawable/spinner_background"
                             android:paddingStart="16dp"
                             android:paddingEnd="40dp"
                             android:gravity="center_vertical"
-                            android:textColor="@color/text_primary"
+                            android:textColor="@color/md_theme_light_onSurface"
                             android:textSize="16sp"
                             android:textStyle="bold" />
 
@@ -409,10 +313,9 @@
                     android:layout_marginBottom="20dp"
                     android:minHeight="40dp"
                     android:gravity="center_vertical"
-                    android:background="@drawable/rounded_background_light"
+                    android:background="@color/md_theme_light_surfaceVariant"
                     android:padding="16dp"
-                    android:textColor="@color/success"
-                    android:fontFamily="sans-serif-medium"
+                    android:textColor="@color/status_success"
                     android:drawableStart="@drawable/ic_status_success"
                     android:drawablePadding="12dp" />
 
@@ -431,7 +334,7 @@
                         android:text="Filter für alle Zellen setzen"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        app:backgroundTint="@color/primary"
+                        app:backgroundTint="@color/md_theme_light_primary"
                         app:cornerRadius="12dp"
                         app:icon="@drawable/ic_filter_24"
                         app:iconGravity="textStart"
@@ -444,7 +347,7 @@
                         android:layout_height="32dp"
                         android:layout_marginStart="16dp"
                         android:visibility="gone"
-                        android:indeterminateTint="@color/primary" />
+                        android:indeterminateTint="@color/md_theme_light_primary" />
 
                 </LinearLayout>
 
@@ -457,43 +360,23 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="8dp"
-            app:strokeWidth="0dp"
-            app:cardBackgroundColor="@android:color/white">
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:padding="16dp">
 
-                <!-- Card Header -->
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="📊"
-                        android:textSize="24sp"
-                        android:layout_marginEnd="12dp" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Status"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/primary_dark"
-                        android:fontFamily="sans-serif-medium" />
-
-                </LinearLayout>
+                    android:text="Status"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/md_theme_light_onSurface"
+                    android:layout_marginBottom="16dp" />
 
                 <TextView
                     android:id="@+id/text_status"
@@ -503,10 +386,9 @@
                     android:textSize="16sp"
                     android:minHeight="48dp"
                     android:gravity="center_vertical"
-                    android:background="@drawable/rounded_background_light"
+                    android:background="@color/md_theme_light_surfaceVariant"
                     android:padding="16dp"
-                    android:textColor="@color/text_primary"
-                    android:fontFamily="sans-serif-medium"
+                    android:textColor="@color/md_theme_light_onSurfaceVariant"
                     android:drawableStart="@drawable/ic_status_pending"
                     android:drawablePadding="12dp" />
 
@@ -527,34 +409,16 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:padding="16dp">
 
-                <!-- Card Header -->
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <TextView
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="💡"
-                        android:textSize="24sp"
-                        android:layout_marginEnd="12dp" />
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Tipps &amp; Hinweise"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/info_text"
-                        android:fontFamily="sans-serif-medium" />
-
-                </LinearLayout>
+                    android:text="Tipps &amp; Hinweise"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/md_theme_light_onSurface"
+                    android:layout_marginBottom="16dp" />
 
                 <TextView
                     android:layout_width="match_parent"
@@ -562,8 +426,7 @@
                     android:text="• Neue Zellen sind standardmäßig auf Adresse 1 (A) konfiguriert\n• Multi-Cell Übersicht zeigt alle Seriennummern an\n• Filter-Änderungen werden sofort an die Hardware übertragen\n• Die App verwendet die gleichen Kommandos wie die Windows-Software"
                     android:textSize="14sp"
                     android:lineSpacingExtra="4dp"
-                    android:textColor="@color/info_text"
-                    android:fontFamily="sans-serif-light" />
+                    android:textColor="@color/md_theme_light_onSurfaceVariant" />
 
             </LinearLayout>
 

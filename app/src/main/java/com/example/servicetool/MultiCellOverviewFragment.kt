@@ -541,7 +541,7 @@ class MultiCellOverviewFragment : Fragment() {
         if (activeAndLoadedCells.isEmpty()){
             val noDataView = TextView(requireContext()).apply {
                 text = "Keine Detail-Daten geladen. Bitte 'Alle aktualisieren' drücken."
-                setTextColor(ContextCompat.getColor(context, R.color.text_secondary_dark))
+                setTextColor(ContextCompat.getColor(context, R.color.md_theme_light_onSurfaceVariant))
                 gravity = Gravity.CENTER
                 setPadding(0, 20, 0, 20)
             }
@@ -562,7 +562,7 @@ class MultiCellOverviewFragment : Fragment() {
 
             val icon = ImageView(requireContext()).apply {
                 setImageResource(R.drawable.ic_info_24)
-                setColorFilter(ContextCompat.getColor(context, R.color.text_secondary_dark))
+                setColorFilter(ContextCompat.getColor(context, R.color.md_theme_light_onSurfaceVariant))
                 layoutParams = LinearLayout.LayoutParams(
                     (20 * resources.displayMetrics.density).toInt(),
                     (20 * resources.displayMetrics.density).toInt()
@@ -573,7 +573,7 @@ class MultiCellOverviewFragment : Fragment() {
 
             val cellLabel = TextView(requireContext()).apply {
                 text = "Zelle ${cellData.cellNumber}:"
-                setTextColor(ContextCompat.getColor(context, R.color.text_secondary_dark))
+                setTextColor(ContextCompat.getColor(context, R.color.md_theme_light_onSurfaceVariant))
                 textSize = 14f
                 setTypeface(null, Typeface.BOLD)
                 layoutParams = LinearLayout.LayoutParams(
@@ -584,7 +584,7 @@ class MultiCellOverviewFragment : Fragment() {
 
             val detailsText = TextView(requireContext()).apply {
                 text = " Filter: ${cellData.filter}  |  Version: ${cellData.version}"
-                setTextColor(ContextCompat.getColor(context, R.color.text_primary_dark))
+                setTextColor(ContextCompat.getColor(context, R.color.md_theme_light_onSurface))
                 textSize = 14f
                 layoutParams = LinearLayout.LayoutParams(
                     0,

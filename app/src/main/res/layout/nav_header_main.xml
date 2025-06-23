@@ -2,68 +2,29 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="180dp"
-    android:background="@drawable/gradient_primary_enhanced"
-    android:padding="24dp"
+    android:layout_height="176dp"
+    android:background="@color/md_theme_light_surfaceVariant"
+    android:paddingTop="48dp"
+    android:paddingBottom="16dp"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
     android:orientation="vertical"
-    android:gravity="center"
-    android:theme="@style/ThemeOverlay.AppCompat.Dark">
+    android:gravity="bottom">
 
-    <!-- Company Logo -->
-    <ImageView
-        android:id="@+id/imageCompanyLogo"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:src="@drawable/company_logo"
-        android:layout_marginTop="2dp"
-        android:layout_marginBottom="12dp"
-        android:layout_gravity="center_horizontal"
-        android:scaleType="centerInside"
-        android:contentDescription="Firmenlogo"
-        android:background="@drawable/logo_background_circle"
-        android:padding="8dp"
-        android:elevation="6dp" />
-
-    <!-- Company Name directly under Logo -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Waagen Döhrn GmbH &amp; Co. KG"
-        android:textColor="@android:color/white"
-        android:textSize="16sp"
+        android:text="ServiceTool"
+        android:textSize="24sp"
         android:textStyle="bold"
-        android:gravity="center"
-        android:fontFamily="sans-serif-medium"
-        android:layout_marginBottom="16dp" />
+        android:textColor="@color/md_theme_light_onSurface" />
 
-    <!-- App Title Section -->
-    <LinearLayout
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Service Tool"
-            android:textColor="@android:color/white"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:fontFamily="sans-serif-medium"
-            android:gravity="center" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Flintec RC3D • Version 1.103"
-            android:textColor="@android:color/white"
-            android:textSize="12sp"
-            android:alpha="0.9"
-            android:fontFamily="sans-serif-light"
-            android:layout_marginTop="4dp"
-            android:gravity="center" />
-
-    </LinearLayout>
+        android:text="Flintec RC3D Configuration"
+        android:textSize="16sp"
+        android:textColor="@color/md_theme_light_onSurfaceVariant"
+        android:layout_marginTop="4dp" />
 
 </LinearLayout>
