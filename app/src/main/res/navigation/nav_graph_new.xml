@@ -5,32 +5,28 @@
     android:id="@+id/nav_graph_new"
     app:startDestination="@id/nav_dashboard">
 
-    <!-- Dashboard -->
     <fragment
         android:id="@+id/nav_dashboard"
         android:name="com.example.servicetool.DashboardFragment"
         android:label="Dashboard"
         tools:layout="@layout/fragment_dashboard" />
 
-    <!-- Zellen Container with Tabs -->
     <fragment
         android:id="@+id/nav_cells"
         android:name="com.example.servicetool.CellsContainerFragment"
         android:label="Zellen"
         tools:layout="@layout/fragment_cells_container" />
 
-    <!-- Moxa Container -->
     <fragment
         android:id="@+id/nav_moxa"
         android:name="com.example.servicetool.MoxaContainerFragment"
         android:label="Moxa"
         tools:layout="@layout/fragment_moxa_container" />
 
-    <!-- App Settings -->
     <fragment
         android:id="@+id/nav_settings"
         android:name="com.example.servicetool.SettingsFragment"
         android:label="Einstellungen"
-        tools:layout="@layout/fragment_enhanced_settings" />
+        tools:layout="@layout/fragment_settings" />
 
 </navigation>

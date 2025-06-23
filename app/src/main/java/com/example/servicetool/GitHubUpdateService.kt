@@ -20,7 +20,7 @@ import java.net.URL
 class GitHubUpdateService(private val context: Context) {
     
     companion object {
-        private const val GITHUB_API_URL = "https://api.github.com/repos/YOUR_USERNAME/ServiceTool_V1/releases/latest"
+        private const val GITHUB_API_URL = "https://api.github.com/repos/stnde91/ServiceTool_V1/releases/latest"
         private const val TAG = "GitHubUpdateService"
     }
     

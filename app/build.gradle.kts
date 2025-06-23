@@ -60,6 +60,9 @@ dependencies {
 
     // RecyclerView
     implementation("androidx.recyclerview:recyclerview:1.3.2")
+    
+    // ViewPager2 für Tab Layout
+    implementation("androidx.viewpager2:viewpager2:1.0.0")
 
     // NEU: Telnet-Bibliothek (Apache Commons Net)
     // Diese Bibliothek wird für die direkte Telnet-Kommunikation mit der Moxa benötigt.
