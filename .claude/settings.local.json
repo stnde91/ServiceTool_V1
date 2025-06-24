@@ -15,7 +15,8 @@
       "Bash(sudo apt:*)",
       "Bash(sudo apt install:*)",
       "Bash(cp:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(git push:*)"
     ],
     "deny": []
   }
