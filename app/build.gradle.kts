@@ -9,10 +9,10 @@ android {
 
     defaultConfig {
         applicationId = "com.example.servicetool"
-        minSdk = 26 // ANGEPASST: Erhöht auf 26 wegen adaptiver Icons
+        minSdk = 34 // Android 14 (2023) - Moderne industrielle Geräte
         targetSdk = 35 // Sollte mit compileSdk übereinstimmen
-        versionCode = 105
-        versionName = "0.105" // ServiceTool V0.105
+        versionCode = 106
+        versionName = "0.106" // ServiceTool V0.106
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -44,9 +44,9 @@ android {
 }
 
 dependencies {
-    // Kernbibliotheken
-    implementation("androidx.core:core-ktx:1.13.1")
-    implementation("androidx.appcompat:appcompat:1.6.1")
+    // Moderne Kernbibliotheken (Android 14+)
+    implementation("androidx.core:core-ktx:1.15.0")
+    implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
 
     // UI & Layout

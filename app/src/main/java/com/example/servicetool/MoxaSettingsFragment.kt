@@ -7,11 +7,16 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
+import android.widget.Spinner
+import android.widget.ArrayAdapter
+import android.widget.AdapterView
 import androidx.appcompat.app.AlertDialog
+import com.google.android.material.button.MaterialButton
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.textfield.TextInputEditText
@@ -19,6 +24,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.core.content.ContextCompat
 
 class MoxaSettingsFragment : Fragment() {
 
@@ -34,6 +40,7 @@ class MoxaSettingsFragment : Fragment() {
     private lateinit var buttonMoxaRestart: Button
     private lateinit var textViewMoxaStatus: TextView
     private lateinit var progressBarConnection: ProgressBar
+    private lateinit var layoutPortDetails: ViewGroup
 
     // Services
     private lateinit var settingsManager: SettingsManager
@@ -81,6 +88,7 @@ class MoxaSettingsFragment : Fragment() {
         buttonMoxaRestart = view.findViewById(R.id.buttonMoxaRestart)
         textViewMoxaStatus = view.findViewById(R.id.textViewMoxaStatus)
         progressBarConnection = view.findViewById(R.id.progressBarConnection)
+        layoutPortDetails = view.findViewById(R.id.layoutPortDetails)
 
         updateConnectionStatus("Bereit für Verbindungstest", false)
     }
@@ -127,6 +135,9 @@ class MoxaSettingsFragment : Fragment() {
         buttonMoxaRestart.setOnClickListener { 
             showTelnetRestartConfirmation() 
         }
+        
+        // Automatisch Port-Details laden
+        loadPortDetails()
     }
 
     private fun saveSettings() {
@@ -342,6 +353,233 @@ class MoxaSettingsFragment : Fragment() {
         if(context != null) {
             textViewConnectionResult.text = status
             textViewConnectionResult.setTextColor(requireContext().getColor(if (isSuccess) R.color.status_success_color else R.color.status_error_color))
+        }
+    }
+
+    private fun loadPortDetails() {
+        lifecycleScope.launch {
+            try {
+                // UI auf Ladevorgang setzen
+                withContext(Dispatchers.Main) {
+                    layoutPortDetails.removeAllViews()
+                    val loadingText = TextView(requireContext()).apply {
+                        text = "Port-Konfiguration wird geladen..."
+                        textSize = 14f
+                        setPadding(16, 32, 16, 32)
+                        gravity = android.view.Gravity.CENTER
+                        setTextColor(requireContext().getColor(android.R.color.darker_gray))
+                    }
+                    layoutPortDetails.addView(loadingText)
+                }
+                
+                // Port-Settings laden
+                val portSettings = telnetController.getPortSettings("moxa")
+                
+                withContext(Dispatchers.Main) {
+                    layoutPortDetails.removeAllViews()
+                    
+                    if (portSettings != null) {
+                        displayPortSettings(portSettings)
+                    } else {
+                        val errorText = TextView(requireContext()).apply {
+                            text = "❌ Port-Konfiguration konnte nicht geladen werden\n\nStellen Sie sicher, dass:\n• Die Moxa erreichbar ist\n• Die IP-Adresse korrekt ist\n• Das Standard-Passwort 'moxa' verwendet wird"
+                            textSize = 14f
+                            setPadding(16, 16, 16, 16)
+                            setTextColor(requireContext().getColor(R.color.status_error_color))
+                        }
+                        layoutPortDetails.addView(errorText)
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    layoutPortDetails.removeAllViews()
+                    val errorText = TextView(requireContext()).apply {
+                        text = "❌ Fehler beim Laden: ${e.message}"
+                        textSize = 14f
+                        setPadding(16, 16, 16, 16)
+                        setTextColor(requireContext().getColor(R.color.status_error_color))
+                    }
+                    layoutPortDetails.addView(errorText)
+                }
+            }
+        }
+    }
+    
+    private fun displayPortSettings(portSettings: Map<Int, MoxaTelnetController.PortSettings>) {
+        for ((portNumber, settings) in portSettings) {
+            val portCard = createPortCard(portNumber, settings)
+            layoutPortDetails.addView(portCard)
+        }
+    }
+    
+    private fun createPortCard(portNumber: Int, settings: MoxaTelnetController.PortSettings): View {
+        val cardView = com.google.android.material.card.MaterialCardView(requireContext()).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                setMargins(0, 0, 0, 16)
+            }
+            radius = 12f
+            cardElevation = 4f
+        }
+        
+        val cardContent = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(16, 16, 16, 16)
+        }
+        
+        // Port-Titel mit Bearbeiten-Button
+        val titleLayout = LinearLayout(requireContext()).apply {
+            orientation = LinearLayout.HORIZONTAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+        
+        val titleText = TextView(requireContext()).apply {
+            text = "Port $portNumber"
+            textSize = 18f
+            setTypeface(null, android.graphics.Typeface.BOLD)
+            setTextColor(requireContext().getColor(android.R.color.black))
+            layoutParams = LinearLayout.LayoutParams(
+                0,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                weight = 1f
+            }
+        }
+        titleLayout.addView(titleText)
+        
+        val editButton = MaterialButton(requireContext()).apply {
+            text = "Bearbeiten"
+            textSize = 12f
+            setOnClickListener {
+                showPortEditDialog(portNumber, settings)
+            }
+        }
+        titleLayout.addView(editButton)
+        
+        cardContent.addView(titleLayout)
+        
+        // Port-Details
+        val detailsText = TextView(requireContext()).apply {
+            text = buildString {
+                appendLine("🔧 Baudrate: ${settings.baudRate} bps")
+                appendLine("📡 Datenbits: ${settings.dataBits}")
+                appendLine("⏹️ Stoppbits: ${settings.stopBits}")
+                appendLine("🔀 Parität: ${settings.parity}")
+                appendLine("💫 Flow Control: ${settings.flowControl}")
+                appendLine("📋 FIFO: ${settings.fifo}")
+                append("🔌 Interface: ${settings.interfaceType}")
+            }
+            textSize = 14f
+            setTextColor(requireContext().getColor(android.R.color.darker_gray))
+            setTypeface(null, android.graphics.Typeface.NORMAL)
+            setPadding(0, 12, 0, 0)
+        }
+        cardContent.addView(detailsText)
+        
+        cardView.addView(cardContent)
+        return cardView
+    }
+
+    private fun showPortEditDialog(portNumber: Int, currentSettings: MoxaTelnetController.PortSettings) {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_port_settings, null)
+        
+        // Initialize spinners
+        val spinnerBaudRate = dialogView.findViewById<Spinner>(R.id.spinnerBaudRate)
+        val spinnerDataBits = dialogView.findViewById<Spinner>(R.id.spinnerDataBits)
+        val spinnerStopBits = dialogView.findViewById<Spinner>(R.id.spinnerStopBits)
+        val spinnerParity = dialogView.findViewById<Spinner>(R.id.spinnerParity)
+        val spinnerFlowControl = dialogView.findViewById<Spinner>(R.id.spinnerFlowControl)
+        val spinnerFifo = dialogView.findViewById<Spinner>(R.id.spinnerFifo)
+        
+        // Setup baud rate spinner
+        val baudRates = telnetController.supportedBaudRates.map { it.toString() }
+        spinnerBaudRate.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, baudRates)
+        spinnerBaudRate.setSelection(telnetController.supportedBaudRates.indexOf(currentSettings.baudRate))
+        
+        // Setup data bits spinner
+        val dataBits = listOf("5", "6", "7", "8")
+        spinnerDataBits.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, dataBits)
+        spinnerDataBits.setSelection(currentSettings.dataBits - 5)
+        
+        // Setup stop bits spinner
+        val stopBits = listOf("1", "2")
+        spinnerStopBits.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, stopBits)
+        spinnerStopBits.setSelection(currentSettings.stopBits - 1)
+        
+        // Setup parity spinner
+        val parityOptions = listOf("None", "Even", "Odd", "Space", "Mark")
+        spinnerParity.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, parityOptions)
+        spinnerParity.setSelection(parityOptions.indexOf(currentSettings.parity))
+        
+        // Setup flow control spinner
+        val flowControlOptions = listOf("None", "RTS/CTS", "XON/XOFF", "DTR/DSR")
+        spinnerFlowControl.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, flowControlOptions)
+        spinnerFlowControl.setSelection(flowControlOptions.indexOf(currentSettings.flowControl))
+        
+        // Setup FIFO spinner
+        val fifoOptions = listOf("Enabled", "Disabled")
+        spinnerFifo.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, fifoOptions)
+        spinnerFifo.setSelection(if (currentSettings.fifo == "Enabled") 0 else 1)
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Port $portNumber Einstellungen bearbeiten")
+            .setView(dialogView)
+            .setPositiveButton("Anwenden") { _, _ ->
+                val newSettings = MoxaTelnetController.PortSettingsUpdate(
+                    baudRate = telnetController.supportedBaudRates[spinnerBaudRate.selectedItemPosition],
+                    dataBits = spinnerDataBits.selectedItemPosition + 5,
+                    stopBits = spinnerStopBits.selectedItemPosition + 1,
+                    parity = parityOptions[spinnerParity.selectedItemPosition],
+                    flowControl = flowControlOptions[spinnerFlowControl.selectedItemPosition],
+                    fifoEnabled = spinnerFifo.selectedItemPosition == 0
+                )
+                applyPortSettings(portNumber, newSettings)
+            }
+            .setNegativeButton("Abbrechen", null)
+            .show()
+    }
+    
+    private fun applyPortSettings(portNumber: Int, settings: MoxaTelnetController.PortSettingsUpdate) {
+        lifecycleScope.launch {
+            try {
+                withContext(Dispatchers.Main) {
+                    updateMoxaStatus("Wende Port $portNumber Einstellungen an...")
+                    setUIEnabled(false)
+                }
+                
+                val success = telnetController.applyPortSettings(portNumber, settings)
+                
+                withContext(Dispatchers.Main) {
+                    if (success) {
+                        updateMoxaStatus("✅ Port $portNumber Einstellungen erfolgreich angewendet. Moxa wird neu gestartet...")
+                        showToast("Port-Einstellungen wurden geändert")
+                        loggingManager.logInfo("MoxaSettings", "Port $portNumber Einstellungen erfolgreich geändert")
+                        
+                        // Warte auf Neustart und lade dann die Einstellungen neu
+                        delay(10000)
+                        loadPortDetails()
+                    } else {
+                        updateMoxaStatus("❌ Fehler beim Anwenden der Port-Einstellungen")
+                        showToast("Fehler beim Ändern der Einstellungen")
+                        loggingManager.logError("MoxaSettings", "Port $portNumber Einstellungen konnten nicht geändert werden", null)
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    updateMoxaStatus("❌ Fehler: ${e.message}")
+                    showToast("Fehler: ${e.message}")
+                    loggingManager.logError("MoxaSettings", "Ausnahme beim Ändern der Port-Einstellungen", e)
+                }
+            } finally {
+                withContext(Dispatchers.Main) {
+                    setUIEnabled(true)
+                }
+            }
         }
     }
 

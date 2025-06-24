@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayout
@@ -34,7 +33,7 @@ class CellsContainerFragment : Fragment() {
     }
 
     private fun setupViewPager() {
-        val adapter = CellsPagerAdapter(requireActivity())
+        val adapter = CellsPagerAdapter(this)
         viewPager.adapter = adapter
 
         TabLayoutMediator(tabLayout, viewPager) { tab, position ->
@@ -46,8 +45,8 @@ class CellsContainerFragment : Fragment() {
         }.attach()
     }
 
-    private class CellsPagerAdapter(fragmentActivity: FragmentActivity) : 
-        FragmentStateAdapter(fragmentActivity) {
+    private class CellsPagerAdapter(fragment: Fragment) : 
+        FragmentStateAdapter(fragment) {
 
         override fun getItemCount(): Int = 2
 
