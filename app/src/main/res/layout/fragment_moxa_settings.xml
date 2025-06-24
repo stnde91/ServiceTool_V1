@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/android:colorBackground"
+    android:fitsSystemWindows="true"
     android:padding="16dp">
 
     <LinearLayout
@@ -172,7 +173,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginBottom="20dp">
+                    android:layout_marginBottom="20dp"
+                    android:gravity="center_vertical"
+                    android:baselineAligned="false">
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/buttonTestConnection"
@@ -180,9 +183,13 @@
                         android:layout_height="56dp"
                         android:layout_marginEnd="8dp"
                         android:layout_weight="1"
+                        android:layout_gravity="center_vertical"
                         android:text="Verbindung testen"
                         android:textSize="14sp"
                         android:textStyle="bold"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:ellipsize="end"
                         app:backgroundTint="?attr/colorPrimary"
                         app:cornerRadius="12dp"
                         app:icon="@drawable/ic_network_24"
@@ -196,9 +203,13 @@
                         android:layout_height="56dp"
                         android:layout_marginStart="8dp"
                         android:layout_weight="1"
+                        android:layout_gravity="center_vertical"
                         android:text="Ping Test"
                         android:textSize="14sp"
                         android:textStyle="bold"
+                        android:gravity="center"
+                        android:maxLines="1"
+                        android:ellipsize="end"
                         app:backgroundTint="?attr/colorSecondary"
                         app:cornerRadius="12dp"
                         app:icon="@drawable/ic_speed_24"

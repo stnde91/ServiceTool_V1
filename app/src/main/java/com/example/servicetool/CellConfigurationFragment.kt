@@ -13,10 +13,14 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.progressindicator.LinearProgressIndicator
+import androidx.appcompat.app.AlertDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import androidx.core.content.ContextCompat
 
 class CellConfigurationFragment : Fragment() {
 
@@ -36,6 +40,7 @@ class CellConfigurationFragment : Fragment() {
     private lateinit var textViewFilterStatus: TextView
 
     private var communicationManager: CommunicationManager? = null
+    private var progressDialog: AlertDialog? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -389,6 +394,27 @@ class CellConfigurationFragment : Fragment() {
 
     // === AUTOMATISCHE FILTER-FUNKTIONEN ===
     
+    private fun createProgressDialog(): AlertDialog {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_filter_progress, null)
+        
+        return MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .setCancelable(false)
+            .create()
+    }
+    
+    private fun updateProgressDialog(cellNumber: Int, totalCells: Int, message: String) {
+        progressDialog?.let { dialog ->
+            dialog.findViewById<TextView>(R.id.textProgressTitle)?.text = "Setze Filter für Zelle $cellNumber von $totalCells"
+            dialog.findViewById<TextView>(R.id.textProgressMessage)?.text = message
+            dialog.findViewById<LinearProgressIndicator>(R.id.progressIndicator)?.apply {
+                max = totalCells
+                progress = cellNumber
+            }
+            dialog.findViewById<TextView>(R.id.textProgressPercentage)?.text = "${(cellNumber * 100) / totalCells}%"
+        }
+    }
+    
     // Neue Hauptfunktion: Filter für alle Zellen setzen (adress-basiert)
     private fun setFilterForAllDetectedCells(filterValue: Int) {
         Log.d("CellConfig", "setFilterForAllDetectedCells aufgerufen mit filterValue: $filterValue")
@@ -397,15 +423,21 @@ class CellConfigurationFragment : Fragment() {
         val activeCellCount = spinnerCellCount.selectedItem.toString().toInt()
         Log.d("CellConfig", "Verwende konfigurierte Zellanzahl: $activeCellCount")
         
-        showFilterStatus("Setze Filter $filterValue für $activeCellCount Zellen...", false)
-        showStatus("Verwende direkte Zell-Adressierung (A-${('A' + activeCellCount - 1)})...", false)
+        showFilterStatus("Starte Filter-Operation...", false)
         setFilterUIEnabled(false)
+        
+        // Erstelle und zeige Progress-Dialog
+        progressDialog = createProgressDialog()
+        progressDialog?.show()
 
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 if (!ensureConnection()) {
                     withContext(Dispatchers.Main) {
+                        progressDialog?.dismiss()
+                        progressDialog = null
                         showStatus("Fehler: Keine Verbindung zur Hardware!", true)
+                        showFilterStatus("Verbindung fehlgeschlagen", true)
                         setFilterUIEnabled(true)
                     }
                     return@launch
@@ -419,6 +451,10 @@ class CellConfigurationFragment : Fragment() {
                 // Teste nur die konfigurierten aktiven Zellen
                 for (cellNumber in 1..activeCellCount) {
                     try {
+                        withContext(Dispatchers.Main) {
+                            updateProgressDialog(cellNumber, activeCellCount, "Sende Befehle an Zelle $cellNumber...")
+                        }
+                        
                         Log.d("CellConfig", "Setze Filter für Zelle $cellNumber")
                         
                         // Verwende korrigierte zwei-Kommando-Sequenz: AQ Query + Aw Write
@@ -427,6 +463,10 @@ class CellConfigurationFragment : Fragment() {
                         // 1. AQ Query-Kommando (setzt tatsächlich den Filter)
                         val queryCommand = FlintecRC3DMultiCellCommands.createFilterQueryCommand(cellNumber, filterValue)
                         Log.d("CellConfig", "Sende AQ Query für Zelle $cellNumber: '$queryCommand'")
+                        
+                        withContext(Dispatchers.Main) {
+                            updateProgressDialog(cellNumber, activeCellCount, "Sende Query-Befehl...")
+                        }
                         
                         val queryResponse = try {
                             withTimeout(3000) {
@@ -444,6 +484,10 @@ class CellConfigurationFragment : Fragment() {
                         // 2. Aw Write-Kommando (bestätigt den Filter)
                         val writeCommand = FlintecRC3DMultiCellCommands.createFilterCommand(cellNumber, filterValue)
                         Log.d("CellConfig", "Sende Aw Write für Zelle $cellNumber: '$writeCommand'")
+                        
+                        withContext(Dispatchers.Main) {
+                            updateProgressDialog(cellNumber, activeCellCount, "Sende Write-Befehl...")
+                        }
                         
                         val writeResponse = try {
                             withTimeout(3000) {
@@ -489,6 +533,9 @@ class CellConfigurationFragment : Fragment() {
                 }
 
                 withContext(Dispatchers.Main) {
+                    progressDialog?.dismiss()
+                    progressDialog = null
+                    
                     if (successCount > 0) {
                         showFilterStatus("✓ Filter $filterValue erfolgreich für $successCount/$totalCells Zellen gesetzt!", false)
                         showStatus("Filter-Operation erfolgreich abgeschlossen", false)
@@ -502,6 +549,8 @@ class CellConfigurationFragment : Fragment() {
             } catch (e: Exception) {
                 Log.e("CellConfig", "Fehler beim automatischen Filter setzen", e)
                 withContext(Dispatchers.Main) {
+                    progressDialog?.dismiss()
+                    progressDialog = null
                     showFilterStatus("❌ Fehler: ${e.message}", true)
                     setFilterUIEnabled(true)
                 }
@@ -736,9 +785,9 @@ class CellConfigurationFragment : Fragment() {
         textViewStatus.text = message
         textViewStatus.setTextColor(
             if (isError)
-                requireContext().getColor(android.R.color.holo_red_dark)
+                requireContext().getColor(R.color.status_error_color)
             else
-                requireContext().getColor(android.R.color.holo_green_dark)
+                requireContext().getColor(R.color.status_success_color)
         )
     }
 
@@ -760,14 +809,16 @@ class CellConfigurationFragment : Fragment() {
         textViewFilterStatus.text = message
         textViewFilterStatus.setTextColor(
             if (isError)
-                requireContext().getColor(android.R.color.holo_red_dark)
+                requireContext().getColor(R.color.status_error_color)
             else
-                requireContext().getColor(android.R.color.holo_green_dark)
+                requireContext().getColor(R.color.status_success_color)
         )
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+        progressDialog?.dismiss()
+        progressDialog = null
         lifecycleScope.launch {
             communicationManager?.disconnect()
             communicationManager = null

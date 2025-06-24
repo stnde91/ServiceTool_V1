@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:background="?attr/selectableItemBackground">
+
+    <TextView
+        android:id="@+id/textLogTime"
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        android:text="12:34:56"
+        android:textSize="10sp"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:fontFamily="monospace"
+        android:gravity="center" />
+
+    <TextView
+        android:id="@+id/textLogDirection"
+        android:layout_width="20dp"
+        android:layout_height="wrap_content"
+        android:text="→"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginStart="4dp"
+        android:layout_marginEnd="8dp" />
+
+    <TextView
+        android:id="@+id/textLogMessage"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Command or response message"
+        android:textSize="11sp"
+        android:textColor="?attr/colorOnSurface"
+        android:fontFamily="monospace"
+        android:maxLines="2"
+        android:ellipsize="end" />
+
+    <TextView
+        android:id="@+id/textLogStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SUCCESS"
+        android:textSize="9sp"
+        android:textStyle="bold"
+        android:layout_marginStart="8dp"
+        android:minWidth="50dp"
+        android:gravity="center" />
+
+</LinearLayout>

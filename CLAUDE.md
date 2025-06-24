@@ -11,12 +11,12 @@ ServiceTool is an Android application for industrial weighing cell communication
 - **Communication Layer**: `CommunicationManager` handles TCP socket connections to Moxa devices
 - **Protocol Layer**: `FlintecRC3DCommands` and `FlintecRC3DMultiCellCommands` implement Flintec RC3D protocol
 - **Data Layer**: `FlintecData`, `MultiCellConfig`, and `SettingsManager` handle data persistence and configuration
-- **UI Layer**: Fragment-based navigation with drawer layout using Material Design 3
+- **UI Layer**: Fragment-based navigation with bottom navigation using Material Design 3
 - **Infrastructure**: `LoggingManager` provides comprehensive logging and telemetry
 
 ### Key Components
 
-- **MainActivity**: Navigation hub with drawer layout and splash screen
+- **MainActivity**: Navigation hub with bottom navigation and splash screen
 - **CommunicationManager**: Core TCP/RS485 communication with diagnostic capabilities
 - **MultiCellConfig**: Multi-cell configuration management with persistent settings
 - **MoxaTelnetController**: Telnet-based Moxa device management and configuration
@@ -44,7 +44,7 @@ ServiceTool is an Android application for industrial weighing cell communication
 
 ### Project Setup
 - **Target SDK**: 35 (Android 14)
-- **Min SDK**: 26 (Android 8.0) - Required for adaptive icons
+- **Min SDK**: 34 (Android 14) - Modern industrial devices only
 - **Kotlin**: 1.9.0
 - **Android Gradle Plugin**: 8.6.0
 - **View Binding**: Enabled

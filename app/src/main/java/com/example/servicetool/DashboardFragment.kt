@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.google.android.material.button.MaterialButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -28,20 +29,29 @@ class DashboardFragment : Fragment() {
     private lateinit var iconMoxaStatus: ImageView
     private lateinit var textMoxaStatus: TextView
     private lateinit var textMoxaPing: TextView
-    private lateinit var recyclerViewQuickActions: RecyclerView
 
     // Statistics UI
     private lateinit var textSuccessfulConnections: TextView
     private lateinit var textErrorCount: TextView
     private lateinit var textSuccessRate: TextView
     private lateinit var textAverageResponseTime: TextView
+    
+    // Update Status UI
+    private lateinit var cardUpdateStatus: View
+    private lateinit var iconUpdateStatus: ImageView
+    private lateinit var textUpdateStatus: TextView
+    private lateinit var textUpdateDetails: TextView
+    private lateinit var buttonCheckUpdates: MaterialButton
+    
+    // Communication Log UI
+    private lateinit var recyclerViewCommLog: RecyclerView
+    private lateinit var buttonClearLog: MaterialButton
+    private lateinit var commLogAdapter: CommunicationLogAdapter
 
     // Services
     private lateinit var settingsManager: SettingsManager
     private lateinit var loggingManager: LoggingManager
 
-    // Quick Actions Adapter
-    private lateinit var quickActionAdapter: QuickActionAdapter
 
     // Jobs
     private var statusUpdateJob: Job? = null
@@ -62,7 +72,6 @@ class DashboardFragment : Fragment() {
 
         initializeServices()
         initializeViews(view)
-        setupQuickActions()
         startUpdates()
 
         // Initial update
@@ -90,68 +99,120 @@ class DashboardFragment : Fragment() {
         textErrorCount = view.findViewById(R.id.textErrorCount)
         textSuccessRate = view.findViewById(R.id.textSuccessRate)
         textAverageResponseTime = view.findViewById(R.id.textAverageResponseTime)
+        
+        // Update Status
+        cardUpdateStatus = view.findViewById(R.id.cardUpdateStatus)
+        iconUpdateStatus = view.findViewById(R.id.iconUpdateStatus)
+        textUpdateStatus = view.findViewById(R.id.textUpdateStatus)
+        textUpdateDetails = view.findViewById(R.id.textUpdateDetails)
+        buttonCheckUpdates = view.findViewById(R.id.buttonCheckUpdates)
+        
+        // Communication Log
+        recyclerViewCommLog = view.findViewById(R.id.recyclerViewCommLog)
+        buttonClearLog = view.findViewById(R.id.buttonClearLog)
+        
+        setupCommunicationLog()
+        setupUpdateChecker()
 
-        // Quick Actions
-        recyclerViewQuickActions = view.findViewById(R.id.recyclerViewQuickActions)
-        recyclerViewQuickActions.layoutManager = LinearLayoutManager(context)
     }
-
-    private fun setupQuickActions() {
-        val quickActions = listOf(
-            QuickAction(
-                title = "Multi-Cell Übersicht",
-                description = "Alle Zellen anzeigen und überwachen",
-                iconRes = R.drawable.ic_weight_24,
-                action = {
-                    loggingManager.logInfo("Dashboard", "Navigation zu Multi-Cell Übersicht")
-                    findNavController().navigate(R.id.nav_multicell_overview)
+    
+    private fun setupCommunicationLog() {
+        commLogAdapter = CommunicationLogAdapter()
+        recyclerViewCommLog.apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = commLogAdapter
+        }
+        
+        buttonClearLog.setOnClickListener {
+            commLogAdapter.clearLog()
+            loggingManager.logInfo("Dashboard", "Kommunikations-Log geleert")
+        }
+        
+        // Add some demo entries
+        addLogEntry("→", "RESET", "SUCCESS", 45)
+        addLogEntry("←", "02 01 03", "SUCCESS", null)
+        addLogEntry("→", "READ_WEIGHT", "SUCCESS", 23)
+        addLogEntry("←", "02 12.34 kg 03", "SUCCESS", null)
+        addLogEntry("→", "CONFIG_ADDR", "TIMEOUT", 5000)
+    }
+    
+    private fun setupUpdateChecker() {
+        // Set current version
+        textUpdateDetails.text = "Aktuell: v0.105"
+        
+        buttonCheckUpdates.setOnClickListener {
+            checkForUpdates()
+        }
+        
+        // Auto-check on startup
+        checkForUpdates()
+    }
+    
+    private fun checkForUpdates() {
+        buttonCheckUpdates.isEnabled = false
+        textUpdateStatus.text = "Prüfe auf Updates..."
+        iconUpdateStatus.setImageResource(R.drawable.ic_refresh_24)
+        
+        lifecycleScope.launch {
+            try {
+                // Use existing GitHubUpdateService
+                val updateService = GitHubUpdateService(requireContext())
+                val latestRelease = updateService.checkForUpdates()
+                
+                withContext(Dispatchers.Main) {
+                    if (latestRelease != null) {
+                        val currentVersion = requireContext().packageManager
+                            .getPackageInfo(requireContext().packageName, 0).versionName
+                        
+                        if (latestRelease.isNewVersion) {
+                            // Update available
+                            cardUpdateStatus.visibility = View.VISIBLE
+                            textUpdateStatus.text = "Update verfügbar!"
+                            textUpdateDetails.text = "Aktuell: v$currentVersion → Neu: v${latestRelease.version}"
+                            iconUpdateStatus.setImageResource(R.drawable.ic_refresh_24)
+                            iconUpdateStatus.setColorFilter(requireContext().getColor(R.color.status_success_color))
+                        } else {
+                            // Up to date
+                            textUpdateStatus.text = "App ist aktuell"
+                            textUpdateDetails.text = "Aktuell: v$currentVersion"
+                            iconUpdateStatus.setImageResource(R.drawable.ic_status_success)
+                            iconUpdateStatus.setColorFilter(requireContext().getColor(R.color.status_success_color))
+                            
+                            // Hide card after delay if up to date
+                            delay(3000)
+                            cardUpdateStatus.visibility = View.GONE
+                        }
+                    } else {
+                        textUpdateStatus.text = "Update-Prüfung fehlgeschlagen"
+                        textUpdateDetails.text = "Netzwerkfehler oder GitHub nicht erreichbar"
+                        iconUpdateStatus.setImageResource(R.drawable.ic_status_error)
+                        iconUpdateStatus.setColorFilter(requireContext().getColor(R.color.status_error_color))
+                    }
                 }
-            ),
-
-            QuickAction(
-                title = "System-Diagnose",
-                description = "Verbindung und Hardware-Status prüfen",
-                iconRes = R.drawable.ic_diagnostic_24,
-                action = {
-                    loggingManager.logInfo("Dashboard", "System-Diagnose gestartet")
-                    runSystemDiagnosis()
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    textUpdateStatus.text = "Update-Prüfung fehlgeschlagen"
+                    textUpdateDetails.text = "Fehler: ${e.message}"
+                    iconUpdateStatus.setImageResource(R.drawable.ic_status_error)
+                    iconUpdateStatus.setColorFilter(requireContext().getColor(R.color.status_error_color))
                 }
-            ),
-
-            // NEU: Moxa Einstellungen als prominente Quick Action
-            QuickAction(
-                title = "Moxa Einstellungen",
-                description = "Device Server konfigurieren und steuern",
-                iconRes = R.drawable.ic_digital_24,
-                action = {
-                    loggingManager.logInfo("Dashboard", "Navigation zu Moxa Einstellungen")
-                    findNavController().navigate(R.id.nav_moxa_settings)
+            } finally {
+                withContext(Dispatchers.Main) {
+                    buttonCheckUpdates.isEnabled = true
                 }
-            ),
-
-            QuickAction(
-                title = "Zellen Konfiguration",
-                description = "Zelladressen ändern und konfigurieren",
-                iconRes = R.drawable.ic_settings_24,
-                action = {
-                    loggingManager.logInfo("Dashboard", "Navigation zu Zellen Konfiguration")
-                    findNavController().navigate(R.id.cellConfigurationFragment)
-                }
-            ),
-
-            QuickAction(
-                title = "App Einstellungen",
-                description = "Anwendung konfigurieren und anpassen",
-                iconRes = R.drawable.ic_settings_24,
-                action = {
-                    loggingManager.logInfo("Dashboard", "Navigation zu App Einstellungen")
-                    findNavController().navigate(R.id.nav_settings)
-                }
-            )
+            }
+        }
+    }
+    
+    private fun addLogEntry(direction: String, message: String, status: String, duration: Long?) {
+        val entry = CommunicationLogEntry(
+            timestamp = System.currentTimeMillis(),
+            direction = direction,
+            message = message,
+            status = status,
+            duration = duration
         )
-
-        quickActionAdapter = QuickActionAdapter(quickActions)
-        recyclerViewQuickActions.adapter = quickActionAdapter
+        commLogAdapter.addLogEntry(entry)
     }
 
     private fun startUpdates() {
