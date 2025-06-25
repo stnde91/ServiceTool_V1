@@ -55,47 +55,21 @@
                     android:layout_marginBottom="16dp" />
 
                 <!-- Cell Count Selection -->
-                <LinearLayout
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/activeCellsInputLayout"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:hint="Anzahl aktive Zellen">
 
-                    <LinearLayout
-                        android:layout_width="0dp"
+                    <AutoCompleteTextView
+                        android:id="@+id/autoCompleteActiveCells"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
+                        android:inputType="none"
+                        tools:ignore="LabelFor" />
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Anzahl aktive Zellen"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
-                            android:textColor="?attr/colorOnSurface" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Wählen Sie die Zellenanzahl"
-                            android:textSize="14sp"
-                            android:textColor="?attr/colorOnSurfaceVariant"
-                            android:layout_marginTop="2dp" />
-
-                    </LinearLayout>
-
-                    <Spinner
-                        android:id="@+id/spinnerActiveCells"
-                        android:layout_width="120dp"
-                        android:layout_height="48dp"
-                        android:layout_marginStart="16dp"
-                        android:background="@drawable/spinner_background"
-                        android:paddingStart="16dp"
-                        android:paddingEnd="16dp"
-                        android:textColor="?attr/colorOnSurface" />
-
-                </LinearLayout>
+                </com.google.android.material.textfield.TextInputLayout>
 
             </LinearLayout>
 

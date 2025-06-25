@@ -461,7 +461,7 @@ class CellConfigurationFragment : Fragment() {
                         // Basierend auf funktionierender Wireshark-Analyse
                         
                         // 1. AQ Query-Kommando (setzt tatsächlich den Filter)
-                        val queryCommand = FlintecRC3DMultiCellCommands.createFilterQueryCommand(cellNumber, filterValue)
+                        val queryCommand = FlintecRC3DMultiCellCommands.createFilterStatusCommand(cellNumber)
                         Log.d("CellConfig", "Sende AQ Query für Zelle $cellNumber: '$queryCommand'")
                         
                         withContext(Dispatchers.Main) {
@@ -583,7 +583,7 @@ class CellConfigurationFragment : Fragment() {
                         }
                         
                         if (response.isNotEmpty()) {
-                            val parsedResponse = FlintecRC3DMultiCellCommands.parseMultiCellResponse(response)
+                            val parsedResponse = FlintecRC3DCommands.parseResponse(response)
                             if (parsedResponse is FlintecData.SerialNumber && parsedResponse.value.isNotEmpty()) {
                                 results[cellNumber] = parsedResponse.value
                                 Log.i("CellConfig", "Zelle $cellNumber aktiv: S/N ${parsedResponse.value}")
@@ -625,7 +625,7 @@ class CellConfigurationFragment : Fragment() {
                 Log.i("CellConfig", "Setze Filter $filterValue für Zelle S/N: $serialNumber")
 
                 // Verwende die neue seriennummer-basierte Filter-Funktion
-                val command = FlintecRC3DMultiCellCommands.setFilterBySerialNumber(serialNumber, filterValue)
+                val command = String(FlintecRC3DCommands.setFilter(filterValue), Charsets.US_ASCII)
                 
                 Log.d("CellConfig", "Sende Filter-Kommando: '$command'")
                 
@@ -688,11 +688,11 @@ class CellConfigurationFragment : Fragment() {
                     try {
                         // DEPRECATED: Diese Methode verwendet feste Zelladressen A-H (funktioniert nicht mehr!)
                         // Die neue Methode setFilterForAllDetectedCells() verwendet Seriennummern
-                        val command = FlintecRC3DMultiCellCommands.setFilterForCell(cellNumber, filterValue)
+                        val command = FlintecRC3DMultiCellCommands.createFilterCommandByteArray(cellNumber, filterValue)
                         val commandString = String(command, Charsets.ISO_8859_1)
                         
                         Log.d("CellConfig", "Sende Filter-Kommando für Zelle $cellNumber: ${command.joinToString(" ") { "%02X".format(it) }}")
-                        Log.d("CellConfig", "Command String für Zelle $cellNumber: '${commandString.map { it.code.toString(16) }.joinToString(" ")}'")
+                        Log.d("CellConfig", "Command String für Zelle $cellNumber: '${commandString.map { char -> char.code.toString(16) }.joinToString(" ")}'")
                         
                         val response = try {
                             Log.d("CellConfig", "Starte sendCommand für Zelle $cellNumber...")
@@ -709,7 +709,7 @@ class CellConfigurationFragment : Fragment() {
                             ""
                         }
 
-                        val parsedResponse = FlintecRC3DMultiCellCommands.parseMultiCellResponse(response)
+                        val parsedResponse = FlintecRC3DCommands.parseResponse(response)
                         if (parsedResponse is FlintecData.FilterSetResult && parsedResponse.success) {
                             successCount++
                             Log.i("CellConfig", "Filter erfolgreich gesetzt für Zelle $cellNumber")

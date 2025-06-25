@@ -12,7 +12,8 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.Spinner
+import android.widget.AutoCompleteTextView
+import com.google.android.material.textfield.TextInputLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -36,7 +37,8 @@ class MultiCellOverviewFragment : Fragment() {
     private lateinit var buttonStartLiveAll: Button
     private lateinit var buttonStopLiveAll: Button
     private lateinit var textLastUpdateAll: TextView
-    private lateinit var spinnerActiveCells: Spinner
+    private lateinit var activeCellsInputLayout: TextInputLayout
+    private lateinit var autoCompleteActiveCells: AutoCompleteTextView
     private lateinit var textBaudrateAll: TextView
     private lateinit var layoutIndividualDetailsContainer: LinearLayout
 
@@ -78,7 +80,7 @@ class MultiCellOverviewFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initializeServices()
         initializeViews(view)
-        setupSpinner()
+        setupActiveCellsDropdown()
         setupClickListeners()
         updateConfiguredCells()
         initializeUIWithoutData()
@@ -92,7 +94,8 @@ class MultiCellOverviewFragment : Fragment() {
     private fun initializeViews(view: View) {
         textOverallStatus = view.findViewById(R.id.textOverallStatus)
         progressIndicatorOverall = view.findViewById(R.id.progressIndicatorOverall)
-        spinnerActiveCells = view.findViewById(R.id.spinnerActiveCells)
+        activeCellsInputLayout = view.findViewById(R.id.activeCellsInputLayout)
+        autoCompleteActiveCells = view.findViewById(R.id.autoCompleteActiveCells)
         buttonRefreshAll = view.findViewById(R.id.buttonRefreshAll)
         buttonStartLiveAll = view.findViewById(R.id.buttonStartLiveAll)
         buttonStopLiveAll = view.findViewById(R.id.buttonStopLiveAll)
@@ -119,28 +122,24 @@ class MultiCellOverviewFragment : Fragment() {
         }
     }
 
-    private fun setupSpinner() {
+    private fun setupActiveCellsDropdown() {
         val spinnerItems = (1..MultiCellConfig.maxDisplayCells).map { if (it == 1) "$it Zelle" else "$it Zellen" }
-        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, spinnerItems)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinnerActiveCells.adapter = adapter
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, spinnerItems)
+        autoCompleteActiveCells.setAdapter(adapter)
 
         val currentCellCount = settingsManager.getActiveCellCount()
         if (currentCellCount in 1..MultiCellConfig.maxDisplayCells) {
-            spinnerActiveCells.setSelection(currentCellCount - 1, false)
+            autoCompleteActiveCells.setText(spinnerItems[currentCellCount - 1], false)
         }
 
-        spinnerActiveCells.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val selectedCellCount = position + 1
-                if (settingsManager.getActiveCellCount() != selectedCellCount) {
-                    if (isLiveMode) stopLiveMode()
-                    settingsManager.setActiveCellCount(selectedCellCount)
-                    updateConfiguredCells()
-                    initializeUIWithoutData()
-                }
+        autoCompleteActiveCells.setOnItemClickListener { _, _, position, _ ->
+            val selectedCellCount = position + 1
+            if (settingsManager.getActiveCellCount() != selectedCellCount) {
+                if (isLiveMode) stopLiveMode()
+                settingsManager.setActiveCellCount(selectedCellCount)
+                updateConfiguredCells()
+                initializeUIWithoutData()
             }
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
     }
 
@@ -344,34 +343,19 @@ class MultiCellOverviewFragment : Fragment() {
                     val data = CellDisplayData(cellNumber = cellNumber)
                     var commandSuccess = true
 
-                    // Wir fragen jetzt alle Daten pro Zelle in einer Verbindung ab - mit Retry-Mechanismus
-                    data.serialNumber = fetchSingleCellCommandWithRetry(
-                        FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.SERIAL_NUMBER), 
-                        outputStream, inputStream, cellNumber, "SERIAL_NUMBER"
-                    ) ?: "S/N: Fehler"
+                    // Wir fragen jetzt alle Daten pro Zelle in einer Verbindung ab
+                    data.serialNumber = fetchSingleCellCommand(FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.SERIAL_NUMBER), outputStream, inputStream) ?: "S/N: Fehler"
                     delay(50) // Kleine Pause auch zwischen Befehlen
 
-                    data.counts = fetchSingleCellCommandWithRetry(
-                        FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.COUNTS), 
-                        outputStream, inputStream, cellNumber, "COUNTS"
-                    ) ?: run { commandSuccess = false; "Fehler" }
+                    data.counts = fetchSingleCellCommand(FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.COUNTS), outputStream, inputStream) ?: run { commandSuccess = false; "Fehler" }
                     delay(50)
 
                     if (commandSuccess) {
-                        data.baudrate = fetchSingleCellCommandWithRetry(
-                            FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.BAUDRATE), 
-                            outputStream, inputStream, cellNumber, "BAUDRATE"
-                        ) ?: "Fehler"
+                        data.baudrate = fetchSingleCellCommand(FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.BAUDRATE), outputStream, inputStream) ?: "Fehler"
                         delay(50)
-                        data.filter = fetchSingleCellCommandWithRetry(
-                            FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.FILTER), 
-                            outputStream, inputStream, cellNumber, "FILTER"
-                        ) ?: "Fehler"
+                        data.filter = fetchSingleCellCommand(FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.FILTER), outputStream, inputStream) ?: "Fehler"
                         delay(50)
-                        data.version = fetchSingleCellCommandWithRetry(
-                            FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.VERSION), 
-                            outputStream, inputStream, cellNumber, "VERSION"
-                        ) ?: "Fehler"
+                        data.version = fetchSingleCellCommand(FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.VERSION), outputStream, inputStream) ?: "Fehler"
                     }
 
                     data.lastUpdate = System.currentTimeMillis()
@@ -404,90 +388,6 @@ class MultiCellOverviewFragment : Fragment() {
             Log.w("MultiCellOverview", "Fehler beim Senden/Empfangen eines Befehls: ${e.message}")
             null
         }
-    }
-    
-    /**
-     * Erweiterte Befehlsausführung mit Retry-Mechanismus für verdächtige Antworten
-     */
-    private suspend fun fetchSingleCellCommandWithRetry(
-        commandBytes: ByteArray, 
-        outputStream: OutputStream, 
-        inputStream: InputStream,
-        cellNumber: Int,
-        commandType: String,
-        maxRetries: Int = 3
-    ): String? {
-        if (!coroutineContext.isActive) return null
-        
-        var lastResponse: String? = null
-        var retryCount = 0
-        
-        while (retryCount <= maxRetries && coroutineContext.isActive) {
-            try {
-                Log.d("MultiCellRetry", "Ausführung Befehl für Zelle $cellNumber ($commandType) - Versuch ${retryCount + 1}/${maxRetries + 1}")
-                
-                outputStream.write(commandBytes)
-                outputStream.flush()
-                val rawResponse = readFlintecResponse(inputStream)
-                
-                // Analysiere die Antwort mit CommunicationHelper
-                val analysis = CommunicationHelper.analyzeCommunicationPattern(commandBytes, rawResponse)
-                Log.d("MultiCellRetry", "Analyse für Zelle $cellNumber: ${analysis.pattern}")
-                
-                if (analysis.isSuspicious) {
-                    Log.w("MultiCellRetry", "Verdächtige Antwort für Zelle $cellNumber ($commandType): '$rawResponse'")
-                    Log.w("MultiCellRetry", "Empfehlung: ${CommunicationHelper.getErrorRecommendation(rawResponse)}")
-                    Log.d("MultiCellRetry", analysis.getDetailedReport())
-                    
-                    lastResponse = rawResponse
-                    retryCount++
-                    
-                    if (retryCount <= maxRetries) {
-                        Log.i("MultiCellRetry", "Wiederhole Befehl für Zelle $cellNumber nach 200ms...")
-                        delay(200) // Wartezeit zwischen Versuchen
-                        continue
-                    } else {
-                        Log.e("MultiCellRetry", "Maximale Anzahl Wiederholungen erreicht für Zelle $cellNumber ($commandType)")
-                        loggingManager.logError("MultiCellRetry", "Befehl für Zelle $cellNumber fehlgeschlagen nach $maxRetries Versuchen: $rawResponse", null, cellNumber)
-                        return null
-                    }
-                }
-                
-                // Erfolgreiche Antwort - Parse und return
-                Log.d("MultiCellRetry", "Erfolgreiche Antwort für Zelle $cellNumber ($commandType): '$rawResponse'")
-                if (retryCount > 0) {
-                    Log.i("MultiCellRetry", "Befehl für Zelle $cellNumber erfolgreich nach ${retryCount + 1} Versuchen")
-                    loggingManager.logInfo("MultiCellRetry", "Befehl für Zelle $cellNumber erfolgreich nach ${retryCount + 1} Versuchen")
-                }
-                
-                return FlintecRC3DMultiCellCommands.parseMultiCellResponse(rawResponse)?.let { data ->
-                    when (data) {
-                        is FlintecData.Counts -> data.value
-                        is FlintecData.SerialNumber -> data.value
-                        is FlintecData.Baudrate -> data.value
-                        is FlintecData.Filter -> data.value
-                        is FlintecData.Version -> data.value
-                        else -> rawResponse // Fallback
-                    }
-                }
-                
-            } catch (e: Exception) {
-                Log.w("MultiCellRetry", "Fehler beim Senden/Empfangen Befehl für Zelle $cellNumber (Versuch ${retryCount + 1}): ${e.message}")
-                lastResponse = null
-                retryCount++
-                
-                if (retryCount <= maxRetries) {
-                    delay(200)
-                    continue
-                } else {
-                    Log.e("MultiCellRetry", "Alle Versuche fehlgeschlagen für Zelle $cellNumber ($commandType)")
-                    loggingManager.logError("MultiCellRetry", "Alle Versuche fehlgeschlagen für Zelle $cellNumber", e, cellNumber)
-                    return null
-                }
-            }
-        }
-        
-        return null
     }
 
     // --- Live Modus ---
@@ -567,13 +467,12 @@ class MultiCellOverviewFragment : Fragment() {
                 Socket().use { socket ->
                     socket.connect(InetSocketAddress(getMoxaIpAddress(), getMoxaPort()), 3000)
                     socket.soTimeout = 2000
-                    fetchSingleCellCommandWithRetry(
+                    fetchSingleCellCommand(
                         FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.COUNTS),
-                        socket.getOutputStream(), socket.getInputStream(), cellNumber, "COUNTS_LIVE", 2 // Weniger Retries im Live-Modus
+                        socket.getOutputStream(), socket.getInputStream()
                     )
                 }
             } catch (e: Exception) {
-                Log.w("MultiCellOverview", "Fehler beim Laden von Live-Counts für Zelle $cellNumber: ${e.message}")
                 null
             }
         }
@@ -738,7 +637,7 @@ class MultiCellOverviewFragment : Fragment() {
     private fun showLoading(show: Boolean) {
         progressIndicatorOverall.visibility = if (show) View.VISIBLE else View.GONE
         buttonRefreshAll.isEnabled = !show
-        spinnerActiveCells.isEnabled = !show
+        activeCellsInputLayout.isEnabled = !show
         updateButtonStates()
     }
 
@@ -747,7 +646,7 @@ class MultiCellOverviewFragment : Fragment() {
         buttonStartLiveAll.isEnabled = !isLiveMode && !isLoading
         buttonStopLiveAll.isEnabled = isLiveMode && !isLoading
         buttonRefreshAll.isEnabled = !isLiveMode && !isLoading
-        spinnerActiveCells.isEnabled = !isLiveMode && !isLoading
+        activeCellsInputLayout.isEnabled = !isLiveMode && !isLoading
     }
 
     // --- Utility & Lifecycle ---
@@ -764,39 +663,53 @@ class MultiCellOverviewFragment : Fragment() {
             try {
                 val responseBuffer = mutableListOf<Byte>()
                 var stxFound = false
-                var etxFound = false
-                val tempReadBuffer = ByteArray(128)
                 val startTime = System.currentTimeMillis()
-                val readOverallTimeout = 2000L
-                while (isActive && System.currentTimeMillis() - startTime < readOverallTimeout && !etxFound) {
+                val readOverallTimeout = 2000L // Timeout for the whole operation
+
+                // Phase 1: Wait for and find STX
+                while (isActive && System.currentTimeMillis() - startTime < readOverallTimeout) {
                     if (inputStream.available() > 0) {
-                        val bytesRead = inputStream.read(tempReadBuffer)
-                        if (bytesRead == -1) break
-                        for (k in 0 until bytesRead) {
-                            val byte = tempReadBuffer[k]
-                            if (!stxFound && byte.toInt() == 0x02) {
-                                stxFound = true
-                                responseBuffer.clear()
-                                continue
-                            }
-                            if (stxFound) {
-                                if (byte.toInt() == 0x03) {
-                                    etxFound = true
-                                    break
-                                }
-                                responseBuffer.add(byte)
-                            }
+                        val byte = inputStream.read()
+                        if (byte == -1) break // End of stream
+                        if (byte == 0x02) { // STX found
+                            stxFound = true
+                            break
                         }
                     } else {
-                        delay(50)
+                        delay(10) // Wait for data to become available
                     }
                 }
-                if (stxFound && etxFound) {
-                    String(responseBuffer.toByteArray(), Charsets.US_ASCII)
-                } else {
-                    ""
+
+                if (!stxFound) {
+                    Log.w("MultiCellOverview", "Read timeout: STX not found.")
+                    return@withContext "" // No STX found within timeout
                 }
+
+                // Phase 2: STX found, now read until ETX
+                val readDataTimeout = 1000L // Shorter timeout for reading data after STX
+                val dataStartTime = System.currentTimeMillis()
+                while (isActive && System.currentTimeMillis() - dataStartTime < readDataTimeout) {
+                    if (inputStream.available() > 0) {
+                        val byte = inputStream.read()
+                        if (byte == -1) { // End of stream unexpectedly
+                            Log.w("MultiCellOverview", "Read warning: End of stream reached before ETX.")
+                            break
+                        }
+                        if (byte == 0x03) { // ETX found
+                            // Success, return the buffered data
+                            return@withContext String(responseBuffer.toByteArray(), Charsets.US_ASCII)
+                        }
+                        responseBuffer.add(byte.toByte())
+                    } else {
+                        delay(10)
+                    }
+                }
+
+                // If we reach here, it means we timed out waiting for ETX
+                Log.w("MultiCellOverview", "Read timeout: ETX not found after STX.")
+                ""
             } catch (e: Exception) {
+                Log.e("MultiCellOverview", "Exception in readFlintecResponse: ${e.message}")
                 ""
             }
         }

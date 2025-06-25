@@ -1,152 +1,25 @@
 package com.example.servicetool
 
-import java.util.Locale
+import android.util.Log
 
-// Erweiterte Flintec RC3D Befehle für Multi-Cell Support
+/**
+ * Flintec RC3D Multi-Cell Befehle - Funktionierende Version vom 23.06
+ */
 object FlintecRC3DMultiCellCommands {
 
-    private val STX: Byte = 0x02
-    private val ETX: Byte = 0x03
+    private const val STX: Byte = 0x02
+    private const val ETX: Byte = 0x03
 
-    // Befehlstypen Enum
     enum class CommandType {
         SERIAL_NUMBER, COUNTS, BAUDRATE, TEMPERATURE, FILTER, SET_FILTER, VERSION
     }
 
-    // --- Befehlsgenerierung ---
-
-    // Generische Funktion zur Befehlserstellung basierend auf Wireshark-Logs
     fun getCommandForCell(cellNumber: Int, commandType: CommandType): ByteArray {
-        return when (commandType) {
-            CommandType.SERIAL_NUMBER -> when (cellNumber) {
-                1 -> byteArrayOf(STX, 0x41, 0x63, 0x30, 0x31, 0x31, 0x32, ETX) // Ac0112
-                2 -> byteArrayOf(STX, 0x42, 0x63, 0x30, 0x31, 0x32, 0x32, ETX) // Bc0122
-                3 -> byteArrayOf(STX, 0x43, 0x63, 0x30, 0x31, 0x33, 0x32, ETX) // Cc0132
-                4 -> byteArrayOf(STX, 0x44, 0x63, 0x30, 0x31, 0x34, 0x32, ETX) // Dc0142
-                5 -> byteArrayOf(STX, 0x45, 0x63, 0x30, 0x31, 0x35, 0x32, ETX) // Ec0152
-                6 -> byteArrayOf(STX, 0x46, 0x63, 0x30, 0x31, 0x36, 0x32, ETX) // Fc0162
-                7 -> byteArrayOf(STX, 0x47, 0x63, 0x30, 0x31, 0x37, 0x32, ETX) // Gc0172
-                8 -> byteArrayOf(STX, 0x48, 0x63, 0x30, 0x31, 0x38, 0x32, ETX) // Hc0182
-                else -> byteArrayOf() // Sollte nicht erreicht werden
-            }
-            CommandType.COUNTS -> when (cellNumber) {
-                1 -> byteArrayOf(STX, 0x41, 0x3F, 0x3C, 0x37, ETX)       // A?<?7
-                2 -> byteArrayOf(STX, 0x42, 0x3F, 0x3F, 0x37, ETX)       // B??7
-                3 -> byteArrayOf(STX, 0x43, 0x3F, 0x3E, 0x37, ETX)       // C?>7
-                4 -> byteArrayOf(STX, 0x44, 0x3F, 0x39, 0x37, ETX)       // D?97
-                5 -> byteArrayOf(STX, 0x45, 0x3F, 0x38, 0x37, ETX)       // E?87
-                6 -> byteArrayOf(STX, 0x46, 0x3F, 0x3B, 0x37, ETX)       // F?;7
-                7 -> byteArrayOf(STX, 0x47, 0x3F, 0x3A, 0x37, ETX)       // G?:7
-                8 -> byteArrayOf(STX, 0x48, 0x3F, 0x35, 0x37, ETX)       // H?57
-                else -> byteArrayOf()
-            }
-            CommandType.BAUDRATE -> when (cellNumber) {
-                1 -> byteArrayOf(STX, 0x41, 0x73, 0x32, 0x32, 0x30, ETX) // As220
-                2 -> byteArrayOf(STX, 0x42, 0x73, 0x32, 0x31, 0x30, ETX) // Bs210
-                3 -> byteArrayOf(STX, 0x43, 0x73, 0x32, 0x30, 0x30, ETX) // Cs200
-                4 -> byteArrayOf(STX, 0x44, 0x73, 0x32, 0x37, 0x30, ETX) // Ds270
-                5 -> byteArrayOf(STX, 0x45, 0x73, 0x32, 0x36, 0x30, ETX) // Es260
-                6 -> byteArrayOf(STX, 0x46, 0x73, 0x32, 0x35, 0x30, ETX) // Fs250
-                7 -> byteArrayOf(STX, 0x47, 0x73, 0x32, 0x34, 0x30, ETX) // Gs240
-                8 -> byteArrayOf(STX, 0x48, 0x73, 0x32, 0x3B, 0x30, ETX) // Hs2;0
-                else -> byteArrayOf()
-            }
-            CommandType.TEMPERATURE -> when (cellNumber) {
-                1 -> byteArrayOf(STX, 0x41, 0x74, 0x37, 0x33, ETX)       // At73
-                2 -> byteArrayOf(STX, 0x42, 0x74, 0x34, 0x33, ETX)       // Bt43
-                3 -> byteArrayOf(STX, 0x43, 0x74, 0x35, 0x33, ETX)       // Ct53
-                4 -> byteArrayOf(STX, 0x44, 0x74, 0x32, 0x33, ETX)       // Dt23
-                5 -> byteArrayOf(STX, 0x45, 0x74, 0x33, 0x33, ETX)       // Et33
-                6 -> byteArrayOf(STX, 0x46, 0x74, 0x30, 0x33, ETX)       // Ft03
-                7 -> byteArrayOf(STX, 0x47, 0x74, 0x31, 0x33, ETX)       // Gt13
-                8 -> byteArrayOf(STX, 0x48, 0x74, 0x3E, 0x33, ETX)       // Ht>3
-                else -> byteArrayOf()
-            }
-            CommandType.FILTER -> when (cellNumber) {
-                1 -> byteArrayOf(STX, 0x41, 0x70, 0x33, 0x33, ETX)       // Ap33
-                2 -> byteArrayOf(STX, 0x42, 0x70, 0x30, 0x33, ETX)       // Bp03
-                3 -> byteArrayOf(STX, 0x43, 0x70, 0x31, 0x33, ETX)       // Cp13
-                4 -> byteArrayOf(STX, 0x44, 0x70, 0x36, 0x33, ETX)       // Dp63
-                5 -> byteArrayOf(STX, 0x45, 0x70, 0x37, 0x33, ETX)       // Ep73
-                6 -> byteArrayOf(STX, 0x46, 0x70, 0x34, 0x33, ETX)       // Fp43
-                7 -> byteArrayOf(STX, 0x47, 0x70, 0x35, 0x33, ETX)       // Gp53
-                8 -> byteArrayOf(STX, 0x48, 0x70, 0x3A, 0x33, ETX)       // Hp:3
-                else -> byteArrayOf()
-            }
-            CommandType.SET_FILTER -> byteArrayOf() // Handled by setFilterForCell function
-            CommandType.VERSION -> when (cellNumber) {
-                1 -> byteArrayOf(STX, 0x41, 0x76, 0x35, 0x33, ETX)       // Av53
-                2 -> byteArrayOf(STX, 0x42, 0x76, 0x36, 0x33, ETX)       // Bv63
-                3 -> byteArrayOf(STX, 0x43, 0x76, 0x37, 0x33, ETX)       // Cv73
-                4 -> byteArrayOf(STX, 0x44, 0x76, 0x30, 0x33, ETX)       // Dv03
-                5 -> byteArrayOf(STX, 0x45, 0x76, 0x31, 0x33, ETX)       // Ev13
-                6 -> byteArrayOf(STX, 0x46, 0x76, 0x32, 0x33, ETX)       // Fv23
-                7 -> byteArrayOf(STX, 0x47, 0x76, 0x33, 0x33, ETX)       // Gv33
-                8 -> byteArrayOf(STX, 0x48, 0x76, 0x3C, 0x33, ETX)       // Hv<3
-                else -> byteArrayOf()
-            }
-        }
-    }
-
-    // Filter-Query-Kommando generieren (12 Bytes) - der eigentliche Filter-Setz-Befehl
-    fun createFilterQueryCommand(cellNumber: Int, filterValue: Int): String {
-        android.util.Log.d("FilterQuery", "createFilterQueryCommand aufgerufen: cellNumber=$cellNumber, filterValue=$filterValue")
-        
-        val validatedFilter = filterValue.coerceIn(0, 15)
-        android.util.Log.d("FilterQuery", "validatedFilter: $validatedFilter")
-        
-        val cellChar = when (cellNumber) {
-            1 -> 'A'; 2 -> 'B'; 3 -> 'C'; 4 -> 'D'
-            5 -> 'E'; 6 -> 'F'; 7 -> 'G'; 8 -> 'H'
-            else -> return ""
-        }
-        android.util.Log.d("FilterQuery", "cellChar: $cellChar")
-        
-        // Based on CORRECTED Wireshark analysis:
-        // Filter 0: AQ00140341 for cell A, BQ00140371 for cell B
-        // Filter 5: AQ05140311 for cell A, BQ05140321 for cell B
-        // Format: CELL + Q + filter_2digits + "1403" + filter_dependent_digit + cell_digit
-        val filterStr = String.format("%02d", validatedFilter)
-        android.util.Log.d("FilterQuery", "filterStr: '$filterStr'")
-        
-        // The digit before cell number depends on BOTH filter value AND cell number:
-        // For filter 0: Cell A="4", Cell B="7" 
-        // For filter 5: Cell A="1", Cell B="2"
-        val filterDependentDigit = when {
-            validatedFilter == 0 && cellNumber == 1 -> "4"  // Cell A, Filter 0
-            validatedFilter == 0 && cellNumber == 2 -> "7"  // Cell B, Filter 0
-            validatedFilter == 5 && cellNumber == 1 -> "1"  // Cell A, Filter 5
-            validatedFilter == 5 && cellNumber == 2 -> "2"  // Cell B, Filter 5
-            else -> "1" // Default fallback for other combinations
-        }
-        
-        val baseCommand = "${cellChar}Q${filterStr}1403${filterDependentDigit}1"
-        android.util.Log.d("FilterQuery", "baseCommand: '$baseCommand'")
-        
-        // No checksum needed - the command ends as shown in Wireshark
-        val checksumStr = ""
-        android.util.Log.d("FilterQuery", "checksumStr: '$checksumStr'")
-        
-        val fullCommand = "\u0002${baseCommand}${checksumStr}\u0003"
-        
-        android.util.Log.d("FilterQuery", "Filter-Query für Zelle $cellNumber: Wert $validatedFilter -> '$fullCommand'")
-        return fullCommand
-    }
-
-    // Filter setzen für spezifische Zelle - KORRIGIERTE VERSION basierend auf Wireshark-Analyse
-    fun setFilterForCell(cellNumber: Int, filterValue: Int): ByteArray {
-        // Validation: Cell number should be between 1 and 8
         if (cellNumber !in 1..8) {
-            android.util.Log.w("FlintecRC3D", "Invalid cell number: $cellNumber. Must be 1-8.")
+            Log.w("FlintecRC3D", "Invalid cell number: $cellNumber. Must be 1-8.")
             return byteArrayOf()
         }
-        
-        // Validation: Filter value should be between 0 and 15
-        val validatedFilter = filterValue.coerceIn(0, 15)
-        if (validatedFilter != filterValue) {
-            android.util.Log.w("FlintecRC3D", "Filter value $filterValue clamped to $validatedFilter (valid range: 0-15)")
-        }
-        
+
         val cellPrefix = when (cellNumber) {
             1 -> 0x41  // A
             2 -> 0x42  // B
@@ -158,462 +31,288 @@ object FlintecRC3DMultiCellCommands {
             8 -> 0x48  // H
             else -> return byteArrayOf()
         }
-        
-        // Based on Wireshark analysis: Aw43, Bw73 (6 bytes) sets filter
-        // Format: STX + CELL + 'w' + cell_specific_byte + '3' + ETX
-        // From Windows software: Both filter 0 AND filter 5 use the same commands!
-        val cellSpecificByte = when (cellPrefix) {
-            0x41 -> 0x34 // A: Always '4'
-            0x42 -> 0x37 // B: Always '7'
-            0x43 -> 0x34 // C: Pattern '4'
-            0x44 -> 0x37 // D: Pattern '7'
-            0x45 -> 0x34 // E: Pattern '4'
-            0x46 -> 0x37 // F: Pattern '7'
-            0x47 -> 0x34 // G: Pattern '4'
-            0x48 -> 0x37 // H: Pattern '7'
-            else -> 0x34 // Default
+
+        return when (commandType) {
+            CommandType.SERIAL_NUMBER -> byteArrayOf(STX, cellPrefix.toByte(), 0x63.toByte(), 0x30.toByte(), 0x31.toByte(), 0x31.toByte(), 0x32.toByte(), ETX)
+            CommandType.COUNTS -> byteArrayOf(STX, cellPrefix.toByte(), 0x3F.toByte(), 0x3C.toByte(), 0x37.toByte(), ETX)
+            CommandType.BAUDRATE -> byteArrayOf(STX, cellPrefix.toByte(), 0x73.toByte(), 0x32.toByte(), 0x32.toByte(), 0x30.toByte(), ETX)
+            CommandType.TEMPERATURE -> byteArrayOf(STX, cellPrefix.toByte(), 0x74.toByte(), 0x37.toByte(), 0x33.toByte(), ETX)
+            CommandType.FILTER -> byteArrayOf(STX, cellPrefix.toByte(), 0x70.toByte(), 0x33.toByte(), 0x33.toByte(), ETX)
+            CommandType.VERSION -> byteArrayOf(STX, cellPrefix.toByte(), 0x76.toByte(), 0x35.toByte(), 0x33.toByte(), ETX)
+            CommandType.SET_FILTER -> createFilterCommandByteArray(cellNumber, 5) // Default filter value
         }
-        val fixedByte = 0x33 // Always '3' from Wireshark analysis
-        
-        android.util.Log.d("FilterCell", "Filter-Kommando für Zelle $cellNumber (${cellPrefix.toInt().toChar()}): Wert $validatedFilter -> 6-Byte Format")
-        
-        return byteArrayOf(STX, cellPrefix.toByte(), 0x77.toByte(), cellSpecificByte.toByte(), fixedByte.toByte(), ETX) // 'w' = 0x77
-    }
-    
-    // Filter-Status abfragen (basierend auf Wireshark-Log: 024177373303 = Aw73)
-    fun createFilterStatusCommand(cellNumber: Int): String {
-        if (cellNumber !in 1..8) {
-            android.util.Log.w("FilterStatusCommand", "Ungültige Zellnummer: $cellNumber. Muss 1-8 sein.")
-            return ""
-        }
-        
-        val cellChar = when (cellNumber) {
-            1 -> 'A'; 2 -> 'B'; 3 -> 'C'; 4 -> 'D'
-            5 -> 'E'; 6 -> 'F'; 7 -> 'G'; 8 -> 'H'
-            else -> return ""
-        }
-        
-        // Basierend auf Wireshark-Analyse: Filter-Status-Abfrage verwendet "w73" Format
-        // Dies entspricht der Windows-App Sequenz nach Filter-Änderung
-        val statusByte = '7'  // Immer '7' für Status-Abfrage
-        val fixedByte = '3'   // Immer '3' aus Wireshark-Analyse
-        
-        val fullCommand = "\u0002${cellChar}w${statusByte}${fixedByte}\u0003"
-        
-        android.util.Log.d("FilterStatusCommand", "Filter-Status-Abfrage für Zelle $cellNumber ($cellChar): '$fullCommand'")
-        return fullCommand
     }
 
-    // Neue Funktion: Erstelle Filter-Kommando als String (für direkte Verwendung) - KORRIGIERTE VERSION
-    fun createFilterCommand(cellNumber: Int, filterValue: Int): String {
+    fun createFilterCommandByteArray(cellNumber: Int, filterValue: Int): ByteArray {
         if (cellNumber !in 1..8) {
-            android.util.Log.w("FilterCommand", "Ungültige Zellnummer: $cellNumber. Muss 1-8 sein.")
-            return ""
+            return byteArrayOf()
         }
         
         val validatedFilter = filterValue.coerceIn(0, 15)
-        val cellChar = when (cellNumber) {
-            1 -> 'A'; 2 -> 'B'; 3 -> 'C'; 4 -> 'D'
-            5 -> 'E'; 6 -> 'F'; 7 -> 'G'; 8 -> 'H'
-            else -> return ""
+        val cellPrefix = when (cellNumber) {
+            1 -> 0x41; 2 -> 0x42; 3 -> 0x43; 4 -> 0x44
+            5 -> 0x45; 6 -> 0x46; 7 -> 0x47; 8 -> 0x48
+            else -> return byteArrayOf()
         }
         
-        // Based on Wireshark analysis: 6-byte format Aw43, Bw73
-        // Format: STX + CELL + 'w' + cell_specific_byte + '3' + ETX
-        // From Windows software: Both filter 0 AND filter 5 use the same commands!
-        // Aw43 for cell A (any filter), Bw73 for cell B (any filter)
-        val cellSpecificByte = when (cellChar) {
-            'A' -> '4'  // Always '4' for cell A
-            'B' -> '7'  // Always '7' for cell B
-            'C' -> '4'  // Assume pattern continues
-            'D' -> '7'
-            'E' -> '4'
-            'F' -> '7'
-            'G' -> '4'
-            'H' -> '7'
-            else -> '4' // Default
+        val useAlternativeFormat = cellNumber in listOf(3, 5, 6, 7, 8)
+        
+        return if (useAlternativeFormat) {
+            val filterChar = when (validatedFilter) {
+                in 0..9 -> ('0' + validatedFilter).code.toByte()
+                in 10..15 -> ('A' + (validatedFilter - 10)).code.toByte()
+                else -> '0'.code.toByte()
+            }
+            val commandByte = '0'.code.toByte()
+            byteArrayOf(STX, cellPrefix.toByte(), 0x77.toByte(), filterChar, commandByte, ETX)
+        } else {
+            val cellSpecificByte = when (cellPrefix) {
+                0x41 -> 0x34; 0x42 -> 0x37; 0x44 -> 0x37; else -> 0x34
+            }
+            val fixedByte = 0x33
+            byteArrayOf(STX, cellPrefix.toByte(), 0x77.toByte(), cellSpecificByte.toByte(), fixedByte.toByte(), ETX)
         }
-        val fixedByte = '3' // Always '3' from Wireshark analysis
-        
-        val fullCommand = "\u0002${cellChar}w${cellSpecificByte}${fixedByte}\u0003"
-        
-        android.util.Log.d("FilterCommand", "Filter-String für Zelle $cellNumber ($cellChar): $validatedFilter -> '$fullCommand' (6-Byte Format)")
-        return fullCommand
     }
 
-    // --- Antwort-Parsing ---
     fun parseMultiCellResponse(response: String): FlintecData? {
-        android.util.Log.d("ParserDebug", "=== parseMultiCellResponse START ===")
-        android.util.Log.d("ParserDebug", "Input: '$response' (Länge: ${response.length})")
-        
-        // Erweiterte Sonderbehandlung für bekannte Fehlerantworten
-        if (response == "COMM_ERROR_BEL" || response == "BEL_ERROR") {
-            android.util.Log.w("Parser", "Kommunikationsfehler: BEL-Zeichen empfangen")
-            return FlintecData.Unknown("Kommunikationsfehler")
-        }
-        
-        // Prüfe auf verdächtige Antworten mit CommunicationHelper
-        if (CommunicationHelper.isSuspiciousResponse(response)) {
-            android.util.Log.w("Parser", "Verdächtige Antwort erkannt: '$response'")
-            android.util.Log.w("Parser", "Empfehlung: ${CommunicationHelper.getErrorRecommendation(response)}")
-            
-            // Bei verdächtigen Antworten gib "Fehler" zurück statt null
-            return when {
-                response.length == 1 && response[0] in "0237" -> FlintecData.Unknown("Fehler")
-                response.isEmpty() -> null
-                else -> FlintecData.Unknown("Fehler")
-            }
-        }
-        
-        if (response.length < 2) {
-            android.util.Log.w("Parser", "Antwort zu kurz: '$response' - möglicherweise unvollständige Übertragung")
+        if (response.isEmpty() || response.length < 2) {
             return null
         }
 
-        // Debug: Zeige die Bytes der Antwort
-        val responseBytes = response.toByteArray(Charsets.US_ASCII)
-        android.util.Log.d("ParserDebug", "Response bytes: ${responseBytes.joinToString(" ") { "0x%02X".format(it) }}")
-        android.util.Log.d("ParserDebug", "Response chars: ${responseBytes.joinToString(" ") { "'${if (it.toInt() in 32..126) it.toInt().toChar() else '?'}'" }}")
-
-        val responseCellPrefix = response.take(1)
         val responseCommandType = response.drop(1).take(1)
         val dataPayload = response.drop(2)
 
-        android.util.Log.d("ParserDebug", "Prefix='$responseCellPrefix', Type='$responseCommandType', Payload='$dataPayload'")
-        android.util.Log.d("Parser", "parseMultiCellResponse: Input='$response', Prefix='$responseCellPrefix', Type='$responseCommandType', Payload='$dataPayload'")
-
-        val result = when (responseCommandType) {
-            "c" -> {
-                android.util.Log.d("ParserDebug", "Parsing SerialNumber...")
-                val decoded = decodeSerialNumber(dataPayload)
-                android.util.Log.d("ParserDebug", "SerialNumber result: '$decoded'")
-                FlintecData.SerialNumber(decoded)
-            }
-            "?" -> {
-                android.util.Log.d("ParserDebug", "Parsing Counts...")
-                val decoded = decodeCountsMultiCell(dataPayload)
-                android.util.Log.d("ParserDebug", "Counts result: '$decoded'")
-                FlintecData.Counts(decoded)
-            }
-            "s" -> {
-                android.util.Log.d("ParserDebug", "Parsing Baudrate...")
-                val decoded = decodeBaudrateMultiCell(dataPayload, responseCellPrefix)
-                android.util.Log.d("ParserDebug", "Baudrate result: '$decoded'")
-                FlintecData.Baudrate(decoded)
-            }
-            "t" -> {
-                android.util.Log.d("ParserDebug", "Parsing Temperature...")
-                val decoded = decodeTemperatureMultiCell(dataPayload)
-                android.util.Log.d("ParserDebug", "Temperature result: '$decoded'")
-                FlintecData.Temperature(decoded)
-            }
-            "p" -> {
-                android.util.Log.d("ParserDebug", "Parsing Filter...")
-                val decoded = decodeFilterMultiCell(dataPayload)
-                android.util.Log.d("ParserDebug", "Filter result: '$decoded'")
-                FlintecData.Filter(decoded)
-            }
-            "P", "w" -> {
-                android.util.Log.d("ParserDebug", "Parsing FilterSetResult...")
-                val success = dataPayload.isNotEmpty()
-                android.util.Log.d("ParserDebug", "FilterSetResult: $success")
-                FlintecData.FilterSetResult(success)
-            }
-            "v" -> {
-                android.util.Log.d("ParserDebug", "Parsing Version...")
-                val decoded = decodeVersion(dataPayload)
-                android.util.Log.d("ParserDebug", "Version result: '$decoded'")
-                FlintecData.Version(decoded)
-            }
-            else -> {
-                android.util.Log.w("ParserDebug", "Unbekannter Befehlstyp: '$responseCommandType'")
-                // Prüfe ob die Antwort nur aus nicht-druckbaren Zeichen besteht
-                val containsOnlyControlChars = response.all { it.code < 32 || it.code > 126 }
-                if (containsOnlyControlChars) {
-                    android.util.Log.w("Parser", "Antwort enthält nur Steuerzeichen: ${responseBytes.joinToString(" ") { "0x%02X".format(it) }}")
-                    FlintecData.Unknown("Fehler")  // "Fehler" statt "Ungültige Antwort"
-                } else {
-                    android.util.Log.w("Parser", "Unbekannter Befehlstyp '$responseCommandType' in Antwort: '$response'")
-                    FlintecData.Unknown("Fehler")  // "Fehler" statt Rohdaten
-                }
-            }
+        return when (responseCommandType) {
+            "c" -> FlintecData.SerialNumber(decodeSerialNumber(dataPayload))
+            "?" -> FlintecData.Counts(decodeCounts(dataPayload))
+            "s" -> FlintecData.Baudrate(decodeBaudrate(dataPayload))
+            "t" -> FlintecData.Temperature(decodeTemperature(dataPayload))
+            "p" -> FlintecData.Filter(decodeFilter(dataPayload))
+            "v" -> FlintecData.Version(decodeVersion(dataPayload))
+            else -> FlintecData.Unknown(response)
         }
-        
-        android.util.Log.d("ParserDebug", "=== parseMultiCellResponse END ===")
-        return result
     }
 
     private fun decodeSerialNumber(rawData: String): String {
-        android.util.Log.d("DecoderSN", "=== DecodeSerialNumber START ===")
-        android.util.Log.d("DecoderSN", "Input: '$rawData' (Länge: ${rawData.length})")
-        
-        // Erweiterte Sonderbehandlung für verdächtige einstellige Antworten
-        if (CommunicationHelper.isSuspiciousResponse(rawData)) {
-            android.util.Log.w("DecoderSN", "Verdächtige Antwort erkannt: '$rawData'")
-            android.util.Log.w("DecoderSN", "Empfehlung: ${CommunicationHelper.getErrorRecommendation(rawData)}")
-            return "Fehler"
-        }
-        
-        if (rawData.isEmpty()) {
-            android.util.Log.w("DecoderSN", "Leere Antwort - return Fehler")
-            return "Fehler"
-        }
-
-        var hexToConvert = rawData
-
-        // Entferne "01" Präfix falls vorhanden
-        if (hexToConvert.startsWith("01") && hexToConvert.length > 2) {
-            hexToConvert = hexToConvert.substring(2)
-            android.util.Log.d("DecoderSN", "Nach Präfix-Entfernung: '$hexToConvert'")
-        }
-
-        // Bereinige den Hex-String
-        hexToConvert = hexToConvert.takeWhile { it.isLetterOrDigit() }
-
-        if (hexToConvert.isEmpty()) {
-            android.util.Log.w("DecoderSN", "Keine gültigen Hex-Zeichen gefunden in: '$rawData'")
-            return rawData
-        }
-
-        // LÖSUNG: Verwende die ersten 6 Zeichen für die Seriennummer
-        if (hexToConvert.length > 6) {
-            hexToConvert = hexToConvert.take(6)  // Erste 6 Zeichen
-            android.util.Log.d("DecoderSN", "Verwende erste 6 Zeichen: '$hexToConvert'")
-        }
-
         return try {
-            val decimalValue = hexToConvert.toULong(16)
-            val result = decimalValue.toString()
-            android.util.Log.d("DecoderSN", "Konvertierung: '$hexToConvert' (hex) -> '$result' (decimal)")
-            result
+            if (rawData.isEmpty()) return "Unbekannt"
 
-        } catch (e: NumberFormatException) {
-            android.util.Log.e("DecoderSN", "Fehler bei Hex-Konvertierung von '$hexToConvert': ${e.message}")
-            rawData // Fallback auf Original-String
-        }
-    }
-
-
-    private fun decodeCountsMultiCell(rawCountsData: String): String {
-        android.util.Log.d("CountsDecoder", "=== DecodeCountsMultiCell START ===")
-        android.util.Log.d("CountsDecoder", "Input Rohdaten: '$rawCountsData' (Länge: ${rawCountsData.length})")
-        
-        // Erweiterte Sonderbehandlung für bekannte Fehlerfälle
-        if (CommunicationHelper.isSuspiciousResponse(rawCountsData)) {
-            android.util.Log.w("CountsDecoder", "Verdächtige Antwort erkannt: '$rawCountsData'")
-            android.util.Log.w("CountsDecoder", "Empfehlung: ${CommunicationHelper.getErrorRecommendation(rawCountsData)}")
-            
-            // Spezielle Behandlung für das "7"-Problem
-            if (rawCountsData == "7") {
-                android.util.Log.e("CountsDecoder", "VERDRAHTUNGSFEHLER: Nur '7' empfangen - prüfen Sie die RS485-Verkabelung!")
+            // Entferne das Präfix "01" falls vorhanden
+            var hexString = rawData
+            if (hexString.startsWith("01") && hexString.length > 2) {
+                hexString = hexString.substring(2)
             }
-            
-            return "Fehler"
-        }
-        
-        if (rawCountsData.isEmpty()) {
-            android.util.Log.w("CountsDecoder", "Leere Antwort - return Fehler")
-            return "Fehler"
-        }
-        
-        var stringToProcess = rawCountsData
-        if (stringToProcess.startsWith("d", ignoreCase = true)) {
-            stringToProcess = stringToProcess.drop(1) // Remove 'd' or 'D'
-        }
-        android.util.Log.d("CountsDecoder", "Nach 'd'-Entfernung: '$stringToProcess'")
 
-        // Nimm die ersten bis zu 6 Zeichen für den Zählwert
-        val potentialCountsPart = stringToProcess.take(6)
-        android.util.Log.d("CountsDecoder", "Potentieller Zählwert (erste 6 Zeichen): '$potentialCountsPart'")
+            // Bereinige die Hex-Daten
+            hexString = hexString.filter { it.isDigit() || it.uppercaseChar() in 'A'..'F' }
 
-        // Filtere alle Nicht-Ziffern aus diesem Teil heraus
-        val numericOnlyPart = potentialCountsPart.filter { it.isDigit() }
-        android.util.Log.d("CountsDecoder", "Nur Ziffern aus potentiellem Zählwert: '$numericOnlyPart'")
-
-        if (numericOnlyPart.isEmpty()) {
-            android.util.Log.w("CountsDecoder", "Keine Ziffern im relevanten Teil gefunden. Input: '$rawCountsData', Verarbeitet: '$potentialCountsPart'. Ergebnis: '0'")
-            return "0" // Fallback, wenn keine Ziffern vorhanden sind
-        }
-
-        val asLong = numericOnlyPart.toLongOrNull()
-        // Wenn die Konvertierung zu Long erfolgreich war, gib den Wert als String zurück (entfernt führende Nullen).
-        // Ansonsten (sollte bei reinen Ziffern nicht passieren), gib den gefilterten String zurück.
-        val result = asLong?.toString() ?: numericOnlyPart
-
-        android.util.Log.i("CountsDecoder", "Verarbeiteter Zählwert für '$rawCountsData': '$result'")
-        return result
-    }
-
-
-    private fun decodeBaudrateMultiCell(rawData: String, cellPrefix: String): String {
-        android.util.Log.d("BaudrateDecoder", "=== DecodeBaudrateMultiCell START ===")
-        android.util.Log.d("BaudrateDecoder", "Input: '$rawData' (Länge: ${rawData.length}), CellPrefix: '$cellPrefix'")
-        
-        // Erweiterte Sonderbehandlung für verdächtige Antworten
-        if (CommunicationHelper.isSuspiciousResponse(rawData)) {
-            android.util.Log.w("BaudrateDecoder", "Verdächtige Antwort erkannt: '$rawData'")
-            android.util.Log.w("BaudrateDecoder", "Empfehlung: ${CommunicationHelper.getErrorRecommendation(rawData)}")
-            return "Fehler"
-        }
-        
-        if (rawData.isEmpty()) {
-            android.util.Log.w("BaudrateDecoder", "Leere Antwort - return Fehler")
-            return "Fehler"
-        }
-        
-        val relevantPart = rawData.split(':', ';').firstOrNull { it.contains("961") || it.contains("192") || it.contains("384") } ?: rawData
-        android.util.Log.d("BaudrateDecoder", "Relevanter Teil: '$relevantPart'")
-
-        val result = when {
-            relevantPart.contains("9617") || relevantPart.contains("961") -> "9600"
-            relevantPart.contains("19200") || relevantPart.contains("192") -> "19200"
-            relevantPart.contains("38400") || relevantPart.contains("384") -> "38400"
-            else -> {
-                android.util.Log.w("BaudrateDecoder", "Unbekannter Baudraten-Code: '$relevantPart' (aus Rohdaten '$rawData')")
-                "Fehler"  // Return "Fehler" statt Rohdaten
+            if (hexString.isEmpty() || hexString.length % 2 != 0) {
+                return "Unbekannt"
             }
+
+            // Konvertiere Hex zu ASCII
+            val result = StringBuilder()
+            for (i in hexString.indices step 2) {
+                if (i + 1 < hexString.length) {
+                    val hexPair = hexString.substring(i, i + 2)
+                    val byteValue = hexPair.toInt(16)
+                    if (byteValue in 32..126) { // Druckbare ASCII-Zeichen
+                        result.append(byteValue.toChar())
+                    }
+                }
+            }
+
+            val serialNumber = result.toString().trim()
+            serialNumber.ifEmpty { "Unbekannt" }
+
+        } catch (e: Exception) {
+            Log.e("FlintecRC3DMultiCell", "Fehler beim Dekodieren der Seriennummer: ${e.message}")
+            "Unbekannt"
         }
-        
-        android.util.Log.d("BaudrateDecoder", "Result: '$result'")
-        return result
     }
 
+    private fun decodeCounts(rawCountsData: String): String {
+        return try {
+            if (rawCountsData.isEmpty()) return "0"
 
-    private fun decodeTemperatureMultiCell(tempData: String): String {
-        android.util.Log.d("TempDecoder", "Input: '$tempData'")
-        var cleanTempString = tempData.replace("+", "").trim()
-        cleanTempString = cleanTempString.takeWhile { it.isDigit() || it == '.' || it == '-' }
+            // Bereinige die Antwort - nur Hex-Zeichen (0-9, A-F)
+            val cleanedResponse = rawCountsData.filter { it.isDigit() || it.uppercaseChar() in 'A'..'F' }
 
-        val tempValue = cleanTempString.toDoubleOrNull()
-        val result = if (tempValue != null) {
-            String.format(Locale.GERMAN, "%.1f°C", tempValue)
-        } else {
-            android.util.Log.w("TempDecoder", "Konnte Temperatur nicht parsen: '$tempData', clean: '$cleanTempString'")
-            "${tempData}°C"
-        }
-        android.util.Log.d("TempDecoder", "Result: '$result'")
-        return result
-    }
+            if (cleanedResponse.length < 8) {
+                return "0"
+            }
 
-    private fun decodeFilterMultiCell(rawData: String): String {
-        android.util.Log.d("FilterDecoder", "=== DecodeFilterMultiCell START ===")
-        android.util.Log.d("FilterDecoder", "Input: '$rawData' (Länge: ${rawData.length})")
-        
-        // Erweiterte Sonderbehandlung für verdächtige einstellige Antworten
-        if (CommunicationHelper.isSuspiciousResponse(rawData)) {
-            android.util.Log.w("FilterDecoder", "Verdächtige Antwort erkannt: '$rawData'")
-            android.util.Log.w("FilterDecoder", "Empfehlung: ${CommunicationHelper.getErrorRecommendation(rawData)}")
-            return "Fehler"
-        }
-        
-        if (rawData.isEmpty()) {
-            android.util.Log.w("FilterDecoder", "Leere Antwort - return Fehler")
-            return "Fehler"
-        }
-        
-        val corePart = rawData.split('=', ':').firstOrNull() ?: rawData
+            // Nimm die ersten 8 Hex-Zeichen (repräsentieren 4 Bytes)
+            val hexString = cleanedResponse.take(8)
 
-        return if (corePart.startsWith("23001") && corePart.length > 5) {
-            android.util.Log.i("FilterDecoder", "Filter-Regel '23001...' -> '0' angewendet für '$rawData'")
+            // Konvertiere jeden 2-Zeichen Hex-String zu einem Byte
+            val bytes = ByteArray(4)
+            for (i in 0 until 4) {
+                val hexPair = hexString.substring(i * 2, i * 2 + 2)
+                bytes[i] = hexPair.toInt(16).toByte()
+            }
+
+            // Konvertiere die 4 Bytes zu einem 32-Bit Integer (Big Endian)
+            val result = ((bytes[0].toInt() and 0xFF) shl 24) or
+                        ((bytes[1].toInt() and 0xFF) shl 16) or
+                        ((bytes[2].toInt() and 0xFF) shl 8) or
+                        (bytes[3].toInt() and 0xFF)
+
+            // Formatiere als 6-stellige Zahl mit führenden Nullen
+            String.format("%06d", result)
+
+        } catch (e: Exception) {
+            Log.e("FlintecRC3DMultiCell", "Fehler beim Dekodieren der Counts: ${e.message}")
             "0"
-        } else if (corePart.all { it.isDigit() }) {
-            val result = corePart.toIntOrNull()?.toString() ?: corePart
-            android.util.Log.d("FilterDecoder", "Filter ist numerisch: '$corePart' -> '$result'")
-            result
-        } else {
-            val numericPrefix = corePart.takeWhile { it.isDigit() }
-            if (numericPrefix.isNotEmpty() && numericPrefix.toLongOrNull() != null) {
-                android.util.Log.d("FilterDecoder", "Filter extrahiert als numerischer Präfix: '$numericPrefix' aus '$corePart'")
-                return numericPrefix
+        }
+    }
+
+    private fun decodeBaudrate(rawData: String): String {
+        return try {
+            if (rawData.isEmpty()) return "Unbekannt"
+
+            val cleanedResponse = rawData.filter { it.isDigit() || it.uppercaseChar() in 'A'..'F' }
+
+            if (cleanedResponse.isEmpty() || cleanedResponse.length % 2 != 0) {
+                return "Unbekannt"
             }
-            android.util.Log.w("FilterDecoder", "Unbekannter Filter-Code, verwende Rohdaten: '$rawData'")
-            rawData
+
+            // Konvertiere Hex zu ASCII
+            val result = StringBuilder()
+            for (i in cleanedResponse.indices step 2) {
+                if (i + 1 < cleanedResponse.length) {
+                    val hexPair = cleanedResponse.substring(i, i + 2)
+                    val byteValue = hexPair.toInt(16)
+                    if (byteValue in 32..126) {
+                        result.append(byteValue.toChar())
+                    }
+                }
+            }
+
+            val baudrate = result.toString().trim().filter { it.isDigit() }
+            baudrate.ifEmpty { "Unbekannt" }
+
+        } catch (e: Exception) {
+            Log.e("FlintecRC3DMultiCell", "Fehler beim Dekodieren der Baudrate: ${e.message}")
+            "Unbekannt"
+        }
+    }
+
+    private fun decodeTemperature(tempData: String): String {
+        return if (tempData.isEmpty()) {
+            "N/A"
+        } else {
+            val cleanData = tempData.takeWhile { it.isLetterOrDigit() }
+            val tempValue = cleanData.filter { it.isDigit() || it == '.' || it == '-' }
+            tempValue.ifEmpty { "N/A" }
+        }
+    }
+
+    private fun decodeFilter(rawData: String): String {
+        return try {
+            if (rawData.isEmpty()) return "Unbekannt"
+
+            val cleanedResponse = rawData.filter { it.isDigit() || it.uppercaseChar() in 'A'..'F' }
+
+            if (cleanedResponse.isEmpty() || cleanedResponse.length % 2 != 0) {
+                return "Unbekannt"
+            }
+
+            // Konvertiere Hex zu ASCII
+            val result = StringBuilder()
+            for (i in cleanedResponse.indices step 2) {
+                if (i + 1 < cleanedResponse.length) {
+                    val hexPair = cleanedResponse.substring(i, i + 2)
+                    val byteValue = hexPair.toInt(16)
+                    if (byteValue in 32..126) {
+                        result.append(byteValue.toChar())
+                    }
+                }
+            }
+
+            val filter = result.toString().trim().filter { it.isDigit() }
+            filter.ifEmpty { "Unbekannt" }
+
+        } catch (e: Exception) {
+            Log.e("FlintecRC3DMultiCell", "Fehler beim Dekodieren des Filters: ${e.message}")
+            "Unbekannt"
         }
     }
 
     private fun decodeVersion(rawData: String): String {
-        android.util.Log.d("VersionDecoder", "=== DecodeVersion START ===")
-        android.util.Log.d("VersionDecoder", "Input: '$rawData' (Länge: ${rawData.length})")
-        
-        // Erweiterte Sonderbehandlung für verdächtige einstellige Antworten
-        if (CommunicationHelper.isSuspiciousResponse(rawData)) {
-            android.util.Log.w("VersionDecoder", "Verdächtige Antwort erkannt: '$rawData'")
-            android.util.Log.w("VersionDecoder", "Empfehlung: ${CommunicationHelper.getErrorRecommendation(rawData)}")
-            return "Fehler"
+        return try {
+            if (rawData.isEmpty()) return "Unbekannt"
+
+            val cleanedResponse = rawData.filter { it.isDigit() || it.uppercaseChar() in 'A'..'F' }
+
+            if (cleanedResponse.isEmpty() || cleanedResponse.length % 2 != 0) {
+                return "Unbekannt"
+            }
+
+            // Konvertiere Hex zu ASCII
+            val result = StringBuilder()
+            for (i in cleanedResponse.indices step 2) {
+                if (i + 1 < cleanedResponse.length) {
+                    val hexPair = cleanedResponse.substring(i, i + 2)
+                    val byteValue = hexPair.toInt(16)
+                    if (byteValue in 32..126) {
+                        result.append(byteValue.toChar())
+                    }
+                }
+            }
+
+            val version = result.toString().trim()
+            version.ifEmpty { "Unbekannt" }
+
+        } catch (e: Exception) {
+            Log.e("FlintecRC3DMultiCell", "Fehler beim Dekodieren der Version: ${e.message}")
+            "Unbekannt"
         }
-        
-        if (rawData.isEmpty()) {
-            android.util.Log.w("VersionDecoder", "Leere Antwort - return Fehler")
-            return "Fehler"
-        }
-        
-        var versionString = rawData
-        // Keine spezielle Behandlung für 'X' am Anfang mehr, da es Teil der Version sein kann.
-        // Entferne nur problematische Endzeichen, falls vorhanden.
-        if (versionString.endsWith("=") || versionString.endsWith("?") || versionString.endsWith(">") || versionString.endsWith("<")) {
-            // versionString = versionString.dropLast(1) // Vorsicht, könnte valide Zeichen entfernen.
-        }
-        android.util.Log.d("VersionDecoder", "Result: '$versionString'")
-        return versionString
     }
 
-
-    // === NEUE SERIENNUMMER-BASIERTE FILTER-BEFEHLE ===
-    
-    // Filter mit Seriennummer abfragen
-    fun getFilterBySerialNumber(serialNumber: String): String {
-        val STX = "\u0002"
-        val ETX = "\u0003"
+    fun createFilterCommand(cellNumber: Int, filterValue: Int): String {
+        if (cellNumber !in 1..8) return ""
         
-        val command = STX + "<" + serialNumber + "p33"
-        val commandWithChecksum = command + calculateChecksum(command) + ETX
-        
-        android.util.Log.d("FilterSerial", "Filter-Abfrage für S/N $serialNumber: '$commandWithChecksum'")
-        return commandWithChecksum
-    }
-    
-    // Filter mit Seriennummer setzen
-    fun setFilterBySerialNumber(serialNumber: String, filterValue: Int): String {
-        val STX = "\u0002"
-        val ETX = "\u0003"
-        
-        // Validierung: Filter-Wert muss zwischen 0 und 15 liegen
         val validatedFilter = filterValue.coerceIn(0, 15)
-        if (validatedFilter != filterValue) {
-            android.util.Log.w("FilterSerial", "Filter-Wert $filterValue auf $validatedFilter begrenzt (gültiger Bereich: 0-15)")
+        val cellChar = when (cellNumber) {
+            1 -> 'A'; 2 -> 'B'; 3 -> 'C'; 4 -> 'D'
+            5 -> 'E'; 6 -> 'F'; 7 -> 'G'; 8 -> 'H'
+            else -> return ""
         }
         
-        val filterString = String.format("%02d", validatedFilter)
-        val command = STX + "<" + serialNumber + "P33" + filterString + "0000"
-        val commandWithChecksum = command + calculateChecksum(command) + ETX
+        val useAlternativeFormat = cellNumber in listOf(3, 5, 6, 7, 8)
         
-        android.util.Log.d("FilterSerial", "Filter-Setzung für S/N $serialNumber auf Wert $validatedFilter: '$commandWithChecksum'")
-        return commandWithChecksum
+        return if (useAlternativeFormat) {
+            val filterChar = when (validatedFilter) {
+                in 0..9 -> ('0' + validatedFilter)
+                in 10..15 -> ('A' + (validatedFilter - 10))
+                else -> '0'
+            }
+            "\u0002${cellChar}w${filterChar}0\u0003"
+        } else {
+            val cellSpecificByte = when (cellChar) {
+                'A' -> '4'; 'B' -> '7'; 'D' -> '7'; else -> '4'
+            }
+            "\u0002${cellChar}w${cellSpecificByte}3\u0003"
+        }
     }
-    
-    // Checksumme berechnen (gleiche Logik wie in CellConfigurationFragment)
-    private fun calculateChecksum(command: String): String {
-        var checksum = 0
-        for (char in command) {
-            checksum = checksum xor char.code
+
+    fun createFilterStatusCommand(cellNumber: Int): String {
+        if (cellNumber !in 1..8) return ""
+        
+        val cellChar = when (cellNumber) {
+            1 -> 'A'; 2 -> 'B'; 3 -> 'C'; 4 -> 'D'
+            5 -> 'E'; 6 -> 'F'; 7 -> 'G'; 8 -> 'H'
+            else -> return ""
         }
         
-        val lowNibble = (checksum % 16) + 0x30
-        val highNibble = (checksum / 16) + 0x30
-        
-        return "${lowNibble.toChar()}${highNibble.toChar()}"
+        return "\u0002${cellChar}p33\u0003"
     }
 
     fun getCommandDescription(cellNumber: Int, commandType: CommandType): String {
         val cellName = when (cellNumber) {
-            1 -> "A (Zelle 1)"
-            2 -> "B (Zelle 2)"
-            3 -> "C (Zelle 3)"
-            4 -> "D (Zelle 4)"
-            5 -> "E (Zelle 5)"
-            6 -> "F (Zelle 6)"
-            7 -> "G (Zelle 7)"
-            8 -> "H (Zelle 8)"
+            1 -> "A (Zelle 1)"; 2 -> "B (Zelle 2)"; 3 -> "C (Zelle 3)"; 4 -> "D (Zelle 4)"
+            5 -> "E (Zelle 5)"; 6 -> "F (Zelle 6)"; 7 -> "G (Zelle 7)"; 8 -> "H (Zelle 8)"
             else -> "? (Unbekannt)"
         }
 
