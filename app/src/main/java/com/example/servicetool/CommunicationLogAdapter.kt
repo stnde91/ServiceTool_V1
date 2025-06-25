@@ -56,7 +56,7 @@ class CommunicationLogAdapter : RecyclerView.Adapter<CommunicationLogAdapter.Log
         val textColor = when (entry.status) {
             "SUCCESS" -> context.getColor(R.color.status_success_color)
             "ERROR" -> context.getColor(R.color.status_error_color)
-            "TIMEOUT" -> context.getColor(R.color.status_warning)
+            "TIMEOUT" -> context.getColor(R.color.status_warning_color)
             else -> context.getColor(R.color.md_theme_light_onSurfaceVariant)
         }
         holder.textStatus.setTextColor(textColor)

@@ -82,4 +82,154 @@
     <string name="app_description">Flintec RC3D Service Tool</string>
     <string name="logo_content_description">Firmenlogo</string>
 
+    <!-- ========== HARDCODED STRINGS FROM LAYOUTS ========== -->
+    
+    <!-- Titles & Headers -->
+    <string name="settings_title">Einstellungen</string>
+    <string name="connection_settings_title">Verbindungseinstellungen</string>
+    <string name="connection_status_title">Verbindungsstatus</string>
+    <string name="app_settings_title">Anwendungseinstellungen</string>
+    <string name="about_app_title">Über diese App</string>
+    <string name="moxa_settings_title">Moxa Einstellungen</string>
+    <string name="moxa_device_subtitle">NPort 5232 Device Server Konfiguration</string>
+    <string name="connection_test_title">Verbindungstest</string>
+    <string name="device_management_title">Device Management</string>
+    <string name="port_settings_title">Port Einstellungen</string>
+    <string name="cell_configuration_title">Zellen Konfiguration</string>
+    <string name="cell_config_subtitle">Adresse ändern und Filter konfigurieren</string>
+    <string name="change_cell_address_title">Zellenadresse ändern</string>
+    <string name="filter_configuration_title">Filter Konfiguration</string>
+    <string name="status_title">Status</string>
+    <string name="tips_hints_title">Tipps &amp; Hinweise</string>
+    <string name="multicell_overview_title">Multi-Cell Übersicht</string>
+    <string name="configuration_title">Konfiguration</string>
+    <string name="cells_status_title">Zellen-Status</string>
+    <string name="control_title">Steuerung</string>
+    <string name="technical_details_title">Technische Details</string>
+    <string name="dashboard_title">Dashboard</string>
+    <string name="system_status_title">System Status</string>
+    <string name="system_statistics_title">System-Statistiken</string>
+    <string name="app_updates_title">App Updates</string>
+    <string name="communication_log_title">Kommunikations-Log</string>
+
+    <!-- Button Texts -->
+    <string name="check_update_button">Update prüfen</string>
+    <string name="update_now_button">Jetzt aktualisieren</string>
+    <string name="later_button">Später</string>
+    <string name="test_connection_button">Verbindung testen</string>
+    <string name="save_settings_button">Einstellungen speichern</string>
+    <string name="ping_test_button">Ping Test</string>
+    <string name="device_info_button">Device Info</string>
+    <string name="restart_button">Restart</string>
+    <string name="change_address_button">Adresse ändern</string>
+    <string name="set_filter_all_cells_button">Filter für alle Zellen setzen</string>
+    <string name="refresh_button_text">Aktualisieren</string>
+    <string name="live_start_button">Live Start</string>
+    <string name="live_stop_button">Live Stop</string>
+    <string name="check_button">Prüfen</string>
+    <string name="clear_button">Leeren</string>
+
+    <!-- Status Messages -->
+    <string name="checking_connection">Verbindung überprüfen...</string>
+    <string name="ready_for_connection_test">Bereit für Verbindungstest</string>
+    <string name="ready_for_device_management">Bereit für Device Management</string>
+    <string name="loading_port_configuration">Port-Konfiguration wird geladen...</string>
+    <string name="filter_function_ready">Filter-Funktion bereit</string>
+    <string name="ready_for_configuration">Bereit für Konfiguration</string>
+    <string name="system_ready_status">System bereit</string>
+    <string name="not_loaded_yet">Noch nicht geladen</string>
+    <string name="system_checking">System wird geprüft...</string>
+    <string name="connection_checking">Verbindung wird geprüft...</string>
+    <string name="checking_updates">Checking for updates...</string>
+    <string name="download_preparing">Download wird vorbereitet...</string>
+    <string name="status_ready_for_test">Status: Bereit für Verbindungstest</string>
+
+    <!-- Input Labels & Hints -->
+    <string name="ip_address_label">IP-Adresse</string>
+    <string name="ip_address_example">z.B. 192.168.50.3</string>
+    <string name="port_label">Port</string>
+    <string name="port_default_hint">Standard: 4001</string>
+    <string name="moxa_ip_address_label">Moxa IP-Adresse</string>
+    <string name="serial_number_label">Seriennummer</string>
+    <string name="serial_number_hint">8-12 Zeichen (Hex oder Dezimal)</string>
+    <string name="new_address_label">Neue Adresse</string>
+    <string name="target_address_description">Ziel-Zellenadresse auswählen</string>
+
+    <!-- Cell-Related -->
+    <string name="active_cells_count_label">Anzahl aktive Zellen</string>
+    <string name="cell_1_label">Zelle 1</string>
+    <string name="cell_2_label">Zelle 2</string>
+    <string name="cell_3_label">Zelle 3</string>
+    <string name="cell_4_label">Zelle 4</string>
+    <string name="cell_5_label">Zelle 5</string>
+    <string name="cell_6_label">Zelle 6</string>
+    <string name="cell_7_label">Zelle 7</string>
+    <string name="cell_8_label">Zelle 8</string>
+    <string name="serial_number_placeholder">S/N: ------</string>
+
+    <!-- Technical/System Info -->
+    <string name="flintec_system_label">Flintec RC3D System</string>
+    <string name="moxa_gateway_label">Moxa Gateway</string>
+    <string name="cells_label">Zellen</string>
+    <string name="ping_label">Ping</string>
+    <string name="baudrate_label">Baudrate</string>
+    <string name="communication_speed_description">Kommunikationsgeschwindigkeit</string>
+    <string name="unknown_status">Unbekannt</string>
+
+    <!-- Update/Version -->
+    <string name="app_version_current">Version 0.105</string>
+    <string name="app_update_available">App Update verfügbar</string>
+    <string name="update_version_available">Version 1.104 ist verfügbar</string>
+    <string name="update_description_placeholder">Neue Features und Bugfixes...</string>
+    <string name="current_version_label">Current: v0.105</string>
+
+    <!-- Default/Placeholder Values -->
+    <string name="default_zero_value">0</string>
+    <string name="unknown_ratio">?/?</string>
+    <string name="unknown_value">---</string>
+    <string name="default_hundred_percent">100%</string>
+    <string name="default_zero_ms">0ms</string>
+
+    <!-- Configuration -->
+    <string name="auto_connect_title">Automatische Verbindung</string>
+    <string name="auto_connect_description">Verbinde automatisch beim App-Start</string>
+    <string name="debug_logging_title">Debug-Logging</string>
+    <string name="debug_logging_description">Detaillierte Logs für Diagnose</string>
+    <string name="filter_info_text">Stellen Sie die Anzahl der aktiven Zellen ein. Filter wird nur für diese gesetzt.</string>
+    <string name="active_cells_description">Nur diese Zellen werden bearbeitet</string>
+    <string name="filter_value_label">Filter Wert</string>
+    <string name="filter_value_options">Verfügbar: 0, 5 (Standard: 5)</string>
+
+    <!-- Statistics -->
+    <string name="successful_connections_label">Erfolgreiche Verbindungen</string>
+    <string name="errors_label">Fehler</string>
+    <string name="success_rate_label">Erfolgsrate</string>
+    <string name="average_response_time_label">Ø Antwortzeit</string>
+
+    <!-- Long Text Sections -->
+    <string name="about_app_description">Service Tool für Flintec RC3D Wägezellen\n\n• Adressänderung von Wägezellen\n• Filter-Konfiguration für Multi-Cell-Systeme\n• Moxa Device Server Management\n• Live-Monitoring von Zellendaten\n\nEntwickelt für industrielle Wägesysteme mit Flintec RC3D Technologie.</string>
+    <string name="configuration_tips">• Neue Zellen sind standardmäßig auf Adresse 1 (A) konfiguriert\n• Multi-Cell Übersicht zeigt alle Seriennummern an\n• Filter-Änderungen werden sofort an die Hardware übertragen\n• Die App verwendet die gleichen Kommandos wie die Windows-Software</string>
+
+    <!-- Content Descriptions for Accessibility -->
+    <string name="cd_info_icon">Info-Symbol</string>
+    <string name="cd_refresh_icon">Aktualisieren-Symbol</string>
+    <string name="cd_live_icon">Live-Modus Symbol</string>
+    <string name="cd_diagnostic_icon">Diagnose-Symbol</string>
+    <string name="cd_ethernet_icon">Ethernet-Symbol</string>
+    <string name="cd_status_icon">Status-Symbol</string>
+    <string name="cd_company_logo">Firmenlogo</string>
+    <string name="cd_app_icon">App-Symbol</string>
+
+    <!-- Dialog Strings -->
+    <string name="databits_label">Datenbits</string>
+    <string name="stopbits_label">Stoppbits</string>
+    <string name="parity_label">Parität</string>
+    <string name="flow_control_label">Flow Control</string>
+    <string name="fifo_label">FIFO</string>
+    <string name="moxa_restart_warning">⚠️ Nach dem Anwenden wird die Moxa automatisch neu gestartet!</string>
+    <string name="filter_progress_title">Setze Filter für Zelle 1 von 8</string>
+    <string name="send_command_progress">Sende Befehle...</string>
+    <string name="filter_settings_info">• Verwende direkte Zell-Adressierung\n• Sende AQ Query und AW Write Befehle\n• Prüfe Filter-Status nach jedem Befehl</string>
+    <string name="wait_message">⚠️ Bitte warten Sie, bis alle Zellen konfiguriert wurden</string>
+
 </resources>

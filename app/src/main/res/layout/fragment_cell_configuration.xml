@@ -15,7 +15,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Zellen Konfiguration"
+            android:text="@string/cell_configuration_title"
             android:textSize="32sp"
             android:textStyle="bold"
             android:textColor="?attr/colorOnSurface"
@@ -24,7 +24,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Adresse ändern und Filter konfigurieren"
+            android:text="@string/cell_config_subtitle"
             android:textSize="16sp"
             android:textColor="?attr/colorOnSurfaceVariant"
             android:layout_marginBottom="24dp" />
@@ -46,7 +46,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Zellenadresse ändern"
+                    android:text="@string/change_cell_address_title"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface"
@@ -58,13 +58,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="20dp"
-                    android:hint="Seriennummer"
-                    app:helperText="8-12 Zeichen (Hex oder Dezimal)"
+                    android:hint="@string/serial_number_label"
+                    app:helperText="@string/serial_number_hint"
                     app:counterEnabled="true"
                     app:counterMaxLength="12"
                     app:boxStrokeColor="?attr/colorPrimary"
                     app:hintTextColor="?attr/colorPrimary"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editTextSerialNumber"
@@ -94,7 +94,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Neue Adresse"
+                            android:text="@string/new_address_label"
                             android:textSize="16sp"
                             android:textStyle="bold"
                             android:textColor="?attr/colorOnSurface" />
@@ -102,7 +102,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Ziel-Zellenadresse auswählen"
+                            android:text="@string/target_address_description"
                             android:textSize="14sp"
                             android:textColor="?attr/colorOnSurfaceVariant"
                             android:layout_marginTop="2dp" />
@@ -131,7 +131,7 @@
                         android:layout_width="0dp"
                         android:layout_height="56dp"
                         android:layout_weight="1"
-                        android:text="Adresse ändern"
+                        android:text="@string/change_address_button"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         app:backgroundTint="?attr/colorPrimary"
@@ -140,7 +140,7 @@
                         app:iconGravity="textStart"
                         app:iconPadding="8dp"
                         android:enabled="false"
-                        style="@style/Widget.MaterialComponents.Button" />
+                        style="@style/Widget.Material3.Button" />
 
                     <ProgressBar
                         android:id="@+id/progress_bar"
@@ -173,7 +173,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Filter Konfiguration"
+                    android:text="@string/filter_configuration_title"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface"
@@ -193,7 +193,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Stellen Sie die Anzahl der aktiven Zellen ein. Filter wird nur für diese gesetzt."
+                        android:text="@string/filter_info_text"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
@@ -225,7 +225,7 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="Anzahl aktive Zellen"
+                                android:text="@string/active_cells_count_label"
                                 android:textSize="16sp"
                                 android:textStyle="bold"
                                 android:textColor="?attr/colorPrimary"
@@ -234,7 +234,7 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="Nur diese Zellen werden bearbeitet"
+                                android:text="@string/active_cells_description"
                                 android:textSize="12sp"
                                 android:layout_marginTop="2dp"
                                 android:textColor="?attr/colorOnSurfaceVariant" />
@@ -272,7 +272,7 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="Filter Wert"
+                                android:text="@string/filter_value_label"
                                 android:textSize="16sp"
                                 android:textStyle="bold"
                                 android:textColor="?attr/colorOnSurface" />
@@ -280,7 +280,7 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="Verfügbar: 0, 5 (Standard: 5)"
+                                android:text="@string/filter_value_options"
                                 android:textSize="12sp"
                                 android:layout_marginTop="2dp"
                                 android:textColor="?attr/colorOnSurfaceVariant" />
@@ -309,14 +309,14 @@
                     android:id="@+id/text_filter_status"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Filter-Funktion bereit"
+                    android:text="@string/filter_function_ready"
                     android:textSize="14sp"
                     android:layout_marginBottom="20dp"
                     android:minHeight="40dp"
                     android:gravity="center_vertical"
                     android:background="?attr/colorSurfaceVariant"
                     android:padding="16dp"
-                    android:textColor="@color/status_success_color"
+                    android:textColor="?attr/colorPrimary"
                     android:drawableStart="@drawable/ic_status_success"
                     android:drawablePadding="12dp" />
 
@@ -332,7 +332,7 @@
                         android:layout_width="0dp"
                         android:layout_height="56dp"
                         android:layout_weight="1"
-                        android:text="Filter für alle Zellen setzen"
+                        android:text="@string/set_filter_all_cells_button"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         app:backgroundTint="?attr/colorPrimary"
@@ -340,7 +340,7 @@
                         app:icon="@drawable/ic_filter_24"
                         app:iconGravity="textStart"
                         app:iconPadding="8dp"
-                        style="@style/Widget.MaterialComponents.Button" />
+                        style="@style/Widget.Material3.Button" />
 
                     <ProgressBar
                         android:id="@+id/progress_bar_filter"
@@ -373,7 +373,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Status"
+                    android:text="@string/status_title"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface"
@@ -383,7 +383,7 @@
                     android:id="@+id/text_status"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Bereit für Konfiguration"
+                    android:text="@string/ready_for_configuration"
                     android:textSize="16sp"
                     android:minHeight="48dp"
                     android:gravity="center_vertical"
@@ -415,7 +415,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Tipps &amp; Hinweise"
+                    android:text="@string/tips_hints_title"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface"
@@ -424,7 +424,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="• Neue Zellen sind standardmäßig auf Adresse 1 (A) konfiguriert\n• Multi-Cell Übersicht zeigt alle Seriennummern an\n• Filter-Änderungen werden sofort an die Hardware übertragen\n• Die App verwendet die gleichen Kommandos wie die Windows-Software"
+                    android:text="@string/configuration_tips"
                     android:textSize="14sp"
                     android:lineSpacingExtra="4dp"
                     android:textColor="?attr/colorOnSurfaceVariant" />

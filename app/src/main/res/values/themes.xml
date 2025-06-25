@@ -1,173 +1,50 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Material 3 Base Theme -->
-    <style name="Base.Theme.ServiceTool" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Primary brand color -->
-        <item name="colorPrimary">@color/md_theme_light_primary</item>
-        <item name="colorOnPrimary">@color/md_theme_light_onPrimary</item>
-        <item name="colorPrimaryContainer">@color/md_theme_light_primaryContainer</item>
-        <item name="colorOnPrimaryContainer">@color/md_theme_light_onPrimaryContainer</item>
-        
-        <!-- Secondary brand color -->
-        <item name="colorSecondary">@color/md_theme_light_secondary</item>
-        <item name="colorOnSecondary">@color/md_theme_light_onSecondary</item>
-        <item name="colorSecondaryContainer">@color/md_theme_light_secondaryContainer</item>
-        <item name="colorOnSecondaryContainer">@color/md_theme_light_onSecondaryContainer</item>
-        
-        <!-- Tertiary brand color -->
-        <item name="colorTertiary">@color/md_theme_light_tertiary</item>
-        <item name="colorOnTertiary">@color/md_theme_light_onTertiary</item>
-        <item name="colorTertiaryContainer">@color/md_theme_light_tertiaryContainer</item>
-        <item name="colorOnTertiaryContainer">@color/md_theme_light_onTertiaryContainer</item>
-        
-        <!-- Error color -->
-        <item name="colorError">@color/md_theme_light_error</item>
-        <item name="colorOnError">@color/md_theme_light_onError</item>
-        <item name="colorErrorContainer">@color/md_theme_light_errorContainer</item>
-        <item name="colorOnErrorContainer">@color/md_theme_light_onErrorContainer</item>
-        
-        <!-- Background colors -->
-        <item name="android:colorBackground">@color/md_theme_light_background</item>
-        <item name="colorOnBackground">@color/md_theme_light_onBackground</item>
-        <item name="colorSurface">@color/md_theme_light_surface</item>
-        <item name="colorOnSurface">@color/md_theme_light_onSurface</item>
-        <item name="colorSurfaceVariant">@color/md_theme_light_surfaceVariant</item>
-        <item name="colorOnSurfaceVariant">@color/md_theme_light_onSurfaceVariant</item>
-        
-        <!-- Outline colors -->
-        <item name="colorOutline">@color/md_theme_light_outline</item>
-        <item name="colorOutlineVariant">@color/md_theme_light_outlineVariant</item>
-        
-        <!-- Other colors -->
-        <item name="colorSurfaceInverse">@color/md_theme_light_inverseSurface</item>
-        <item name="colorOnSurfaceInverse">@color/md_theme_light_inverseOnSurface</item>
-        <item name="colorPrimaryInverse">@color/md_theme_light_inversePrimary</item>
-        
-        <!-- Material 3 compatibility -->
-        <item name="elevationOverlayColor">@color/md_theme_light_primary</item>
-        
-        
-        <!-- Typography and shapes -->
-        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.Material3.SmallComponent</item>
-        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.Material3.MediumComponent</item>
-        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.Material3.LargeComponent</item>
-        
-        <!-- Modern Window attributes (Android 14+) -->
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:windowLightNavigationBar">true</item>
-        <item name="android:enforceStatusBarContrast">false</item>
-        <item name="android:enforceNavigationBarContrast">false</item>
-    </style>
 
-    <style name="Theme.ServiceTool" parent="Base.Theme.ServiceTool" />
+  <!-- Base application theme. -->
+  <style name="Base.Theme.ServiceTool" parent="Theme.Material3.DayNight.NoActionBar">
+    <!-- Material 3 color attributes -->
+    <item name="colorPrimary">@color/md_theme_light_primary</item>
+    <item name="colorOnPrimary">@color/md_theme_light_onPrimary</item>
+    <item name="colorPrimaryContainer">@color/md_theme_light_primaryContainer</item>
+    <item name="colorOnPrimaryContainer">@color/md_theme_light_onPrimaryContainer</item>
+    <item name="colorSecondary">@color/md_theme_light_secondary</item>
+    <item name="colorOnSecondary">@color/md_theme_light_onSecondary</item>
+    <item name="colorSecondaryContainer">@color/md_theme_light_secondaryContainer</item>
+    <item name="colorOnSecondaryContainer">@color/md_theme_light_onSecondaryContainer</item>
+    <item name="colorTertiary">@color/md_theme_light_tertiary</item>
+    <item name="colorOnTertiary">@color/md_theme_light_onTertiary</item>
+    <item name="colorTertiaryContainer">@color/md_theme_light_tertiaryContainer</item>
+    <item name="colorOnTertiaryContainer">@color/md_theme_light_onTertiaryContainer</item>
+    <item name="colorError">@color/md_theme_light_error</item>
+    <item name="colorOnError">@color/md_theme_light_onError</item>
+    <item name="colorErrorContainer">@color/md_theme_light_errorContainer</item>
+    <item name="colorOnErrorContainer">@color/md_theme_light_onErrorContainer</item>
+    <item name="android:colorBackground">@color/md_theme_light_background</item>
+    <item name="colorOnBackground">@color/md_theme_light_onBackground</item>
+    <item name="colorSurface">@color/md_theme_light_surface</item>
+    <item name="colorOnSurface">@color/md_theme_light_onSurface</item>
+    <item name="colorSurfaceVariant">@color/md_theme_light_surfaceVariant</item>
+    <item name="colorOnSurfaceVariant">@color/md_theme_light_onSurfaceVariant</item>
+    <item name="colorOutline">@color/md_theme_light_outline</item>
+    <item name="colorSurfaceInverse">@color/md_theme_light_inverseSurface</item>
+    <item name="colorOnSurfaceInverse">@color/md_theme_light_inverseOnSurface</item>
+    <item name="colorPrimaryInverse">@color/md_theme_light_inversePrimary</item>
     
-    <!-- Dynamic Color Theme for Android 12+ (API 31+) -->
-    <style name="Theme.ServiceTool.DynamicColors" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Material 3 Dynamic Colors will override these automatically -->
-        <!-- Keep essential customizations only -->
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:enforceStatusBarContrast">false</item>
-        <item name="android:enforceNavigationBarContrast">false</item>
-        
-        <!-- Typography and shapes -->
-        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.Material3.SmallComponent</item>
-        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.Material3.MediumComponent</item>
-        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.Material3.LargeComponent</item>
-        
-        <!-- Custom component styles -->
-        <item name="materialButtonStyle">@style/Widget.App.Button</item>
-        <item name="materialCardViewStyle">@style/Widget.App.CardView</item>
-        <item name="bottomNavigationStyle">@style/Widget.App.BottomNavigationView</item>
-        
-        <!-- Typography -->
-        <item name="textAppearanceDisplayLarge">@style/TextAppearance.App.DisplayLarge</item>
-        <item name="textAppearanceDisplayMedium">@style/TextAppearance.App.DisplayMedium</item>
-        <item name="textAppearanceHeadlineLarge">@style/TextAppearance.App.HeadlineLarge</item>
-        <item name="textAppearanceHeadlineMedium">@style/TextAppearance.App.HeadlineMedium</item>
-        <item name="textAppearanceTitleLarge">@style/TextAppearance.App.TitleLarge</item>
-        <item name="textAppearanceTitleMedium">@style/TextAppearance.App.TitleMedium</item>
-        <item name="textAppearanceBodyLarge">@style/TextAppearance.App.BodyLarge</item>
-        <item name="textAppearanceBodyMedium">@style/TextAppearance.App.BodyMedium</item>
-        <item name="textAppearanceLabelLarge">@style/TextAppearance.App.LabelLarge</item>
-    </style>
+    <!-- Set the custom headline medium style -->
+    <item name="textAppearanceHeadlineMedium">@style/TextAppearance.App.HeadlineMedium</item>
+  </style>
 
-    <!-- Splash Screen Theme -->
-    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/md_theme_light_background</item>
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
-        <item name="postSplashScreenTheme">@style/Theme.ServiceTool</item>
-    </style>
-    
-    <!-- Material 3 Component Styles -->
-    <style name="Widget.App.Button" parent="Widget.Material3.Button">
-        <item name="android:minHeight">48dp</item>
-        <item name="android:textAllCaps">false</item>
-    </style>
-    
-    <style name="Widget.App.Button.OutlinedButton" parent="Widget.Material3.Button.OutlinedButton">
-        <item name="android:minHeight">48dp</item>
-        <item name="android:textAllCaps">false</item>
-    </style>
-    
-    <style name="Widget.App.CardView" parent="Widget.Material3.CardView.Elevated">
-        <item name="cardCornerRadius">12dp</item>
-        <item name="cardElevation">4dp</item>
-    </style>
-    
-    <style name="Widget.App.BottomNavigationView" parent="Widget.Material3.BottomNavigationView">
-        <item name="labelVisibilityMode">labeled</item>
-        <item name="itemIconSize">24dp</item>
-        <item name="android:textAllCaps">false</item>
-    </style>
-    
-    <style name="Widget.App.Button.TextButton" parent="Widget.Material3.Button.TextButton">
-        <item name="android:minHeight">48dp</item>
-        <item name="android:textAllCaps">false</item>
-    </style>
-    
-    <!-- Material 3 Typography Styles -->
-    <style name="TextAppearance.App.DisplayLarge" parent="TextAppearance.Material3.DisplayLarge">
-        <item name="android:fontFamily">sans-serif</item>
-    </style>
-    
-    <style name="TextAppearance.App.DisplayMedium" parent="TextAppearance.Material3.DisplayMedium">
-        <item name="android:fontFamily">sans-serif</item>
-    </style>
-    
-    <style name="TextAppearance.App.HeadlineLarge" parent="TextAppearance.Material3.HeadlineLarge">
-        <item name="android:fontFamily">sans-serif-medium</item>
-    </style>
-    
-    <style name="TextAppearance.App.HeadlineMedium" parent="TextAppearance.Material3.HeadlineMedium">
-        <item name="android:fontFamily">sans-serif-medium</item>
-    </style>
-    
-    <style name="TextAppearance.App.TitleLarge" parent="TextAppearance.Material3.TitleLarge">
-        <item name="android:fontFamily">sans-serif-medium</item>
-    </style>
-    
-    <style name="TextAppearance.App.TitleMedium" parent="TextAppearance.Material3.TitleMedium">
-        <item name="android:fontFamily">sans-serif-medium</item>
-    </style>
-    
-    <style name="TextAppearance.App.BodyLarge" parent="TextAppearance.Material3.BodyLarge">
-        <item name="android:fontFamily">sans-serif</item>
-    </style>
-    
-    <style name="TextAppearance.App.BodyMedium" parent="TextAppearance.Material3.BodyMedium">
-        <item name="android:fontFamily">sans-serif</item>
-    </style>
-    
-    <style name="TextAppearance.App.LabelLarge" parent="TextAppearance.Material3.LabelLarge">
-        <item name="android:fontFamily">sans-serif-medium</item>
-    </style>
-    
-    <style name="Widget.App.Card" parent="Widget.Material3.CardView.Elevated">
-        <item name="cardCornerRadius">12dp</item>
-        <item name="cardElevation">2dp</item>
-        <item name="cardUseCompatPadding">true</item>
-    </style>
-    
+  <!-- Custom Headline Medium Style -->
+  <style name="TextAppearance.App.HeadlineMedium" parent="TextAppearance.Material3.HeadlineMedium">
+    <item name="android:textStyle">bold</item>
+  </style>
+
+  <style name="Theme.ServiceTool" parent="Base.Theme.ServiceTool" />
+
+  <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+    <item name="windowSplashScreenBackground">@android:color/white</item>
+    <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+    <item name="postSplashScreenTheme">@style/Theme.ServiceTool</item>
+  </style>
+
 </resources>

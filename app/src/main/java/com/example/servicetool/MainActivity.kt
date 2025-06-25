@@ -98,18 +98,19 @@ class MainActivity : AppCompatActivity() {
             bottomNav.setupWithNavController(navController)
             
             // Apply window insets for edge-to-edge display
-            ViewCompat.setOnApplyWindowInsetsListener(window.decorView.rootView) { view, insets ->
+            val mainContainer = findViewById<android.view.View>(R.id.main_container)
+            ViewCompat.setOnApplyWindowInsetsListener(mainContainer) { _, insets ->
                 val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-                val navigationBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-                
-                // Apply bottom padding to bottom navigation
-                bottomNav.setPadding(0, 0, 0, navigationBars.bottom)
-                
-                // Apply top padding to nav host for status bar
+
+                // Apply top padding to the NavHostFragment so its content is below the status bar
                 val navHost = findViewById<androidx.fragment.app.FragmentContainerView>(R.id.nav_host_fragment)
-                navHost.setPadding(0, systemBars.top, 0, 0)
-                
-                Log.d(TAG, "Window insets applied - top: ${systemBars.top}, bottom: ${navigationBars.bottom}")
+                navHost.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
+
+                // Apply bottom padding to the BottomNavigationView so its content is above the navigation bar
+                val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+                bottomNav.setPadding(0, bottomNav.paddingTop, 0, systemBars.bottom)
+
+                // Return the original insets, so that children can also handle them if they need to
                 insets
             }
             

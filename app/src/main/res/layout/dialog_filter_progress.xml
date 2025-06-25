@@ -11,7 +11,7 @@
         android:id="@+id/textProgressTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Setze Filter für Zelle 1 von 8"
+        android:text="@string/filter_progress_title"
         android:textSize="20sp"
         android:textStyle="bold"
         android:textColor="?attr/colorOnSurface"
@@ -22,7 +22,7 @@
         android:id="@+id/textProgressMessage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Sende Befehle..."
+        android:text="@string/send_command_progress"
         android:textSize="14sp"
         android:textColor="?attr/colorOnSurfaceVariant"
         android:layout_marginBottom="24dp" />
@@ -71,7 +71,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Filter-Einstellungen"
+                android:text="@string/filter_configuration_title"
                 android:textSize="12sp"
                 android:textStyle="bold"
                 android:textColor="?attr/colorOnSurfaceVariant"
@@ -80,7 +80,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="• Verwende direkte Zell-Adressierung\n• Sende AQ Query und Aw Write Befehle\n• Prüfe Filter-Status nach jedem Befehl"
+                android:text="@string/filter_settings_info"
                 android:textSize="12sp"
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:lineSpacingExtra="2dp" />
@@ -93,9 +93,9 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="⚠️ Bitte warten Sie, bis alle Zellen konfiguriert wurden"
+        android:text="@string/wait_message"
         android:textSize="12sp"
-        android:textColor="@color/status_warning"
+        android:textColor="@color/status_warning_color"
         android:gravity="center"
         android:layout_marginTop="16dp" />
 

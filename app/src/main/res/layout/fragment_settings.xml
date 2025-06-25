@@ -4,8 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/android:colorBackground"
-    android:fitsSystemWindows="true">
+    android:background="?attr/android:colorBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -17,7 +16,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Einstellungen"
+            android:text="@string/settings_title"
             android:textSize="32sp"
             android:textStyle="bold"
             android:textColor="?attr/colorOnSurface"
@@ -43,7 +42,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Version 0.105"
+                    android:text="@string/app_version_current"
                     android:textColor="?attr/colorOnSurface"
                     android:textSize="16sp"
                     android:textStyle="bold"
@@ -55,7 +54,7 @@
                     android:id="@+id/buttonCheckUpdate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Update prüfen"
+                    android:text="@string/check_update_button"
                     android:textSize="12sp"
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     app:icon="@drawable/ic_refresh_24"
@@ -84,7 +83,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="App Update verfügbar"
+                    android:text="@string/app_update_available"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface"
@@ -94,7 +93,7 @@
                     android:id="@+id/textUpdateVersion"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Version 1.104 ist verfügbar"
+                    android:text="@string/update_version_available"
                     android:textSize="16sp"
                     android:textColor="?attr/colorOnSurface"
                     android:layout_marginBottom="8dp" />
@@ -103,7 +102,7 @@
                     android:id="@+id/textUpdateDescription"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Neue Features und Bugfixes..."
+                    android:text="@string/update_description_placeholder"
                     android:textSize="14sp"
                     android:textColor="?attr/colorOnSurfaceVariant"
                     android:layout_marginBottom="16dp"
@@ -121,7 +120,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:layout_marginEnd="8dp"
-                        android:text="Jetzt aktualisieren"
+                        android:text="@string/update_now_button"
                         android:textSize="14sp"
                         app:backgroundTint="?attr/colorPrimary"
                         app:icon="@drawable/ic_refresh_24" />
@@ -130,7 +129,7 @@
                         android:id="@+id/buttonIgnoreUpdate"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Später"
+                        android:text="@string/later_button"
                         android:textSize="14sp"
                         style="@style/Widget.Material3.Button.OutlinedButton" />
 
@@ -149,7 +148,7 @@
                         android:id="@+id/textUpdateStatus"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Download wird vorbereitet..."
+                        android:text="@string/download_preparing"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"
                         android:layout_marginBottom="8dp" />
@@ -183,7 +182,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Verbindungseinstellungen"
+                    android:text="@string/connection_settings_title"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface"
@@ -195,11 +194,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="20dp"
-                    android:hint="IP-Adresse"
-                    app:helperText="z.B. 192.168.50.3"
+                    android:hint="@string/ip_address_label"
+                    app:helperText="@string/ip_address_example"
                     app:boxStrokeColor="?attr/colorPrimary"
                     app:hintTextColor="?attr/colorPrimary"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editTextIpAddress"
@@ -217,11 +216,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="20dp"
-                    android:hint="Port"
-                    app:helperText="Standard: 4001"
+                    android:hint="@string/port_label"
+                    app:helperText="@string/port_default_hint"
                     app:boxStrokeColor="?attr/colorPrimary"
                     app:hintTextColor="?attr/colorPrimary"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editTextPort"
@@ -238,7 +237,7 @@
                     android:id="@+id/buttonConnect"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
-                    android:text="Verbindung testen"
+                    android:text="@string/test_connection_button"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     app:backgroundTint="?attr/colorPrimary"
@@ -246,7 +245,7 @@
                     app:icon="@drawable/ic_network_24"
                     app:iconGravity="textStart"
                     app:iconPadding="8dp"
-                    style="@style/Widget.MaterialComponents.Button" />
+                    style="@style/Widget.Material3.Button" />
 
             </LinearLayout>
 
@@ -269,7 +268,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Verbindungsstatus"
+                    android:text="@string/connection_status_title"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface"
@@ -280,7 +279,7 @@
                     android:id="@+id/textViewConnectionStatus"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Status: Bereit für Verbindungstest"
+                    android:text="@string/status_ready_for_test"
                     android:textSize="16sp"
                     android:minHeight="56dp"
                     android:gravity="center_vertical"
@@ -311,7 +310,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Anwendungseinstellungen"
+                    android:text="@string/app_settings_title"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface"
@@ -332,6 +331,7 @@
                         android:layout_height="24dp"
                         android:layout_marginEnd="16dp"
                         android:src="@drawable/ic_live_24"
+                        android:contentDescription="@string/cd_live_icon"
                         app:tint="?attr/colorPrimary" />
 
                     <LinearLayout
@@ -343,7 +343,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Automatische Verbindung"
+                            android:text="@string/auto_connect_title"
                             android:textColor="?attr/colorOnSurface"
                             android:textSize="16sp"
                             android:textStyle="bold" />
@@ -351,7 +351,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Verbinde automatisch beim App-Start"
+                            android:text="@string/auto_connect_description"
                             android:textColor="?attr/colorOnSurfaceVariant"
                             android:textSize="12sp"
                             android:layout_marginTop="2dp" />
@@ -382,6 +382,7 @@
                         android:layout_height="24dp"
                         android:layout_marginEnd="16dp"
                         android:src="@drawable/ic_diagnostic_24"
+                        android:contentDescription="@string/cd_diagnostic_icon"
                         app:tint="?attr/colorPrimary" />
 
                     <LinearLayout
@@ -393,7 +394,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Debug-Logging"
+                            android:text="@string/debug_logging_title"
                             android:textColor="?attr/colorOnSurface"
                             android:textSize="16sp"
                             android:textStyle="bold" />
@@ -401,7 +402,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Detaillierte Logs für Diagnose"
+                            android:text="@string/debug_logging_description"
                             android:textColor="?attr/colorOnSurfaceVariant"
                             android:textSize="12sp"
                             android:layout_marginTop="2dp" />
@@ -438,7 +439,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Über diese App"
+                    android:text="@string/about_app_title"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface"
@@ -447,7 +448,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Service Tool für Flintec RC3D Wägezellen\n\n• Adressänderung von Wägezellen\n• Filter-Konfiguration für Multi-Cell-Systeme\n• Moxa Device Server Management\n• Live-Monitoring von Zellendaten\n\nEntwickelt für industrielle Wägesysteme mit Flintec RC3D Technologie."
+                    android:text="@string/about_app_description"
                     android:textSize="14sp"
                     android:lineSpacingExtra="4dp"
                     android:textColor="?attr/colorOnSurfaceVariant" />

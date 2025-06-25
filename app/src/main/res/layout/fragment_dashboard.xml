@@ -4,30 +4,28 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/android:colorBackground"
-    android:fitsSystemWindows="true">
+    android:background="?attr/android:colorBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="@dimen/spacing_large">
 
         <!-- Minimalist Header -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Dashboard"
-            android:textSize="32sp"
-            android:textStyle="bold"
+            android:text="@string/dashboard_title"
+            android:textAppearance="?attr/textAppearanceHeadlineMedium"
             android:textColor="?attr/colorOnSurface"
-            android:layout_marginBottom="24dp" />
+            android:layout_marginBottom="@dimen/spacing_xlarge" />
 
         <!-- System Status Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="@dimen/spacing_large"
             app:cardCornerRadius="12dp"
             app:cardElevation="4dp">
 
@@ -35,33 +33,33 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="@dimen/spacing_large">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="System Status"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
+                    android:text="@string/system_status_title"
+                    android:textAppearance="?attr/textAppearanceTitleLarge"
                     android:textColor="?attr/colorOnSurface"
-                    android:layout_marginBottom="16dp" />
+                    android:layout_marginBottom="@dimen/spacing_large" />
 
                 <!-- Flintec Status -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginBottom="@dimen/spacing_medium"
                     android:background="?attr/colorSurfaceVariant"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:padding="12dp">
+                    android:padding="@dimen/spacing_medium">
 
                     <ImageView
                         android:id="@+id/iconFlintecStatus"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:layout_marginEnd="12dp"
+                        android:layout_marginEnd="@dimen/spacing_medium"
                         android:src="@drawable/ic_status_pending"
+                        android:contentDescription="@string/cd_status_icon"
                         tools:src="@drawable/ic_status_success" />
 
                     <LinearLayout
@@ -73,17 +71,16 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Flintec RC3D System"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
+                            android:text="@string/flintec_system_label"
+                            android:textAppearance="?attr/textAppearanceTitleMedium"
                             android:textColor="?attr/colorOnSurface" />
 
                         <TextView
                             android:id="@+id/textFlintecStatus"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="System wird geprüft..."
-                            android:textSize="14sp"
+                            android:text="@string/system_checking"
+                            android:textAppearance="?attr/textAppearanceBodyMedium"
                             android:textColor="?attr/colorOnSurfaceVariant"
                             android:layout_marginTop="2dp"
                             tools:text="3/4 Zellen online" />
@@ -100,17 +97,16 @@
                             android:id="@+id/textFlintecCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="?/?"
-                            android:textSize="20sp"
-                            android:textStyle="bold"
+                            android:text="@string/unknown_ratio"
+                            android:textAppearance="?attr/textAppearanceTitleLarge"
                             android:textColor="?attr/colorPrimary"
                             tools:text="3/4" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Zellen"
-                            android:textSize="12sp"
+                            android:text="@string/cells_label"
+                            android:textAppearance="?attr/textAppearanceLabelMedium"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
                     </LinearLayout>
@@ -124,14 +120,15 @@
                     android:background="?attr/colorSurfaceVariant"
                     android:gravity="center_vertical"
                     android:orientation="horizontal"
-                    android:padding="12dp">
+                    android:padding="@dimen/spacing_medium">
 
                     <ImageView
                         android:id="@+id/iconMoxaStatus"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:layout_marginEnd="12dp"
+                        android:layout_marginEnd="@dimen/spacing_medium"
                         android:src="@drawable/ic_status_pending"
+                        android:contentDescription="@string/cd_status_icon"
                         tools:src="@drawable/ic_status_success" />
 
                     <LinearLayout
@@ -143,17 +140,16 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Moxa Gateway"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
+                            android:text="@string/moxa_gateway_label"
+                            android:textAppearance="?attr/textAppearanceTitleMedium"
                             android:textColor="?attr/colorOnSurface" />
 
                         <TextView
                             android:id="@+id/textMoxaStatus"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Verbindung wird geprüft..."
-                            android:textSize="14sp"
+                            android:text="@string/connection_checking"
+                            android:textAppearance="?attr/textAppearanceBodyMedium"
                             android:textColor="?attr/colorOnSurfaceVariant"
                             android:layout_marginTop="2dp"
                             tools:text="192.168.50.3:4001" />
@@ -170,17 +166,16 @@
                             android:id="@+id/textMoxaPing"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="---"
-                            android:textSize="16sp"
-                            android:textStyle="bold"
+                            android:text="@string/unknown_value"
+                            android:textAppearance="?attr/textAppearanceTitleMedium"
                             android:textColor="?attr/colorPrimary"
                             tools:text="12ms" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Ping"
-                            android:textSize="12sp"
+                            android:text="@string/ping_label"
+                            android:textAppearance="?attr/textAppearanceLabelMedium"
                             android:textColor="?attr/colorOnSurfaceVariant" />
 
                     </LinearLayout>
@@ -203,16 +198,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="@dimen/spacing_large">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="System-Statistiken"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
+                    android:text="@string/system_statistics_title"
+                    android:textAppearance="?attr/textAppearanceTitleLarge"
                     android:textColor="?attr/colorOnSurface"
-                    android:layout_marginBottom="16dp" />
+                    android:layout_marginBottom="@dimen/spacing_large" />
 
                 <!-- Statistics Grid -->
                 <LinearLayout
@@ -224,31 +218,30 @@
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="8dp"
+                        android:layout_marginEnd="@dimen/spacing_small"
                         android:layout_weight="1"
                         android:background="?attr/colorPrimaryContainer"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="16dp">
+                        android:padding="@dimen/spacing_large">
 
                         <TextView
                             android:id="@+id/textSuccessfulConnections"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
+                            android:textAppearance="?attr/textAppearanceHeadlineSmall"
                             android:textColor="?attr/colorOnPrimaryContainer"
                             tools:text="47" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Erfolgreiche Verbindungen"
+                            android:text="@string/successful_connections_label"
                             android:textAlignment="center"
-                            android:textSize="12sp"
+                            android:textAppearance="?attr/textAppearanceLabelMedium"
                             android:textColor="?attr/colorOnPrimaryContainer"
-                            android:layout_marginTop="4dp" />
+                            android:layout_marginTop="@dimen/spacing_xsmall" />
 
                     </LinearLayout>
 
@@ -256,31 +249,30 @@
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
+                        android:layout_marginStart="@dimen/spacing_small"
                         android:layout_weight="1"
                         android:background="?attr/colorSurfaceVariant"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="16dp">
+                        android:padding="@dimen/spacing_large">
 
                         <TextView
                             android:id="@+id/textErrorCount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="0"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
+                            android:textAppearance="?attr/textAppearanceHeadlineSmall"
                             android:textColor="?attr/colorError"
                             tools:text="2" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Fehler"
+                            android:text="@string/errors_label"
                             android:textAlignment="center"
-                            android:textSize="12sp"
+                            android:textAppearance="?attr/textAppearanceLabelMedium"
                             android:textColor="?attr/colorOnSurfaceVariant"
-                            android:layout_marginTop="4dp" />
+                            android:layout_marginTop="@dimen/spacing_xsmall" />
 
                     </LinearLayout>
 
@@ -289,38 +281,37 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="@dimen/spacing_small"
                     android:orientation="horizontal">
 
                     <!-- Success Rate -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="8dp"
+                        android:layout_marginEnd="@dimen/spacing_small"
                         android:layout_weight="1"
                         android:background="?attr/colorSurfaceVariant"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="16dp">
+                        android:padding="@dimen/spacing_large">
 
                         <TextView
                             android:id="@+id/textSuccessRate"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="100%"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
+                            android:text="@string/default_hundred_percent"
+                            android:textAppearance="?attr/textAppearanceHeadlineSmall"
                             android:textColor="@color/status_success_color"
                             tools:text="97.8%" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Erfolgsrate"
+                            android:text="@string/success_rate_label"
                             android:textAlignment="center"
-                            android:textSize="12sp"
+                            android:textAppearance="?attr/textAppearanceLabelMedium"
                             android:textColor="?attr/colorOnSurfaceVariant"
-                            android:layout_marginTop="4dp" />
+                            android:layout_marginTop="@dimen/spacing_xsmall" />
 
                     </LinearLayout>
 
@@ -328,31 +319,30 @@
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
+                        android:layout_marginStart="@dimen/spacing_small"
                         android:layout_weight="1"
                         android:background="?attr/colorSurfaceVariant"
                         android:gravity="center"
                         android:orientation="vertical"
-                        android:padding="16dp">
+                        android:padding="@dimen/spacing_large">
 
                         <TextView
                             android:id="@+id/textAverageResponseTime"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0ms"
-                            android:textSize="24sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/status_warning"
+                            android:text="@string/default_zero_ms"
+                            android:textAppearance="?attr/textAppearanceHeadlineSmall"
+                            android:textColor="@color/status_warning_color"
                             tools:text="25ms" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Ø Antwortzeit"
+                            android:text="@string/average_response_time_label"
                             android:textAlignment="center"
-                            android:textSize="12sp"
+                            android:textAppearance="?attr/textAppearanceLabelMedium"
                             android:textColor="?attr/colorOnSurfaceVariant"
-                            android:layout_marginTop="4dp" />
+                            android:layout_marginTop="@dimen/spacing_xsmall" />
 
                     </LinearLayout>
 
@@ -367,7 +357,7 @@
             android:id="@+id/cardUpdateStatus"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="@dimen/spacing_large"
             app:cardCornerRadius="12dp"
             app:cardElevation="4dp"
             android:visibility="gone">
@@ -376,16 +366,15 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="@dimen/spacing_large">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="App Updates"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
+                    android:text="@string/app_updates_title"
+                    android:textAppearance="?attr/textAppearanceTitleLarge"
                     android:textColor="?attr/colorOnSurface"
-                    android:layout_marginBottom="12dp" />
+                    android:layout_marginBottom="@dimen/spacing_medium" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -397,9 +386,10 @@
                         android:id="@+id/iconUpdateStatus"
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:layout_marginEnd="12dp"
+                        android:layout_marginEnd="@dimen/spacing_medium"
                         android:src="@drawable/ic_refresh_24"
-                        android:tint="?attr/colorPrimary" />
+                        android:contentDescription="@string/cd_refresh_icon"
+                        app:tint="?attr/colorPrimary" />
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -411,16 +401,16 @@
                             android:id="@+id/textUpdateStatus"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Checking for updates..."
-                            android:textSize="16sp"
+                            android:text="@string/checking_updates"
+                            android:textAppearance="?attr/textAppearanceBodyLarge"
                             android:textColor="?attr/colorOnSurface" />
 
                         <TextView
                             android:id="@+id/textUpdateDetails"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Current: v0.105"
-                            android:textSize="14sp"
+                            android:text="@string/current_version_label"
+                            android:textAppearance="?attr/textAppearanceBodyMedium"
                             android:textColor="?attr/colorOnSurfaceVariant"
                             android:layout_marginTop="2dp" />
 
@@ -430,8 +420,7 @@
                         android:id="@+id/buttonCheckUpdates"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Prüfen"
-                        android:textSize="12sp"
+                        android:text="@string/check_button"
                         style="@style/Widget.Material3.Button.OutlinedButton"
                         app:icon="@drawable/ic_refresh_24"
                         app:iconSize="16dp" />
@@ -446,7 +435,7 @@
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="@dimen/spacing_large"
             app:cardCornerRadius="12dp"
             app:cardElevation="4dp">
 
@@ -454,30 +443,28 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:padding="@dimen/spacing_large">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
+                    android:layout_marginBottom="@dimen/spacing_medium">
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Kommunikations-Log"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
+                        android:text="@string/communication_log_title"
+                        android:textAppearance="?attr/textAppearanceTitleLarge"
                         android:textColor="?attr/colorOnSurface" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/buttonClearLog"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Leeren"
-                        android:textSize="10sp"
+                        android:text="@string/clear_button"
                         style="@style/Widget.Material3.Button.TextButton"
                         app:icon="@drawable/ic_refresh_24"
                         app:iconSize="14dp" />
@@ -489,7 +476,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="200dp"
                     android:background="?attr/colorSurfaceVariant"
-                    android:padding="8dp"
+                    android:padding="@dimen/spacing_small"
                     android:nestedScrollingEnabled="true" />
 
             </LinearLayout>

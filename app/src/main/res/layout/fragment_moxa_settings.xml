@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/android:colorBackground"
-    android:fitsSystemWindows="true"
     android:padding="16dp">
 
     <LinearLayout
@@ -17,7 +16,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Moxa Einstellungen"
+            android:text="@string/moxa_settings_title"
             android:textSize="32sp"
             android:textStyle="bold"
             android:textColor="?attr/colorOnSurface"
@@ -26,7 +25,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="NPort 5232 Device Server Konfiguration"
+            android:text="@string/moxa_device_subtitle"
             android:textSize="16sp"
             android:textColor="?attr/colorOnSurfaceVariant"
             android:layout_marginBottom="16dp" />
@@ -44,7 +43,7 @@
                 android:id="@+id/textViewMoxaModel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Verbindung überprüfen..."
+                android:text="@string/checking_connection"
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:textSize="14sp"
                 android:textStyle="bold" />
@@ -76,7 +75,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Verbindungseinstellungen"
+                    android:text="@string/connection_settings_title"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface"
@@ -88,11 +87,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="20dp"
-                    android:hint="Moxa IP-Adresse"
-                    app:helperText="z.B. 192.168.50.3"
+                    android:hint="@string/moxa_ip_address_label"
+                    app:helperText="@string/ip_address_example"
                     app:boxStrokeColor="?attr/colorPrimary"
                     app:hintTextColor="?attr/colorPrimary"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editTextMoxaIp"
@@ -110,11 +109,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="20dp"
-                    android:hint="Port"
-                    app:helperText="Standard: 4001"
+                    android:hint="@string/port_label"
+                    app:helperText="@string/port_default_hint"
                     app:boxStrokeColor="?attr/colorPrimary"
                     app:hintTextColor="?attr/colorPrimary"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editTextMoxaPort"
@@ -131,7 +130,7 @@
                     android:id="@+id/buttonSaveMoxaSettings"
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
-                    android:text="Einstellungen speichern"
+                    android:text="@string/save_settings_button"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     app:backgroundTint="?attr/colorPrimary"
@@ -139,7 +138,7 @@
                     app:icon="@drawable/ic_settings_24"
                     app:iconGravity="textStart"
                     app:iconPadding="8dp"
-                    style="@style/Widget.MaterialComponents.Button" />
+                    style="@style/Widget.Material3.Button" />
 
             </LinearLayout>
 
@@ -162,7 +161,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Verbindungstest"
+                    android:text="@string/connection_test_title"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface"
@@ -184,7 +183,7 @@
                         android:layout_marginEnd="8dp"
                         android:layout_weight="1"
                         android:layout_gravity="center_vertical"
-                        android:text="Verbindung testen"
+                        android:text="@string/test_connection_button"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:gravity="center"
@@ -195,7 +194,7 @@
                         app:icon="@drawable/ic_network_24"
                         app:iconGravity="textStart"
                         app:iconPadding="8dp"
-                        style="@style/Widget.MaterialComponents.Button" />
+                        style="@style/Widget.Material3.Button" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/buttonPingMoxa"
@@ -204,7 +203,7 @@
                         android:layout_marginStart="8dp"
                         android:layout_weight="1"
                         android:layout_gravity="center_vertical"
-                        android:text="Ping Test"
+                        android:text="@string/ping_test_button"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:gravity="center"
@@ -215,7 +214,7 @@
                         app:icon="@drawable/ic_speed_24"
                         app:iconGravity="textStart"
                         app:iconPadding="8dp"
-                        style="@style/Widget.MaterialComponents.Button" />
+                        style="@style/Widget.Material3.Button" />
 
                 </LinearLayout>
 
@@ -224,7 +223,7 @@
                     android:id="@+id/textViewConnectionResult"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Bereit für Verbindungstest"
+                    android:text="@string/ready_for_connection_test"
                     android:textSize="14sp"
                     android:minHeight="48dp"
                     android:gravity="center_vertical"
@@ -255,7 +254,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Device Management"
+                    android:text="@string/device_management_title"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface"
@@ -274,15 +273,15 @@
                         android:layout_height="56dp"
                         android:layout_marginEnd="8dp"
                         android:layout_weight="1"
-                        android:text="Device Info"
+                        android:text="@string/device_info_button"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        app:backgroundTint="@color/status_info"
+                        app:backgroundTint="?attr/colorTertiary"
                         app:cornerRadius="12dp"
                         app:icon="@drawable/ic_info_24"
                         app:iconGravity="textStart"
                         app:iconPadding="8dp"
-                        style="@style/Widget.MaterialComponents.Button" />
+                        style="@style/Widget.Material3.Button" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/buttonMoxaRestart"
@@ -290,15 +289,15 @@
                         android:layout_height="56dp"
                         android:layout_marginStart="8dp"
                         android:layout_weight="1"
-                        android:text="Restart"
+                        android:text="@string/restart_button"
                         android:textSize="14sp"
                         android:textStyle="bold"
-                        app:backgroundTint="@color/status_warning"
+                        app:backgroundTint="?attr/colorError"
                         app:cornerRadius="12dp"
                         app:icon="@drawable/ic_refresh_24"
                         app:iconGravity="textStart"
                         app:iconPadding="8dp"
-                        style="@style/Widget.MaterialComponents.Button" />
+                        style="@style/Widget.Material3.Button" />
 
                 </LinearLayout>
 
@@ -307,7 +306,7 @@
                     android:id="@+id/textViewMoxaStatus"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Bereit für Device Management"
+                    android:text="@string/ready_for_device_management"
                     android:textSize="14sp"
                     android:minHeight="48dp"
                     android:gravity="center_vertical"
@@ -337,7 +336,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Port Einstellungen"
+                    android:text="@string/port_settings_title"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:textColor="?attr/colorOnSurface"
@@ -355,7 +354,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Port-Konfiguration wird geladen..."
+                        android:text="@string/loading_port_configuration"
                         android:textSize="14sp"
                         android:textColor="?attr/colorOnSurfaceVariant"
                         android:gravity="center"

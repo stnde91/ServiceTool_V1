@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Monochrome icon for Material You theming -->
+    <!-- This should be a simplified version of your app icon -->
+    
+    <!-- Weight/Scale icon representation -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M34,45 L74,45 C76,45 78,47 78,49 L78,59 C78,61 76,63 74,63 L34,63 C32,63 30,61 30,59 L30,49 C30,47 32,45 34,45 Z"/>
+    
+    <!-- Display/Screen -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M40,50 L68,50 C69,50 70,51 70,52 L70,56 C70,57 69,58 68,58 L40,58 C39,58 38,57 38,56 L38,52 C38,51 39,50 40,50 Z"/>
+    
+    <!-- Connection lines -->
+    <path
+        android:fillColor="#000000"
+        android:strokeWidth="2"
+        android:pathData="M54,63 L54,70 M46,70 L62,70 M46,70 L46,74 M62,70 L62,74"/>
+    
+    <!-- Base/Stand -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M42,74 L66,74 C67,74 68,75 68,76 L68,78 C68,79 67,80 66,80 L42,80 C41,80 40,79 40,78 L40,76 C40,75 41,74 42,74 Z"/>
+    
+    <!-- Signal waves (representing communication) -->
+    <path
+        android:fillColor="#000000"
+        android:pathData="M35,35 C35,35 37,33 39,33 C41,33 43,35 43,35 M31,31 C31,31 35,27 39,27 C43,27 47,31 47,31 M27,27 C27,27 33,21 39,21 C45,21 51,27 51,27"/>
+        
+</vector>
