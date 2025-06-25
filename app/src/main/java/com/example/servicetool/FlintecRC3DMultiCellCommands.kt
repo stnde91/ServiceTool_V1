@@ -243,34 +243,121 @@ object FlintecRC3DMultiCellCommands {
 
     // --- Antwort-Parsing ---
     fun parseMultiCellResponse(response: String): FlintecData? {
+        android.util.Log.d("ParserDebug", "=== parseMultiCellResponse START ===")
+        android.util.Log.d("ParserDebug", "Input: '$response' (Länge: ${response.length})")
+        
+        // Erweiterte Sonderbehandlung für bekannte Fehlerantworten
+        if (response == "COMM_ERROR_BEL" || response == "BEL_ERROR") {
+            android.util.Log.w("Parser", "Kommunikationsfehler: BEL-Zeichen empfangen")
+            return FlintecData.Unknown("Kommunikationsfehler")
+        }
+        
+        // Prüfe auf verdächtige Antworten mit CommunicationHelper
+        if (CommunicationHelper.isSuspiciousResponse(response)) {
+            android.util.Log.w("Parser", "Verdächtige Antwort erkannt: '$response'")
+            android.util.Log.w("Parser", "Empfehlung: ${CommunicationHelper.getErrorRecommendation(response)}")
+            
+            // Bei verdächtigen Antworten gib "Fehler" zurück statt null
+            return when {
+                response.length == 1 && response[0] in "0237" -> FlintecData.Unknown("Fehler")
+                response.isEmpty() -> null
+                else -> FlintecData.Unknown("Fehler")
+            }
+        }
+        
         if (response.length < 2) {
-            android.util.Log.w("Parser", "Antwort zu kurz: '$response'")
+            android.util.Log.w("Parser", "Antwort zu kurz: '$response' - möglicherweise unvollständige Übertragung")
             return null
         }
+
+        // Debug: Zeige die Bytes der Antwort
+        val responseBytes = response.toByteArray(Charsets.US_ASCII)
+        android.util.Log.d("ParserDebug", "Response bytes: ${responseBytes.joinToString(" ") { "0x%02X".format(it) }}")
+        android.util.Log.d("ParserDebug", "Response chars: ${responseBytes.joinToString(" ") { "'${if (it.toInt() in 32..126) it.toInt().toChar() else '?'}'" }}")
 
         val responseCellPrefix = response.take(1)
         val responseCommandType = response.drop(1).take(1)
         val dataPayload = response.drop(2)
 
+        android.util.Log.d("ParserDebug", "Prefix='$responseCellPrefix', Type='$responseCommandType', Payload='$dataPayload'")
         android.util.Log.d("Parser", "parseMultiCellResponse: Input='$response', Prefix='$responseCellPrefix', Type='$responseCommandType', Payload='$dataPayload'")
 
-        return when (responseCommandType) {
-            "c" -> FlintecData.SerialNumber(decodeSerialNumber(dataPayload))
-            "?" -> FlintecData.Counts(decodeCountsMultiCell(dataPayload))
-            "s" -> FlintecData.Baudrate(decodeBaudrateMultiCell(dataPayload, responseCellPrefix))
-            "t" -> FlintecData.Temperature(decodeTemperatureMultiCell(dataPayload))
-            "p" -> FlintecData.Filter(decodeFilterMultiCell(dataPayload))
-            "P", "w" -> FlintecData.FilterSetResult(dataPayload.isNotEmpty())
-            "v" -> FlintecData.Version(decodeVersion(dataPayload))
+        val result = when (responseCommandType) {
+            "c" -> {
+                android.util.Log.d("ParserDebug", "Parsing SerialNumber...")
+                val decoded = decodeSerialNumber(dataPayload)
+                android.util.Log.d("ParserDebug", "SerialNumber result: '$decoded'")
+                FlintecData.SerialNumber(decoded)
+            }
+            "?" -> {
+                android.util.Log.d("ParserDebug", "Parsing Counts...")
+                val decoded = decodeCountsMultiCell(dataPayload)
+                android.util.Log.d("ParserDebug", "Counts result: '$decoded'")
+                FlintecData.Counts(decoded)
+            }
+            "s" -> {
+                android.util.Log.d("ParserDebug", "Parsing Baudrate...")
+                val decoded = decodeBaudrateMultiCell(dataPayload, responseCellPrefix)
+                android.util.Log.d("ParserDebug", "Baudrate result: '$decoded'")
+                FlintecData.Baudrate(decoded)
+            }
+            "t" -> {
+                android.util.Log.d("ParserDebug", "Parsing Temperature...")
+                val decoded = decodeTemperatureMultiCell(dataPayload)
+                android.util.Log.d("ParserDebug", "Temperature result: '$decoded'")
+                FlintecData.Temperature(decoded)
+            }
+            "p" -> {
+                android.util.Log.d("ParserDebug", "Parsing Filter...")
+                val decoded = decodeFilterMultiCell(dataPayload)
+                android.util.Log.d("ParserDebug", "Filter result: '$decoded'")
+                FlintecData.Filter(decoded)
+            }
+            "P", "w" -> {
+                android.util.Log.d("ParserDebug", "Parsing FilterSetResult...")
+                val success = dataPayload.isNotEmpty()
+                android.util.Log.d("ParserDebug", "FilterSetResult: $success")
+                FlintecData.FilterSetResult(success)
+            }
+            "v" -> {
+                android.util.Log.d("ParserDebug", "Parsing Version...")
+                val decoded = decodeVersion(dataPayload)
+                android.util.Log.d("ParserDebug", "Version result: '$decoded'")
+                FlintecData.Version(decoded)
+            }
             else -> {
-                android.util.Log.w("Parser", "Unbekannter Befehlstyp '$responseCommandType' in Antwort: '$response'")
-                FlintecData.Unknown(response)
+                android.util.Log.w("ParserDebug", "Unbekannter Befehlstyp: '$responseCommandType'")
+                // Prüfe ob die Antwort nur aus nicht-druckbaren Zeichen besteht
+                val containsOnlyControlChars = response.all { it.code < 32 || it.code > 126 }
+                if (containsOnlyControlChars) {
+                    android.util.Log.w("Parser", "Antwort enthält nur Steuerzeichen: ${responseBytes.joinToString(" ") { "0x%02X".format(it) }}")
+                    FlintecData.Unknown("Fehler")  // "Fehler" statt "Ungültige Antwort"
+                } else {
+                    android.util.Log.w("Parser", "Unbekannter Befehlstyp '$responseCommandType' in Antwort: '$response'")
+                    FlintecData.Unknown("Fehler")  // "Fehler" statt Rohdaten
+                }
             }
         }
+        
+        android.util.Log.d("ParserDebug", "=== parseMultiCellResponse END ===")
+        return result
     }
 
     private fun decodeSerialNumber(rawData: String): String {
-        android.util.Log.d("DecoderSN", "Input: '$rawData'")
+        android.util.Log.d("DecoderSN", "=== DecodeSerialNumber START ===")
+        android.util.Log.d("DecoderSN", "Input: '$rawData' (Länge: ${rawData.length})")
+        
+        // Erweiterte Sonderbehandlung für verdächtige einstellige Antworten
+        if (CommunicationHelper.isSuspiciousResponse(rawData)) {
+            android.util.Log.w("DecoderSN", "Verdächtige Antwort erkannt: '$rawData'")
+            android.util.Log.w("DecoderSN", "Empfehlung: ${CommunicationHelper.getErrorRecommendation(rawData)}")
+            return "Fehler"
+        }
+        
+        if (rawData.isEmpty()) {
+            android.util.Log.w("DecoderSN", "Leere Antwort - return Fehler")
+            return "Fehler"
+        }
 
         var hexToConvert = rawData
 
@@ -308,7 +395,27 @@ object FlintecRC3DMultiCellCommands {
 
 
     private fun decodeCountsMultiCell(rawCountsData: String): String {
-        android.util.Log.d("CountsDecoder", "Input Rohdaten: '$rawCountsData'")
+        android.util.Log.d("CountsDecoder", "=== DecodeCountsMultiCell START ===")
+        android.util.Log.d("CountsDecoder", "Input Rohdaten: '$rawCountsData' (Länge: ${rawCountsData.length})")
+        
+        // Erweiterte Sonderbehandlung für bekannte Fehlerfälle
+        if (CommunicationHelper.isSuspiciousResponse(rawCountsData)) {
+            android.util.Log.w("CountsDecoder", "Verdächtige Antwort erkannt: '$rawCountsData'")
+            android.util.Log.w("CountsDecoder", "Empfehlung: ${CommunicationHelper.getErrorRecommendation(rawCountsData)}")
+            
+            // Spezielle Behandlung für das "7"-Problem
+            if (rawCountsData == "7") {
+                android.util.Log.e("CountsDecoder", "VERDRAHTUNGSFEHLER: Nur '7' empfangen - prüfen Sie die RS485-Verkabelung!")
+            }
+            
+            return "Fehler"
+        }
+        
+        if (rawCountsData.isEmpty()) {
+            android.util.Log.w("CountsDecoder", "Leere Antwort - return Fehler")
+            return "Fehler"
+        }
+        
         var stringToProcess = rawCountsData
         if (stringToProcess.startsWith("d", ignoreCase = true)) {
             stringToProcess = stringToProcess.drop(1) // Remove 'd' or 'D'
@@ -339,18 +446,36 @@ object FlintecRC3DMultiCellCommands {
 
 
     private fun decodeBaudrateMultiCell(rawData: String, cellPrefix: String): String {
-        android.util.Log.d("BaudrateDecoder", "Input: '$rawData', CellPrefix: '$cellPrefix'")
+        android.util.Log.d("BaudrateDecoder", "=== DecodeBaudrateMultiCell START ===")
+        android.util.Log.d("BaudrateDecoder", "Input: '$rawData' (Länge: ${rawData.length}), CellPrefix: '$cellPrefix'")
+        
+        // Erweiterte Sonderbehandlung für verdächtige Antworten
+        if (CommunicationHelper.isSuspiciousResponse(rawData)) {
+            android.util.Log.w("BaudrateDecoder", "Verdächtige Antwort erkannt: '$rawData'")
+            android.util.Log.w("BaudrateDecoder", "Empfehlung: ${CommunicationHelper.getErrorRecommendation(rawData)}")
+            return "Fehler"
+        }
+        
+        if (rawData.isEmpty()) {
+            android.util.Log.w("BaudrateDecoder", "Leere Antwort - return Fehler")
+            return "Fehler"
+        }
+        
         val relevantPart = rawData.split(':', ';').firstOrNull { it.contains("961") || it.contains("192") || it.contains("384") } ?: rawData
+        android.util.Log.d("BaudrateDecoder", "Relevanter Teil: '$relevantPart'")
 
-        return when {
+        val result = when {
             relevantPart.contains("9617") || relevantPart.contains("961") -> "9600"
             relevantPart.contains("19200") || relevantPart.contains("192") -> "19200"
             relevantPart.contains("38400") || relevantPart.contains("384") -> "38400"
             else -> {
                 android.util.Log.w("BaudrateDecoder", "Unbekannter Baudraten-Code: '$relevantPart' (aus Rohdaten '$rawData')")
-                rawData
+                "Fehler"  // Return "Fehler" statt Rohdaten
             }
         }
+        
+        android.util.Log.d("BaudrateDecoder", "Result: '$result'")
+        return result
     }
 
 
@@ -371,7 +496,21 @@ object FlintecRC3DMultiCellCommands {
     }
 
     private fun decodeFilterMultiCell(rawData: String): String {
-        android.util.Log.d("FilterDecoder", "Input: '$rawData'")
+        android.util.Log.d("FilterDecoder", "=== DecodeFilterMultiCell START ===")
+        android.util.Log.d("FilterDecoder", "Input: '$rawData' (Länge: ${rawData.length})")
+        
+        // Erweiterte Sonderbehandlung für verdächtige einstellige Antworten
+        if (CommunicationHelper.isSuspiciousResponse(rawData)) {
+            android.util.Log.w("FilterDecoder", "Verdächtige Antwort erkannt: '$rawData'")
+            android.util.Log.w("FilterDecoder", "Empfehlung: ${CommunicationHelper.getErrorRecommendation(rawData)}")
+            return "Fehler"
+        }
+        
+        if (rawData.isEmpty()) {
+            android.util.Log.w("FilterDecoder", "Leere Antwort - return Fehler")
+            return "Fehler"
+        }
+        
         val corePart = rawData.split('=', ':').firstOrNull() ?: rawData
 
         return if (corePart.startsWith("23001") && corePart.length > 5) {
@@ -393,7 +532,21 @@ object FlintecRC3DMultiCellCommands {
     }
 
     private fun decodeVersion(rawData: String): String {
-        android.util.Log.d("VersionDecoder", "Input: '$rawData'")
+        android.util.Log.d("VersionDecoder", "=== DecodeVersion START ===")
+        android.util.Log.d("VersionDecoder", "Input: '$rawData' (Länge: ${rawData.length})")
+        
+        // Erweiterte Sonderbehandlung für verdächtige einstellige Antworten
+        if (CommunicationHelper.isSuspiciousResponse(rawData)) {
+            android.util.Log.w("VersionDecoder", "Verdächtige Antwort erkannt: '$rawData'")
+            android.util.Log.w("VersionDecoder", "Empfehlung: ${CommunicationHelper.getErrorRecommendation(rawData)}")
+            return "Fehler"
+        }
+        
+        if (rawData.isEmpty()) {
+            android.util.Log.w("VersionDecoder", "Leere Antwort - return Fehler")
+            return "Fehler"
+        }
+        
         var versionString = rawData
         // Keine spezielle Behandlung für 'X' am Anfang mehr, da es Teil der Version sein kann.
         // Entferne nur problematische Endzeichen, falls vorhanden.

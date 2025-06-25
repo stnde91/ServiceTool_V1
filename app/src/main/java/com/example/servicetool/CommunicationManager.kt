@@ -96,12 +96,22 @@ class CommunicationManager {
             val startTime = System.currentTimeMillis()
             try {
                 val commandBytes = command.toByteArray(Charsets.US_ASCII)
+                
+                // Erweiterte Debug-Logs
+                Log.d("CommunicationDebug", "=== Sende Befehl für Zelle $cellNumber ===")
+                Log.d("CommunicationDebug", "Befehl (Hex): ${commandBytes.joinToString(" ") { "0x%02X".format(it) }}")
+                Log.d("CommunicationDebug", "Befehl (String): '$command'")
+                Log.d("CommunicationDebug", "Befehl (Länge): ${commandBytes.size} bytes")
+                Log.d("CommunicationDebug", "Timing: Start um ${System.currentTimeMillis()}")
+                
+                // Legacy Logs beibehalten
                 Log.d("CommunicationManager", "sendCommand: Sende Befehl (Hex): ${commandBytes.joinToString(" ") { it.toString(16).padStart(2, '0') }}")
                 Log.d("CommunicationManager", "sendCommand: Sende Befehl (String): $command")
 
                 outputStream?.write(commandBytes)
                 outputStream?.flush()
                 Log.d("CommunicationManager", "sendCommand: Befehl gesendet und geflusht.")
+                Log.d("CommunicationDebug", "Befehl erfolgreich gesendet, warte auf Antwort...")
 
                 // Lese die Antwort mit Timeout (verkürzt für bessere UX)
                 val responseMessage = withTimeoutOrNull(3000L) {
@@ -135,8 +145,28 @@ class CommunicationManager {
                     }
 
                     if (responseBuffer.isNotEmpty()) {
+                        // Erweiterte Debug-Logs für empfangene Daten
+                        val receivedTimestamp = System.currentTimeMillis()
+                        val responseTime = receivedTimestamp - startTime
+                        
+                        Log.d("CommunicationDebug", "=== Antwort empfangen für Zelle $cellNumber ===")
+                        Log.d("CommunicationDebug", "Empfangene Bytes (Hex): ${responseBuffer.joinToString(" ") { "0x%02X".format(it) }}")
+                        Log.d("CommunicationDebug", "Empfangene Bytes (Decimal): ${responseBuffer.joinToString(" ") { it.toString() }}")
+                        Log.d("CommunicationDebug", "Antwort-Länge: ${responseBuffer.size} bytes")
+                        Log.d("CommunicationDebug", "Antwortzeit: ${responseTime}ms")
+                        
+                        // Debug: Zeige die empfangenen Bytes (Legacy)
+                        Log.d("CommunicationManager", "sendCommand: Empfangene Bytes: ${responseBuffer.joinToString(" ") { "0x%02X".format(it) }}")
+                        
                         val rawResponse = String(responseBuffer.toByteArray(), Charsets.US_ASCII)
                         Log.d("CommunicationManager", "sendCommand: Roh-Antwort empfangen (Länge ${responseBuffer.size}): '$rawResponse'")
+                        Log.d("CommunicationDebug", "Roh-Antwort (String): '$rawResponse'")
+                        
+                        // Prüfe auf verdächtige Antworten
+                        if (CommunicationHelper.isSuspiciousResponse(rawResponse)) {
+                            Log.w("CommunicationDebug", "VERDÄCHTIGE ANTWORT ERKANNT!")
+                            Log.w("CommunicationDebug", "Empfehlung: ${CommunicationHelper.getErrorRecommendation(rawResponse)}")
+                        }
 
                         if (etxFound) {
                             var startIndex = 0
@@ -147,7 +177,17 @@ class CommunicationManager {
                             val endIndex = if (etxIndexInResponse != -1) etxIndexInResponse else responseBuffer.size
 
                             if (startIndex < endIndex) {
-                                String(responseBuffer.subList(startIndex, endIndex).toByteArray(), Charsets.US_ASCII)
+                                val extractedBytes = responseBuffer.subList(startIndex, endIndex)
+                                val extractedString = String(extractedBytes.toByteArray(), Charsets.US_ASCII)
+                                
+                                // Spezialbehandlung für BEL-Zeichen (0x07)
+                                if (extractedBytes.size == 1 && extractedBytes[0] == 0x07.toByte()) {
+                                    Log.w("CommunicationManager", "sendCommand: Antwort enthält nur BEL-Zeichen (0x07) - möglicher Kommunikationsfehler")
+                                    "BEL_ERROR"
+                                } else {
+                                    Log.d("CommunicationManager", "sendCommand: Extrahierte Antwort: '$extractedString'")
+                                    extractedString
+                                }
                             } else if (rawResponse.length == 2 && rawResponse.startsWith(STX) && rawResponse.endsWith(ETX)) {
                                 Log.w("CommunicationManager", "sendCommand: Antwort war nur STX ETX.")
                                 ""

@@ -344,19 +344,34 @@ class MultiCellOverviewFragment : Fragment() {
                     val data = CellDisplayData(cellNumber = cellNumber)
                     var commandSuccess = true
 
-                    // Wir fragen jetzt alle Daten pro Zelle in einer Verbindung ab
-                    data.serialNumber = fetchSingleCellCommand(FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.SERIAL_NUMBER), outputStream, inputStream) ?: "S/N: Fehler"
+                    // Wir fragen jetzt alle Daten pro Zelle in einer Verbindung ab - mit Retry-Mechanismus
+                    data.serialNumber = fetchSingleCellCommandWithRetry(
+                        FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.SERIAL_NUMBER), 
+                        outputStream, inputStream, cellNumber, "SERIAL_NUMBER"
+                    ) ?: "S/N: Fehler"
                     delay(50) // Kleine Pause auch zwischen Befehlen
 
-                    data.counts = fetchSingleCellCommand(FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.COUNTS), outputStream, inputStream) ?: run { commandSuccess = false; "Fehler" }
+                    data.counts = fetchSingleCellCommandWithRetry(
+                        FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.COUNTS), 
+                        outputStream, inputStream, cellNumber, "COUNTS"
+                    ) ?: run { commandSuccess = false; "Fehler" }
                     delay(50)
 
                     if (commandSuccess) {
-                        data.baudrate = fetchSingleCellCommand(FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.BAUDRATE), outputStream, inputStream) ?: "Fehler"
+                        data.baudrate = fetchSingleCellCommandWithRetry(
+                            FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.BAUDRATE), 
+                            outputStream, inputStream, cellNumber, "BAUDRATE"
+                        ) ?: "Fehler"
                         delay(50)
-                        data.filter = fetchSingleCellCommand(FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.FILTER), outputStream, inputStream) ?: "Fehler"
+                        data.filter = fetchSingleCellCommandWithRetry(
+                            FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.FILTER), 
+                            outputStream, inputStream, cellNumber, "FILTER"
+                        ) ?: "Fehler"
                         delay(50)
-                        data.version = fetchSingleCellCommand(FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.VERSION), outputStream, inputStream) ?: "Fehler"
+                        data.version = fetchSingleCellCommandWithRetry(
+                            FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.VERSION), 
+                            outputStream, inputStream, cellNumber, "VERSION"
+                        ) ?: "Fehler"
                     }
 
                     data.lastUpdate = System.currentTimeMillis()
@@ -389,6 +404,90 @@ class MultiCellOverviewFragment : Fragment() {
             Log.w("MultiCellOverview", "Fehler beim Senden/Empfangen eines Befehls: ${e.message}")
             null
         }
+    }
+    
+    /**
+     * Erweiterte Befehlsausführung mit Retry-Mechanismus für verdächtige Antworten
+     */
+    private suspend fun fetchSingleCellCommandWithRetry(
+        commandBytes: ByteArray, 
+        outputStream: OutputStream, 
+        inputStream: InputStream,
+        cellNumber: Int,
+        commandType: String,
+        maxRetries: Int = 3
+    ): String? {
+        if (!coroutineContext.isActive) return null
+        
+        var lastResponse: String? = null
+        var retryCount = 0
+        
+        while (retryCount <= maxRetries && coroutineContext.isActive) {
+            try {
+                Log.d("MultiCellRetry", "Ausführung Befehl für Zelle $cellNumber ($commandType) - Versuch ${retryCount + 1}/${maxRetries + 1}")
+                
+                outputStream.write(commandBytes)
+                outputStream.flush()
+                val rawResponse = readFlintecResponse(inputStream)
+                
+                // Analysiere die Antwort mit CommunicationHelper
+                val analysis = CommunicationHelper.analyzeCommunicationPattern(commandBytes, rawResponse)
+                Log.d("MultiCellRetry", "Analyse für Zelle $cellNumber: ${analysis.pattern}")
+                
+                if (analysis.isSuspicious) {
+                    Log.w("MultiCellRetry", "Verdächtige Antwort für Zelle $cellNumber ($commandType): '$rawResponse'")
+                    Log.w("MultiCellRetry", "Empfehlung: ${CommunicationHelper.getErrorRecommendation(rawResponse)}")
+                    Log.d("MultiCellRetry", analysis.getDetailedReport())
+                    
+                    lastResponse = rawResponse
+                    retryCount++
+                    
+                    if (retryCount <= maxRetries) {
+                        Log.i("MultiCellRetry", "Wiederhole Befehl für Zelle $cellNumber nach 200ms...")
+                        delay(200) // Wartezeit zwischen Versuchen
+                        continue
+                    } else {
+                        Log.e("MultiCellRetry", "Maximale Anzahl Wiederholungen erreicht für Zelle $cellNumber ($commandType)")
+                        loggingManager.logError("MultiCellRetry", "Befehl für Zelle $cellNumber fehlgeschlagen nach $maxRetries Versuchen: $rawResponse", null, cellNumber)
+                        return null
+                    }
+                }
+                
+                // Erfolgreiche Antwort - Parse und return
+                Log.d("MultiCellRetry", "Erfolgreiche Antwort für Zelle $cellNumber ($commandType): '$rawResponse'")
+                if (retryCount > 0) {
+                    Log.i("MultiCellRetry", "Befehl für Zelle $cellNumber erfolgreich nach ${retryCount + 1} Versuchen")
+                    loggingManager.logInfo("MultiCellRetry", "Befehl für Zelle $cellNumber erfolgreich nach ${retryCount + 1} Versuchen")
+                }
+                
+                return FlintecRC3DMultiCellCommands.parseMultiCellResponse(rawResponse)?.let { data ->
+                    when (data) {
+                        is FlintecData.Counts -> data.value
+                        is FlintecData.SerialNumber -> data.value
+                        is FlintecData.Baudrate -> data.value
+                        is FlintecData.Filter -> data.value
+                        is FlintecData.Version -> data.value
+                        else -> rawResponse // Fallback
+                    }
+                }
+                
+            } catch (e: Exception) {
+                Log.w("MultiCellRetry", "Fehler beim Senden/Empfangen Befehl für Zelle $cellNumber (Versuch ${retryCount + 1}): ${e.message}")
+                lastResponse = null
+                retryCount++
+                
+                if (retryCount <= maxRetries) {
+                    delay(200)
+                    continue
+                } else {
+                    Log.e("MultiCellRetry", "Alle Versuche fehlgeschlagen für Zelle $cellNumber ($commandType)")
+                    loggingManager.logError("MultiCellRetry", "Alle Versuche fehlgeschlagen für Zelle $cellNumber", e, cellNumber)
+                    return null
+                }
+            }
+        }
+        
+        return null
     }
 
     // --- Live Modus ---
@@ -468,12 +567,13 @@ class MultiCellOverviewFragment : Fragment() {
                 Socket().use { socket ->
                     socket.connect(InetSocketAddress(getMoxaIpAddress(), getMoxaPort()), 3000)
                     socket.soTimeout = 2000
-                    fetchSingleCellCommand(
+                    fetchSingleCellCommandWithRetry(
                         FlintecRC3DMultiCellCommands.getCommandForCell(cellNumber, FlintecRC3DMultiCellCommands.CommandType.COUNTS),
-                        socket.getOutputStream(), socket.getInputStream()
+                        socket.getOutputStream(), socket.getInputStream(), cellNumber, "COUNTS_LIVE", 2 // Weniger Retries im Live-Modus
                     )
                 }
             } catch (e: Exception) {
+                Log.w("MultiCellOverview", "Fehler beim Laden von Live-Counts für Zelle $cellNumber: ${e.message}")
                 null
             }
         }
